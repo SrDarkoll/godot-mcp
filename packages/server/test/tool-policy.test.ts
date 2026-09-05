@@ -109,3 +109,22 @@ it('requires approval before undoing or redoing editor history it cannot prove i
             .rejects.toMatchObject({ code: 'APPROVAL_REQUIRED' });
     }
 });
+
+
+it('classifies workflow tools with only the permissions of their composed operations', async () => {
+    const { policy } = await setup();
+    const snapshot = await policy.assess('workflow.snapshot', { capture: 'none' });
+    expect(snapshot.risk).toBe('normal');
+    expect(snapshot.permissions).toEqual(expect.arrayContaining(['network.local','filesystem.project']));
+    expect(snapshot.permissions).not.toContain('editor.modify');
+    expect(snapshot.permissions).not.toContain('runtime.modify');
+
+    const run = await policy.assess('workflow.run_check', { target: 'current', capture: true });
+    expect(run.risk).toBe('normal');
+    expect(run.permissions).toEqual(expect.arrayContaining(['network.local','filesystem.project','runtime.modify','process.godot']));
+    expect(run.permissions).not.toContain('editor.modify');
+
+    const diff = await policy.assess('workflow.diff_since', { snapshot_id: '123e4567-e89b-42d3-a456-426614174000' });
+    expect(diff.risk).toBe('normal');
+    expect(diff.permissions).toEqual(expect.arrayContaining(['network.local','filesystem.project']));
+});

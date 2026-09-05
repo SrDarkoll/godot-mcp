@@ -65,6 +65,7 @@ export const WorkflowDiffResultSchema=z.strictObject({
 });
 
 export type WorkflowCaptureMode=z.infer<typeof WorkflowCaptureModeSchema>;
+export type WorkflowActiveScene=z.infer<typeof WorkflowActiveSceneSchema>;
 export type WorkflowSnapshot=z.infer<typeof WorkflowSnapshotSchema>;
 export type WorkflowSnapshotParams=z.infer<typeof WorkflowSnapshotParamsSchema>;
 export type WorkflowRunCheckParams=z.infer<typeof WorkflowRunCheckParamsSchema>;

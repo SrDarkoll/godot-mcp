@@ -137,6 +137,9 @@ describe('MCP server', () => {
             'visual.capture_game',
             'visual.capture_viewport_2d',
             'visual.capture_viewport_3d',
+            'workflow.diff_since',
+            'workflow.run_check',
+            'workflow.snapshot',
         ]);
         const status = await client.callTool({ name: 'session.status', arguments: {} });
         expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });

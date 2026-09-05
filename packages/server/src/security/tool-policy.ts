@@ -17,7 +17,7 @@ const READS = new Set([
     'editor.get_selected_nodes', 'editor.get_filesystem', 'runtime.status', 'runtime.scene_tree',
     'runtime.inspect_node', 'runtime.get_property', 'debug.output', 'debug.errors', 'debug.warnings',
     'debug.performance', 'permissions.status', 'risk.preview', 'transaction.status', 'transaction.preview',
-    'checkpoint.list', 'checkpoint.inspect'
+    'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since'
 ]);
 const CONTROLS = new Set([
     'runtime.status', 'runtime.stop', 'project.stop', 'session.status', 'permissions.status',
@@ -30,7 +30,7 @@ const NORMAL_MUTATIONS = new Set([
     'signal.disconnect', 'project.input.add_action', 'project.input.remove_action', 'editor.select_node',
     'editor.change_scene', 'editor.scan_filesystem', 'project.run', 'project.run_scene',
     'runtime.pause', 'runtime.resume', 'runtime.restart', 'visual.capture_game', 'visual.capture_viewport_2d',
-    'visual.capture_viewport_3d', 'transaction.begin', 'transaction.write_file', 'transaction.delete_file',
+    'visual.capture_viewport_3d', 'workflow.snapshot', 'workflow.run_check', 'transaction.begin', 'transaction.write_file', 'transaction.delete_file',
     'transaction.rollback', 'checkpoint.create', 'permissions.set', 'permissions.enable', 'permissions.disable'
 ]);
 const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
@@ -77,7 +77,9 @@ export class ToolPolicy {
             permissions.push('network.local');
         }
         if (!READS.has(name) && !CONTROLS.has(name) && !name.startsWith('permissions.')) {
-            if (LOCAL(name) || name.startsWith('visual.'))
+            if (name === 'workflow.run_check')
+                permissions.push('runtime.modify', 'process.godot', 'filesystem.project');
+            else if (name === 'workflow.snapshot' || LOCAL(name) || name.startsWith('visual.'))
                 permissions.push('filesystem.project');
             else if (name.startsWith('runtime.') || name === 'project.run' || name === 'project.run_scene') {
                 permissions.push('runtime.modify', 'process.godot', 'filesystem.project');

@@ -14,6 +14,7 @@ import { registerRecoveryTools } from '../tools/recovery-tools.js';
 import { registerRuntimeTools } from '../tools/runtime-tools.js';
 import { registerSecurityTools } from '../tools/security-tools.js';
 import { VisualTools } from '../tools/visual-tools.js';
+import { WorkflowService } from '../workflow/workflow-service.js';
 import { registerCoreTools } from './register-core-tools.js';
 import { registerEditorTools } from './register-editor-tools.js';
 import { registerNodeTools } from './register-node-tools.js';
@@ -24,6 +25,7 @@ import { registerSceneTools } from './register-scene-tools.js';
 import { registerScriptTools } from './register-script-tools.js';
 import { registerSignalTools } from './register-signal-tools.js';
 import { registerVisualTools } from './register-visual-tools.js';
+import { registerWorkflowTools } from './register-workflow-tools.js';
 export interface McpServerContext {
     session: Session;
     bridge: BridgeServer;
@@ -49,6 +51,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     const policy = ctx.policy ?? new ToolPolicy(ctx.session, ctx.sessions, recovery);
     const runtime = ctx.runtime ?? new RuntimeService(ctx.session, ctx.sessions, ctx.bridge);
     const visual = ctx.visual ?? new VisualTools(ctx.session, ctx.sessions, ctx.bridge, runtime);
+    const workflow = new WorkflowService(ctx.session, ctx.sessions, ctx.bridge, runtime, visual);
     const registrar = guardedRegistrar(server, policy, approvalState);
     const rpc = ctx.bridge.rpc;
     registerRuntimeTools(registrar, runtime);
@@ -56,6 +59,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerRecoveryTools(registrar, recovery, rpc);
     registerSecurityTools(registrar, policy);
     registerVisualTools(registrar, visual, ctx.sessions, ctx.session);
+    registerWorkflowTools(registrar, workflow);
     registerCoreTools(registrar, rpc, ctx.session);
     registerObjectTools(registrar, rpc);
     registerSceneTools(registrar, rpc);
