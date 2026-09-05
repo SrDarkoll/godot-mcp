@@ -45,6 +45,10 @@ it('enforces disabled permissions and resets permissions for a new service insta
     }
     expect(new ToolPolicy(session, sessions, recovery).permissions()['editor.modify']).toBe(true);
 });
+it('accepts synchronous operations as well as promises', async () => {
+    const { policy } = await setup();
+    expect(await policy.execute('session.status', {}, () => ({ ok: true }))).toEqual({ ok: true });
+});
 it('blocks unrelated mutations while a file transaction is open', async () => {
     const { recovery, policy } = await setup();
     await recovery.begin({ label: 'one', paths: ['res://new.json'], atomic: true });

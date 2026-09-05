@@ -247,7 +247,7 @@ export class ToolPolicy {
                 .digest('hex')
         };
     }
-    async execute<T>(name: string, args: Record<string, unknown>, operation: (cleanArgs: Record<string, unknown>) => Promise<T>, authorization: ToolAuthorization = {}): Promise<T> {
+    async execute<T>(name: string, args: Record<string, unknown>, operation: (cleanArgs: Record<string, unknown>) => T | Promise<T>, authorization: ToolAuthorization = {}): Promise<T> {
         const execute = async (): Promise<T> => {
             if (this.closing && !CONTROLS.has(name)) {
                 throw new BridgeRpcError('SESSION_CLOSED', 'Session is closing');
