@@ -36,7 +36,7 @@ it('persists a baseline and returns only post-baseline workflow changes',async()
   const runId='123e4567-e89b-42d3-a456-426614174001';
   status={state:'running',runId,scenePath:'res://main.tscn',connected:true,ownership:'session',features:{...NO_RUNTIME_FEATURES,diagnostics:true},errorCode:null};
   const diagnostic:DiagnosticEntry={sequence:1,runId,timestamp:new Date().toISOString(),kind:'warning',stream:'stderr',message:'changed',file:null,line:null,frames:[],truncated:false};
-  tail={runId,entries:[diagnostic],nextCursor:1,oldestAvailable:1,dropped:0,truncated:false};
+  tail={runId,entries:[diagnostic],nextCursor:1,oldestAvailable:1,dropped:0,truncated:false,errorCount:0,warningCount:1,outputCount:0};
   scene={...scene,root_name:'Changed'};
   const screenshot={id:'123e4567-e89b-42d3-a456-426614174002',sequence:1,type:'game' as const,runId,
     path:'screenshots/game/0001_changed.png',scene:'res://main.tscn',reason:'after_visual_change' as const,label:'changed',transaction:null,
@@ -87,7 +87,7 @@ it('run_check fails on native errors and keeps warnings non-fatal',async()=>{
   const status:RuntimeStatus={state:'running',runId,scenePath:'res://main.tscn',connected:true,ownership:'session',features:{...NO_RUNTIME_FEATURES,diagnostics:true},errorCode:null};
   const runtime={status:async()=>({state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:NO_RUNTIME_FEATURES,errorCode:null}),
     run:async()=>status,stop:async()=>({stopped:true,runId:null}),request:async()=>({}),query:async()=>({runId,entries,nextCursor:entries.length,oldestAvailable:1,dropped:0,truncated:false}),
-    tailDiagnostics:async()=>({runId,entries,nextCursor:entries.length,oldestAvailable:1,dropped:0,truncated:false})} as any;
+    tailDiagnostics:async()=>({runId,entries,nextCursor:entries.length,oldestAvailable:1,dropped:0,truncated:false,errorCount:entries.filter((e:DiagnosticEntry)=>e.kind==='error').length,warningCount:entries.filter((e:DiagnosticEntry)=>e.kind==='warning').length,outputCount:entries.filter((e:DiagnosticEntry)=>e.kind==='output').length})} as any;
   // After launch, subsequent status calls must observe the running fixture.
   let launched=false;runtime.status=async()=>launched?status:{state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:NO_RUNTIME_FEATURES,errorCode:null};
   runtime.run=async()=>{launched=true;return status;};
@@ -95,4 +95,20 @@ it('run_check fails on native errors and keeps warnings non-fatal',async()=>{
   expect((await workflow.runCheck({target:'current',label:'warning',capture:false,checkpoint:true,settle_ms:0,diagnostic_limit:100,include_performance:false})).result.verdict).toBe('pass');
   launched=false;entries=[{...base,sequence:2,kind:'error',message:'boom'}];
   expect((await workflow.runCheck({target:'current',label:'error',capture:false,checkpoint:true,settle_ms:0,diagnostic_limit:100,include_performance:false})).result.verdict).toBe('fail');
+});
+
+
+it('keeps a run failed when an error falls outside the bounded diagnostic tail',async()=>{
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-workflow-error-count-'));
+  const session=createSession(root);const sessions=new SessionStore(root);await sessions.create(session);
+  const runId='123e4567-e89b-42d3-a456-426614174012';
+  const running:RuntimeStatus={state:'running',runId,scenePath:'res://main.tscn',connected:true,ownership:'session',features:{...NO_RUNTIME_FEATURES,diagnostics:true},errorCode:null};
+  let launched=false;
+  const runtime={status:async()=>launched?running:{state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:NO_RUNTIME_FEATURES,errorCode:null},
+    run:async()=>{launched=true;return running;},stop:async()=>({stopped:true,runId:null}),request:async()=>({}),query:async()=>({runId,entries:[],nextCursor:250,oldestAvailable:51,dropped:0,truncated:false}),
+    tailDiagnostics:async()=>({runId,entries:[{sequence:250,runId,timestamp:new Date().toISOString(),kind:'output',stream:'stdout',message:'latest',file:null,line:null,frames:[],truncated:false}],nextCursor:250,oldestAvailable:51,dropped:0,truncated:false,errorCount:1,warningCount:0,outputCount:249})} as any;
+  const workflow=new WorkflowService(session,sessions,{connected:true,rpc:{call:async()=>({path:'res://main.tscn',root_name:'Main',root_type:'Node2D'})}} as any,runtime,{capture:async()=>{throw new Error('not requested');}} as any);
+  const checked=await workflow.runCheck({target:'current',label:'bounded',capture:false,checkpoint:true,settle_ms:0,diagnostic_limit:1,include_performance:false});
+  expect(checked.result.diagnostics?.entries).toHaveLength(1);
+  expect(checked.result.verdict).toBe('fail');
 });

@@ -47,7 +47,8 @@ export class WorkflowService {
   private async diagnosticSnapshot(limit:number):Promise<WorkflowDiagnosticSnapshot|null>{
     const page=await this.runtime.tailDiagnostics(limit);
     if(!page)return null;
-    return {runId:page.runId,cursor:page.nextCursor,entries:page.entries,dropped:page.dropped,truncated:page.truncated};
+    return {runId:page.runId,cursor:page.nextCursor,entries:page.entries,dropped:page.dropped,truncated:page.truncated,
+      errorCount:page.errorCount,warningCount:page.warningCount,outputCount:page.outputCount};
   }
 
   private async capture(mode:Exclude<WorkflowSnapshotParams['capture'],'none'>,label:string,checkpoint:boolean,viewportIndex:number,
@@ -118,7 +119,7 @@ export class WorkflowService {
 
     const activeScene=await this.activeScene();
     const snapshot=await this.persistSnapshot(params.label,runtime,activeScene,diagnostics,captured);
-    const nativeError=diagnostics?.entries.some(entry=>entry.kind==='error')??false;
+    const nativeError=(diagnostics?.errorCount??0)>0;
     let verdict:WorkflowRunCheckResult['verdict']='inconclusive';
     if(nativeError||['failed','stopped','disconnected'].includes(runtime.state))verdict='fail';
     else if(runtime.state==='breaked'||observationErrors.length>0)verdict='inconclusive';
@@ -131,16 +132,19 @@ export class WorkflowService {
 
   private async diagnosticDelta(baseline:WorkflowSnapshot,current:RuntimeStatus,limit:number):Promise<{
     runId:string|null;entries:DiagnosticPage['entries'];nextCursor:number;dropped:number;truncated:boolean;runChanged:boolean;
+    errorCount:number;warningCount:number;outputCount:number;
   }>{
     const runChanged=baseline.runtime.runId!==current.runId;
-    if(!current.runId||!current.features.diagnostics)return {runId:current.runId,entries:[],nextCursor:0,dropped:0,truncated:false,runChanged};
+    const empty={runId:current.runId,entries:[] as DiagnosticPage['entries'],nextCursor:0,dropped:0,truncated:false,runChanged,errorCount:0,warningCount:0,outputCount:0};
+    if(!current.runId||!current.features.diagnostics)return empty;
     if(!runChanged&&baseline.diagnostics?.runId===current.runId){
-      const page=await this.runtime.query('all',{run_id:current.runId,after:baseline.diagnostics.cursor,limit});
-      return {runId:current.runId,entries:page.entries,nextCursor:page.nextCursor,dropped:page.dropped,truncated:page.truncated,runChanged};
+      const [page,tail]=await Promise.all([this.runtime.query('all',{run_id:current.runId,after:baseline.diagnostics.cursor,limit}),this.runtime.tailDiagnostics(1)]);
+      return {runId:current.runId,entries:page.entries,nextCursor:page.nextCursor,dropped:page.dropped,truncated:page.truncated,runChanged,
+        errorCount:tail?.errorCount??0,warningCount:tail?.warningCount??0,outputCount:tail?.outputCount??0};
     }
     const page=await this.runtime.tailDiagnostics(limit);
-    return page?{runId:current.runId,entries:page.entries,nextCursor:page.nextCursor,dropped:page.dropped,truncated:page.truncated,runChanged}
-      :{runId:current.runId,entries:[],nextCursor:0,dropped:0,truncated:false,runChanged};
+    return page?{runId:current.runId,entries:page.entries,nextCursor:page.nextCursor,dropped:page.dropped,truncated:page.truncated,runChanged,
+      errorCount:page.errorCount,warningCount:page.warningCount,outputCount:page.outputCount}:empty;
   }
 
   async diffSince(input:WorkflowDiffParams|unknown):Promise<WorkflowDiffResult>{

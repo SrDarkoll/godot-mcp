@@ -20,3 +20,12 @@ it('persists immutable UUID workflow snapshots inside the current session',async
   expect(JSON.parse(await fs.readFile(file,'utf8')).id).toBe(saved.id);
   await expect(store.load('../outside')).rejects.toMatchObject({code:'WORKFLOW_SNAPSHOT_NOT_FOUND'});
 });
+
+
+it('does not create workflow artifact directories while reading a missing snapshot',async()=>{
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-workflow-readonly-'));
+  const session=createSession(root);const sessions=new SessionStore(root);await sessions.create(session);
+  const store=new WorkflowStore(session,sessions);const workflowDir=path.join(root,'.godot-mcp','sessions',session.id,'artifacts','workflow');
+  await expect(store.load('123e4567-e89b-42d3-a456-426614174099')).rejects.toMatchObject({code:'WORKFLOW_SNAPSHOT_NOT_FOUND'});
+  await expect(fs.lstat(workflowDir)).rejects.toMatchObject({code:'ENOENT'});
+});

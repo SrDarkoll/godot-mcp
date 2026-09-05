@@ -6,6 +6,7 @@ import {BridgeRpcError,type RpcRouter} from '../bridge/rpc-router.js';
 import {DiagnosticStore} from './diagnostic-store.js';
 
 interface RuntimeBridge {connected:boolean;rpc:Pick<RpcRouter,'call'>;}
+export interface RuntimeDiagnosticTail extends DiagnosticPage {errorCount:number;warningCount:number;outputCount:number;}
 export class RuntimeService {
   private current:RuntimeStatus={state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:{...NO_RUNTIME_FEATURES},errorCode:null};
   private target:RunTarget|null=null;
@@ -80,11 +81,11 @@ export class RuntimeService {
     if(method==='runtime.pause'||method==='runtime.resume')this.apply(RuntimeStatusSchema.parse(result));
     return result;
   }
-  async tailDiagnostics(limit=100):Promise<DiagnosticPage|null> {
+  async tailDiagnostics(limit=100):Promise<RuntimeDiagnosticTail|null> {
     const status=await this.status();
     if(!status.runId||!status.features.diagnostics||!this.diagnosticRuns.has(status.runId))return null;
     await this.diagnostics.flush();
-    return this.diagnostics.tail(status.runId,limit);
+    return {...this.diagnostics.tail(status.runId,limit),...this.diagnostics.counts(status.runId)};
   }
   async query(kind:'all'|'output'|'error'|'warning',input:{run_id?:string|undefined;after:number;limit:number}) {
     const id=input.run_id??this.lastRunId;if(!id)throw new BridgeRpcError('NO_RUNTIME_HISTORY','No execution in this session');

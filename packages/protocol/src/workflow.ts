@@ -10,7 +10,8 @@ export const WorkflowActiveSceneSchema=z.strictObject({
 });
 export const WorkflowDiagnosticSnapshotSchema=z.strictObject({
   runId:z.uuid(),cursor:z.number().int().nonnegative(),entries:z.array(DiagnosticEntrySchema).max(200),
-  dropped:z.number().int().nonnegative(),truncated:z.boolean()
+  dropped:z.number().int().nonnegative(),truncated:z.boolean(),errorCount:z.number().int().nonnegative(),
+  warningCount:z.number().int().nonnegative(),outputCount:z.number().int().nonnegative()
 });
 export const WorkflowManifestCursorSchema=z.strictObject({
   nextScreenshotSequence:z.number().int().positive(),errors:z.number().int().nonnegative(),
@@ -48,7 +49,8 @@ export const WorkflowRunCheckResultSchema=z.strictObject({
 });
 export const WorkflowDiagnosticDeltaSchema=z.strictObject({
   runId:z.uuid().nullable(),entries:z.array(DiagnosticEntrySchema).max(200),nextCursor:z.number().int().nonnegative(),
-  dropped:z.number().int().nonnegative(),truncated:z.boolean(),runChanged:z.boolean()
+  dropped:z.number().int().nonnegative(),truncated:z.boolean(),runChanged:z.boolean(),
+  errorCount:z.number().int().nonnegative(),warningCount:z.number().int().nonnegative(),outputCount:z.number().int().nonnegative()
 });
 export const WorkflowSessionErrorSchema=z.strictObject({
   timestamp:z.iso.datetime(),tool:z.string(),code:z.string(),message:z.string()
