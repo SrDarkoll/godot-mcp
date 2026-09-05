@@ -33,7 +33,7 @@
 
 **Interfaces:**
 - `ToolPolicy.assess(name,args)` remains the authority for `normal | risky | blocked`.
-- `ToolPolicy.executeAuthorized(...)` executes only after registrar-side approval has been resolved.
+- `ToolPolicy.execute(..., authorization?)` executes risky work only when registrar-side approval supplies the current approved fingerprint.
 - `guardedRegistrar(...)` requests a boolean confirmation using MCP v2 `input_required` and only executes after accepted human/client input.
 
 **Test cycle:**
@@ -46,7 +46,10 @@
 
 **Files:**
 - Modify: `packages/server/src/security/tool-policy.ts`
+- Create: `packages/server/src/security/reflection-safety.ts`
+- Modify: `packages/godot-addon/addons/godot_mcp/bridge/safety_policy.gd`
 - Modify: `packages/server/test/tool-policy.test.ts`
+- Create: `packages/server/test/reflection-safety.test.ts`
 - Modify: `docs/tools/security.md` (create if absent)
 
 **Interfaces:**

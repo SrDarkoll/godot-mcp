@@ -20,7 +20,7 @@ Use the returned ID with `transaction.write_file`:
 
 Staging does not change working files. `transaction.delete_file` stages removal of an explicit declared file. `transaction.preview` reports create/modify/delete actions, sizes and before/after hashes. `transaction.rollback` cancels an open staging transaction without changing working files.
 
-Call `transaction.commit` with `{"transaction_id":"<UUID>"}`. It first returns a risk confirmation request. After reviewing/authorizing the exact operation, resubmit with the returned `confirmation` token. Publication compares current file fingerprints, saves publication intent, replaces files, validates and either commits or restores the before bytes. Invalid validation returns `isError: true` with transaction state `rolled_back` and its validation errors. Query `transaction.status` after an uncertain response rather than blindly repeating changes.
+Call `transaction.commit` with `{"transaction_id":"<UUID>"}`. Risky operations enter MCP's native `input_required`/elicitation flow. The MCP host presents the operation to the user and retries the same call only after approval; the model does not receive a replayable confirmation token. Publication compares current file fingerprints, saves publication intent, replaces files, validates and either commits or restores the before bytes. Invalid validation returns `isError: true` with transaction state `rolled_back` and its validation errors. Query `transaction.status` after an uncertain response rather than blindly repeating changes.
 
 One file transaction may be open per server. Unrelated mutations and game launches are refused until it is committed/cancelled. Project reads cannot pass a publication writer. Runtime stop/status keep a separate control lane so stopping a game does not wait behind a capture. A running game prevents recovery publication; stop it explicitly first.
 
@@ -74,9 +74,9 @@ Permissions govern the advertised tool surface. They do not sandbox project scri
 
 `risk.preview({tool,arguments})` reports risk and targets without execution. Risky operations include reflective calls, reload/close, project settings changes, existing-resource overwrite, publication and restoration. Known forbidden reflective methods such as `free` remain blocked with `SAFETY_VIOLATION`; confirmation cannot enable them.
 
-A risky attempt returns `CONFIRMATION_REQUIRED` with `error.details.confirmationToken`. Tokens last five minutes, are single-use and bind to the current session, method, canonical arguments and relevant fingerprints. Scene-close/reload also binds to the editor root identity/history version. Changed arguments or files require a new review. This is explicit caller confirmation, not evidence that a human personally approved; clients must honor their own user-approval obligations.
+A risky attempt returns an MCP `input_required` result containing a boolean elicitation request. Its `requestState` is HMAC-signed by the MCP SDK, expires after five minutes, and carries the tool plus the current operation fingerprint. The fingerprint includes the session, canonical arguments and relevant file/editor state. Changed arguments or files invalidate the prior approval and require a new review. The local MCP host is trusted to surface elicitation to the human operator.
 
-Every operational mutation records intent/outcome in `logs/audit.jsonl`. Permission changes also appear in the manifest. Audit entries contain targets, risk, argument hashes and transaction linkage, not raw script contents or confirmation tokens. Snapshot blobs intentionally contain original/staged file bytes and may contain sensitive project data; they remain local.
+Every operational mutation records intent/outcome in `logs/audit.jsonl`. Permission changes also appear in the manifest. Audit entries contain targets, risk, argument hashes and transaction linkage, not raw script contents or approval state secrets. Snapshot blobs intentionally contain original/staged file bytes and may contain sensitive project data; they remain local.
 
 ## Scope of this milestone
 

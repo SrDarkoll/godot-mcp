@@ -1,5 +1,8 @@
 # Godot MCP Transactions, Risk & Recovery Implementation Plan
 
+> **Security mechanism superseded:** the original replayable confirmation-token design in this historical plan was replaced by MCP host/user `input_required` elicitation with HMAC-protected request state. See `docs/tools/security.md` and the hardening plan.
+
+
 > **For agentic workers:** Use superpowers:executing-plans and TDD. Execute inline. Preserve the uncommitted Plans 3–4; no stage, commit, push or merge without a separate request.
 
 **Goal:** Change a saved scene and script, detect invalid GDScript, restore both byte-for-byte, and retain usable snapshots/checkpoints and an audit trail.

@@ -10,6 +10,8 @@ Runtime execution, inspection, native diagnostics and game screenshots are avail
 
 Declared-file transactions, recoverable file checkpoints and session risk/permissions are implemented; see the [recovery guide](docs/tools/transactions-recovery.md).
 
+Risky operations use MCP host/user elicitation rather than model-replayable confirmation tokens; see the [security model](docs/tools/security.md).
+
 > Unsaved editor-state recovery, debugger stepping and release automation remain future milestones. Visual checkpoints index images; file checkpoints restore selected on-disk files.
 
 ## Current capabilities
