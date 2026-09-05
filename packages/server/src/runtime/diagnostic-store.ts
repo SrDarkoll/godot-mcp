@@ -32,6 +32,14 @@ export class DiagnosticStore {
     this.queue=task.catch(()=>{});return task;
   }
   degraded(runId:string):boolean{return this.runs.get(runId)?.degraded??false;}
+  tail(runId:string,limit:number):DiagnosticPage {
+    const run=this.runs.get(runId);if(!run)throw new BridgeRpcError('RUN_NOT_FOUND','Run is not in this session');
+    const bounded=Math.max(1,Math.min(200,Math.trunc(limit)));
+    const available=this.entries.filter(e=>e.runId===runId);
+    const entries=available.slice(-bounded);
+    return {runId,entries,nextCursor:run.last,oldestAvailable:available[0]?.sequence??run.last+1,
+      dropped:run.dropped+run.sourceDropped,truncated:run.degraded||run.dropped>0||run.sourceDropped>0};
+  }
   query(runId:string,kind:DiagnosticEntry['kind']|'all',after:number,limit:number):DiagnosticPage {
     const run=this.runs.get(runId);if(!run)throw new BridgeRpcError('RUN_NOT_FOUND','Run is not in this session');
     const available=this.entries.filter(e=>e.runId===runId);const result:DiagnosticEntry[]=[];let cursor=after;

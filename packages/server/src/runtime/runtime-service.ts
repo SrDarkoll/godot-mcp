@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {RuntimeStatusSchema,RunTargetSchema,NO_RUNTIME_FEATURES,type RuntimeStatus,type RunTarget,type BridgeRuntimeEvent} from '@godot-mcp/protocol';
+import {RuntimeStatusSchema,RunTargetSchema,NO_RUNTIME_FEATURES,type RuntimeStatus,type RunTarget,type BridgeRuntimeEvent,type DiagnosticPage} from '@godot-mcp/protocol';
 import type {Session} from '../session/session.js';
 import type {SessionStore} from '../session/session-store.js';
 import {BridgeRpcError,type RpcRouter} from '../bridge/rpc-router.js';
@@ -79,6 +79,12 @@ export class RuntimeService {
     if((result.runId??result.run_id)!==status.runId)throw new BridgeRpcError('RUNTIME_NOT_CONNECTED','Runtime changed during request');
     if(method==='runtime.pause'||method==='runtime.resume')this.apply(RuntimeStatusSchema.parse(result));
     return result;
+  }
+  async tailDiagnostics(limit=100):Promise<DiagnosticPage|null> {
+    const status=await this.status();
+    if(!status.runId||!status.features.diagnostics||!this.diagnosticRuns.has(status.runId))return null;
+    await this.diagnostics.flush();
+    return this.diagnostics.tail(status.runId,limit);
   }
   async query(kind:'all'|'output'|'error'|'warning',input:{run_id?:string|undefined;after:number;limit:number}) {
     const id=input.run_id??this.lastRunId;if(!id)throw new BridgeRpcError('NO_RUNTIME_HISTORY','No execution in this session');
