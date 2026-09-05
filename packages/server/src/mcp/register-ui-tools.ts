@@ -26,7 +26,7 @@ export function registerUiTools(registrar:ToolRegistrar,rpc:BridgeServer['rpc'])
   registrar.registerTool('ui.set_size_flags',{description:'Set Control horizontal/vertical size flags and optional stretch ratio with Undo/Redo support.',inputSchema:z.object({node_path:z.string().min(1),horizontal:z.array(UiSizeFlagSchema).max(4).optional(),vertical:z.array(UiSizeFlagSchema).max(4).optional(),stretch_ratio:finite.refine(value=>value>0,'stretch_ratio must be greater than zero').optional()})},async args=>{
     try{return toolSuccess(await setUiSizeFlags(rpc,args));}catch(error){return toolError(error);}
   });
-  registrar.registerTool('ui.set_focus_neighbor',{description:'Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support.',inputSchema:z.object({node_path:z.string().min(1),side:UiSideSchema,neighbor_path:z.string().min(1).nullable().optional()})},async args=>{
+  registrar.registerTool('ui.set_focus_neighbor',{description:'Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support.',inputSchema:z.object({node_path:z.string().min(1),side:UiSideSchema,neighbor_path:z.string().max(1024).nullable().optional()})},async args=>{
     try{return toolSuccess(await setUiFocusNeighbor(rpc,args));}catch(error){return toolError(error);}
   });
 }

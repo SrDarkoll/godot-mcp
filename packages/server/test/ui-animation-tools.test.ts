@@ -44,6 +44,14 @@ describe('UI power tools',()=>{
       'ui.inspect_layout','ui.set_layout_preset','ui.set_anchors','ui.set_offsets','ui.set_size_flags','ui.set_focus_neighbor'
     ]);
   });
+
+  it('accepts null or an empty focus-neighbor path to clear the neighbor',()=>{
+    let schema:any;
+    const registrar={registerTool:(name:string,config:any)=>{if(name==='ui.set_focus_neighbor')schema=config.inputSchema;}} as any;
+    registerUiTools(registrar,rpc() as any);
+    expect(schema.parse({node_path:'/Main/A',side:'right',neighbor_path:null}).neighbor_path).toBeNull();
+    expect(schema.parse({node_path:'/Main/A',side:'right',neighbor_path:''}).neighbor_path).toBe('');
+  });
 });
 
 describe('animation power tools',()=>{
