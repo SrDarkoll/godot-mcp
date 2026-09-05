@@ -58,6 +58,12 @@ describe('MCP server', () => {
     expect(toolNames).toContain('node.get_property');
     expect(toolNames).toContain('node.set_property');
     expect(toolNames).toContain('node.get_properties');
+    expect(toolNames).toContain('resource.load');
+    expect(toolNames).toContain('resource.inspect');
+    expect(toolNames).toContain('resource.create');
+    expect(toolNames).toContain('resource.set_property');
+    expect(toolNames).toContain('resource.save');
+    expect(toolNames).toContain('resource.duplicate');
     const status = await client.callTool({ name: 'session.status', arguments: {} });
     expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
     const project = await client.callTool({ name: 'project.info', arguments: {} });
