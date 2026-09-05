@@ -69,6 +69,9 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
 
   process.once('SIGINT', () => { void shutdown(0); });
   process.once('SIGTERM', () => { void shutdown(0); });
+  process.stdin.once('end', () => { void shutdown(0); });
+  process.stdin.once('close', () => { void shutdown(0); });
+  process.stdin.resume();
 }
 
 const entry = process.argv[1];
