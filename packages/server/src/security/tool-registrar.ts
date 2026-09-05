@@ -3,7 +3,7 @@ import { acceptedContent, inputRequired, inputResponse, type McpServer, type Ser
 import * as z from 'zod/v4';
 import { BridgeRpcError } from '../bridge/rpc-router.js';
 import { toolError } from '../mcp/tool-result.js';
-import { approvalArgumentSummary } from './approval-summary.js';
+import { approvalArgumentSummary, approvalTargetSummary } from './approval-summary.js';
 import type { ToolAssessment, ToolPolicy } from './tool-policy.js';
 export type ToolRegistrar = Pick<McpServer, 'registerTool'>;
 export interface RiskApprovalState {
@@ -18,7 +18,7 @@ export interface RiskApprovalStateCodec {
 const APPROVAL_KEY = 'riskApproval';
 const APPROVAL_SCHEMA = z.object({ confirm: z.boolean() });
 function approvalMessage(name: string, args: Record<string, unknown>, assessment: ToolAssessment): string {
-    const targets = assessment.targets.length ? assessment.targets.join(', ') : 'no explicit target';
+    const targets = approvalTargetSummary(assessment.targets);
     return `Approve risky Godot MCP operation '${name}'? Targets: ${targets}. Arguments: ${approvalArgumentSummary(args)}`;
 }
 function declineError(action: 'decline' | 'cancel' | 'invalid'): BridgeRpcError {

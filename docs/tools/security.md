@@ -16,7 +16,7 @@ For each approval request the server:
 
 1. computes a SHA-256 fingerprint over the session, tool name, arguments, relevant on-disk file fingerprints and editor/recovery state;
 2. seals the tool name, fingerprint and a random one-time nonce into MCP `requestState` with the SDK HMAC codec and a five-minute TTL; the codec is also bound to the active Godot MCP session and originating MCP method;
-3. asks the MCP host to present a boolean approval to the user, including targets and a bounded argument preview; large/sensitive payloads are represented by size/type plus a short SHA-256 digest instead of being dumped into the prompt;
+3. asks the MCP host to present a boolean approval to the user, including bounded/escaped targets and a bounded argument preview; large/sensitive payloads are represented by size/type plus a short SHA-256 digest instead of being dumped into the prompt;
 4. on re-entry, verifies the signed/bound state and recomputes the current operation fingerprint;
 5. consumes the approval nonce before execution, so an accepted approval cannot be replayed;
 6. executes only when the user accepted and the current fingerprint still matches the approved operation.
