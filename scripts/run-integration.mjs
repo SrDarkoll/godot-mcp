@@ -59,8 +59,8 @@ try {
   process.exit(1);
 }
 
-const selection = runtime ? ['tests/integration/runtime-debugger.test.ts','tests/integration/runtime-game-capture.test.ts'] : visual ? ['tests/integration/visual-capture.test.ts'] :
-  ['tests/integration', '--exclude', 'tests/integration/visual-capture.test.ts','--exclude','tests/integration/runtime-debugger.test.ts','--exclude','tests/integration/runtime-game-capture.test.ts'];
+const selection = runtime ? ['tests/integration/runtime-debugger.test.ts','tests/integration/runtime-game-capture.test.ts','tests/integration/workflow-run-check.test.ts'] : visual ? ['tests/integration/visual-capture.test.ts'] :
+  ['tests/integration', '--exclude', 'tests/integration/visual-capture.test.ts','--exclude','tests/integration/runtime-debugger.test.ts','--exclude','tests/integration/runtime-game-capture.test.ts','--exclude','tests/integration/workflow-run-check.test.ts'];
 const result = spawnSync(process.execPath, [vitestEntry, 'run', ...selection, '--maxWorkers=1', '--no-file-parallelism'], {
   stdio: 'inherit',
   env: { ...process.env, GODOT_BIN: godotBin },

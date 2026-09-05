@@ -4,7 +4,7 @@ import path from 'node:path';
 import {initProject} from '../../../packages/cli/src/init/init-project.js';
 import {startClient,stopProcess,waitFor} from './visual-harness.js';
 export {waitFor};
-export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:boolean;breakAfterReady?:boolean;slowCapture?:boolean}={}) {
+export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:boolean;breakAfterReady?:boolean;slowCapture?:boolean;noRuntimeError?:boolean}={}) {
   const manual=options.manual??false;
   const godot=process.env.GODOT_BIN;
   if(!godot || process.env.GODOT_RUNTIME_INTEGRATION!=='1')throw new Error('GODOT_BIN and GODOT_RUNTIME_INTEGRATION=1 required');
@@ -17,6 +17,10 @@ export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:b
   const imported=spawnSync(godot,['--headless','--editor','--path',root,'--import'],{windowsHide:true,encoding:'utf8',timeout:20000});
   await writeFile(path.join(root,'import.log'),`${imported.stdout??''}${imported.stderr??''}`);
   if(imported.status!==0 || /SCRIPT ERROR|Parse Error/.test(imported.stderr??''))throw new Error(`Runtime fixture import failed: ${imported.stderr}`);
+  if(options.noRuntimeError){
+    const file=path.join(root,'main.gd');const source=await readFile(file,'utf8');
+    await writeFile(file,source.replace('push_error("RUNTIME_ERROR")','print("RUNTIME_ERROR_SUPPRESSED")'));
+  }
   if(options.breakAfterReady){
     const file=path.join(root,'main.gd');const source=await readFile(file,'utf8');
     await writeFile(file,source.replace('push_error("RUNTIME_ERROR")','push_error("RUNTIME_ERROR")\n    get_tree().create_timer(0.5).timeout.connect(func(): EngineDebugger.debug(true))'));

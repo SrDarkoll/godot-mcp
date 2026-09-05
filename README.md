@@ -119,6 +119,11 @@ docs/
 - [`docs/protocol/foundation-rpc.md`](docs/protocol/foundation-rpc.md)
 - [`docs/superpowers/specs/2026-09-05-godot-mcp-design.md`](docs/superpowers/specs/2026-09-05-godot-mcp-design.md)
 
+
+## Autonomous verification
+
+After editing a project, agents can use `workflow.run_check` to restart only a session-owned runtime, collect diagnostics/performance, capture the game viewport, and receive a deterministic `pass | fail | inconclusive` verdict plus the PNG in the same MCP response. `workflow.snapshot` creates immutable comparison baselines and `workflow.diff_since` returns only evidence created after a baseline. See [`docs/tools/workflow.md`](docs/tools/workflow.md).
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).

@@ -23,7 +23,7 @@ Snapshot contents:
 - immutable snapshot id, session id, label, timestamp;
 - active edited scene when the editor is connected;
 - current runtime status;
-- current diagnostic cursor plus bounded recent entries for the current run when native diagnostics are available;
+- current diagnostic cursor, bounded recent entries, and total output/warning/error counts for the current run when native diagnostics are available;
 - optional persisted screenshot metadata;
 - manifest cursors/counts needed for later deltas: next screenshot sequence, error count, transaction count, checkpoint count, runtime-run count.
 
