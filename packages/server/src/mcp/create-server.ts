@@ -15,6 +15,15 @@ import {
   setObjectProperty,
   callObjectMethod
 } from '../tools/object-tools.js';
+import {
+  createScene,
+  openScene,
+  saveScene,
+  saveSceneAs,
+  reloadScene,
+  instantiateScene,
+  getSceneRoot
+} from '../tools/scene-tools.js';
 import { toolError, toolSuccess } from './tool-result.js';
 
 export interface McpServerContext {
@@ -157,6 +166,99 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
   }, async (args) => {
     try {
       return toolSuccess(await callObjectMethod(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.create', {
+    description: 'Create a new scene with specified root node type and optional path.',
+    inputSchema: z.object({
+      root_type: z.string().default('Node2D'),
+      root_name: z.string().optional(),
+      path: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await createScene(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.open', {
+    description: 'Open a scene file in the Godot editor.',
+    inputSchema: z.object({
+      path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await openScene(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.save', {
+    description: 'Save the currently edited scene.',
+    inputSchema: z.object({
+      path: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await saveScene(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.save_as', {
+    description: 'Save the currently edited scene to a new path.',
+    inputSchema: z.object({
+      path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await saveSceneAs(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.reload', {
+    description: 'Reload a scene from disk in the editor.',
+    inputSchema: z.object({
+      path: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await reloadScene(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.instantiate', {
+    description: 'Instantiate a scene as a child of a node in the edited scene with Undo/Redo support.',
+    inputSchema: z.object({
+      path: z.string(),
+      parent_path: z.string().optional(),
+      name: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await instantiateScene(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('scene.get_root', {
+    description: 'Get the root node info of the currently edited scene.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await getSceneRoot(ctx.bridge.rpc, {}));
     } catch (error) {
       return toolError(error);
     }
