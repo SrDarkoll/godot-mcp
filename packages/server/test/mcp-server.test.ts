@@ -73,6 +73,11 @@ describe('MCP server', () => {
     expect(toolNames).toContain('signal.connections');
     expect(toolNames).toContain('signal.connect');
     expect(toolNames).toContain('signal.disconnect');
+    expect(toolNames).toContain('project.settings.get');
+    expect(toolNames).toContain('project.settings.set');
+    expect(toolNames).toContain('project.input.list');
+    expect(toolNames).toContain('project.input.add_action');
+    expect(toolNames).toContain('project.input.remove_action');
     const status = await client.callTool({ name: 'session.status', arguments: {} });
     expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
     const project = await client.callTool({ name: 'project.info', arguments: {} });

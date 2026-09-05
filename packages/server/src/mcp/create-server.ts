@@ -58,6 +58,13 @@ import {
   connectSignal,
   disconnectSignal
 } from '../tools/signal-tools.js';
+import {
+  getProjectSetting,
+  setProjectSetting,
+  listInputActions,
+  addInputAction,
+  removeInputAction
+} from '../tools/project-settings-tools.js';
 import { toolError, toolSuccess } from './tool-result.js';
 
 export interface McpServerContext {
@@ -663,6 +670,73 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
   }, async (args) => {
     try {
       return toolSuccess(await disconnectSignal(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('project.settings.get', {
+    description: 'Get a project setting value from project.godot.',
+    inputSchema: z.object({
+      setting: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await getProjectSetting(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('project.settings.set', {
+    description: 'Set a project setting value and optionally save to project.godot.',
+    inputSchema: z.object({
+      setting: z.string(),
+      value: z.unknown(),
+      save: z.boolean().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await setProjectSetting(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('project.input.list', {
+    description: 'List all input actions and their assigned events from InputMap.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await listInputActions(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('project.input.add_action', {
+    description: 'Add an action to the InputMap and persist in project settings.',
+    inputSchema: z.object({
+      action: z.string(),
+      deadzone: z.number().optional(),
+      events: z.array(z.record(z.string(), z.unknown())).optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await addInputAction(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('project.input.remove_action', {
+    description: 'Remove an action from the InputMap and project settings.',
+    inputSchema: z.object({
+      action: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await removeInputAction(ctx.bridge.rpc, args));
     } catch (error) {
       return toolError(error);
     }
