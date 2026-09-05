@@ -1,0 +1,19 @@
+{
+  "name": "@godot-mcp/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": { "godot-mcp": "dist/index.js" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@godot-mcp/protocol": "0.1.0",
+    "@godot-mcp/server": "0.1.0",
+    "@godot-mcp/godot-addon": "0.1.0"
+  }
+}

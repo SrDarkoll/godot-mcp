@@ -1,0 +1,7 @@
+{
+  "name": "@godot-mcp/godot-addon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": ["addons/godot_mcp"]
+}
