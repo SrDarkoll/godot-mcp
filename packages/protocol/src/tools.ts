@@ -89,3 +89,39 @@ export interface ObjectSetResult {
 export interface ObjectCallResult {
   result: unknown;
 }
+
+export interface SceneCreateResult {
+  path: string;
+  root_name: string;
+  root_type: string;
+}
+
+export interface SceneOpenResult {
+  path: string;
+  root_name: string;
+  root_type: string;
+}
+
+export interface SceneSaveResult {
+  path: string;
+  saved: boolean;
+}
+
+export interface SceneReloadResult {
+  path: string;
+  reloaded: boolean;
+}
+
+export interface SceneInstantiateResult {
+  name: string;
+  type: string;
+  path: string;
+  scene_file_path: string;
+}
+
+export interface SceneGetRootResult {
+  name: string;
+  type: string;
+  path: string;
+  scene_file_path: string | null;
+}

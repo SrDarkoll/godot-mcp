@@ -4,11 +4,13 @@ extends RefCounted
 var _project_info
 var _scene_tree
 var _object_handlers
+var _scene_handlers
 
 func _init(editor_interface) -> void:
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
     _scene_tree = preload("res://addons/godot_mcp/bridge/handlers/scene_tree.gd").new(editor_interface)
     _object_handlers = preload("res://addons/godot_mcp/bridge/handlers/object_handlers.gd").new(editor_interface)
+    _scene_handlers = preload("res://addons/godot_mcp/bridge/handlers/scene_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -51,6 +53,20 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _object_handlers.set_property(params)
         "object.call":
             result = _object_handlers.call_method(params)
+        "scene.create":
+            result = _scene_handlers.create(params)
+        "scene.open":
+            result = _scene_handlers.open(params)
+        "scene.save":
+            result = _scene_handlers.save(params)
+        "scene.save_as":
+            result = _scene_handlers.save_as(params)
+        "scene.reload":
+            result = _scene_handlers.reload(params)
+        "scene.instantiate":
+            result = _scene_handlers.instantiate(params)
+        "scene.get_root":
+            result = _scene_handlers.get_root(params)
         _:
             return _failure(request_id, "METHOD_NOT_FOUND", "Unknown method: %s" % method)
 

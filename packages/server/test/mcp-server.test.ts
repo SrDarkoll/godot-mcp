@@ -40,6 +40,13 @@ describe('MCP server', () => {
     expect(toolNames).toContain('scene.get_tree');
     expect(toolNames).toContain('session.status');
     expect(toolNames).toContain('object.get_class');
+    expect(toolNames).toContain('scene.create');
+    expect(toolNames).toContain('scene.open');
+    expect(toolNames).toContain('scene.save');
+    expect(toolNames).toContain('scene.save_as');
+    expect(toolNames).toContain('scene.reload');
+    expect(toolNames).toContain('scene.instantiate');
+    expect(toolNames).toContain('scene.get_root');
     const status = await client.callTool({ name: 'session.status', arguments: {} });
     expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
     const project = await client.callTool({ name: 'project.info', arguments: {} });
