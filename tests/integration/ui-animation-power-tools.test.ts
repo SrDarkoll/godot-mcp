@@ -73,6 +73,9 @@ describe('Godot UI and animation power tools',()=>{
 
       const menuPreset=await call('ui.set_layout_preset',{node_path:'/Main/HUD/Menu',preset:'center',resize_mode:'keep_size'});
       expect(menuPreset.isError).not.toBe(true);
+      const anchors=await call('ui.set_anchors',{node_path:'/Main/HUD/Menu',left:0.25,top:0.25,right:0.75,bottom:0.75,keep_offsets:true});
+      expect(anchors.isError,JSON.stringify(anchors.structuredContent)).not.toBe(true);
+      expect((anchors.structuredContent as any).layout.anchors).toEqual({left:0.25,top:0.25,right:0.75,bottom:0.75});
       const flags=await call('ui.set_size_flags',{
         node_path:'/Main/HUD/Menu/PlayButton',horizontal:['fill','expand'],vertical:['shrink_center'],stretch_ratio:2
       });
@@ -103,6 +106,17 @@ describe('Godot UI and animation power tools',()=>{
       });
       expect(createdAnimation.isError,JSON.stringify(createdAnimation.structuredContent)).not.toBe(true);
       expect(createdAnimation.structuredContent).toMatchObject({player_path:'/Main/AnimationPlayer',animation:'fade',qualified_name:'fade'});
+      const duplicateAnimation=await call('animation.create',{player_path:'/Main/AnimationPlayer',animation:'fade'});
+      expect(duplicateAnimation.isError).toBe(true);
+      expect(duplicateAnimation.structuredContent).toMatchObject({error:{code:'ALREADY_EXISTS'}});
+      const configured=await call('animation.configure',{player_path:'/Main/AnimationPlayer',animation:'fade',step:0.05});
+      expect(configured.isError).not.toBe(true);
+
+      const temporary=await call('animation.create',{player_path:'/Main/AnimationPlayer',animation:'temporary'});
+      expect(temporary.isError).not.toBe(true);
+      const removedAnimation=await call('animation.remove',{player_path:'/Main/AnimationPlayer',animation:'temporary'});
+      expect(removedAnimation.isError).not.toBe(true);
+      expect(((await call('animation.list',{player_path:'/Main/AnimationPlayer'})).structuredContent as any).flattened).not.toContain('temporary');
 
       const track=await call('animation.add_track',{
         player_path:'/Main/AnimationPlayer',animation:'fade',type:'value',path:'HUD:modulate:a',interpolation:'linear'
@@ -110,17 +124,25 @@ describe('Godot UI and animation power tools',()=>{
       expect(track.isError,JSON.stringify(track.structuredContent)).not.toBe(true);
       expect((track.structuredContent as any).track_index).toBe(0);
 
-      for(const [time,value] of [[0,0],[0.5,1]] as const){
+      for(const [time,value] of [[0,0],[0.25,0.5],[0.5,1]] as const){
         const key=await call('animation.insert_key',{
           player_path:'/Main/AnimationPlayer',animation:'fade',track_index:0,time,value:{type:'float',value},transition:1
         });
         expect(key.isError,JSON.stringify(key.structuredContent)).not.toBe(true);
       }
+      const duplicateKey=await call('animation.insert_key',{
+        player_path:'/Main/AnimationPlayer',animation:'fade',track_index:0,time:0.5,value:{type:'float',value:0.75}
+      });
+      expect(duplicateKey.isError).toBe(true);
+      expect(duplicateKey.structuredContent).toMatchObject({error:{code:'KEY_EXISTS'}});
+      const removedKey=await call('animation.remove_key',{player_path:'/Main/AnimationPlayer',animation:'fade',track_index:0,key_index:1});
+      expect(removedKey.isError).not.toBe(true);
+      expect(removedKey.structuredContent).toMatchObject({track_index:0,key_index:1,time:0.25});
 
       const inspected=await call('animation.inspect',{player_path:'/Main/AnimationPlayer',animation:'fade'});
       expect(inspected.isError,JSON.stringify(inspected.structuredContent)).not.toBe(true);
       expect(inspected.structuredContent).toMatchObject({
-        player_path:'/Main/AnimationPlayer',animation:'fade',length:0.5,loop_mode:'none',step:0.1,track_count:1
+        player_path:'/Main/AnimationPlayer',animation:'fade',length:0.5,loop_mode:'none',step:0.05,track_count:1
       });
       const inspectedTrack=(inspected.structuredContent as any).tracks[0];
       expect(inspectedTrack).toMatchObject({type:'value',path:'HUD:modulate:a',interpolation:'linear'});
