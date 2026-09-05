@@ -55,4 +55,88 @@ describe('BridgeServer', () => {
     ws.close();
     await bridge.stop();
   });
+
+  it('rejects connection with invalid token', async () => {
+    const session = createSession('C:/Games/Test');
+    const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+    const ws = await connect(bridge, 'b'.repeat(64));
+    const closeEvent = await new Promise<{ code: number; reason: string }>(resolve => {
+      ws.once('close', (code, reason) => resolve({ code, reason: reason.toString() }));
+    });
+    expect(closeEvent.code).toBe(1008);
+    expect(closeEvent.reason).toContain('Authentication failed');
+    expect(bridge.connected).toBe(false);
+    await bridge.stop();
+  });
+
+  it('rejects connection with protocol mismatch', async () => {
+    const session = createSession('C:/Games/Test');
+    const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+    const { port } = await bridge.start();
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+    await new Promise<void>((resolve, reject) => {
+      ws.once('open', resolve);
+      ws.once('error', reject);
+    });
+    ws.send(JSON.stringify({
+      type: 'hello', token: 'a'.repeat(64), protocol: 999,
+      addonVersion: '0.1.0', godotVersion: '4.7.2.stable.official',
+      projectRoot: 'C:/Games/Test',
+      capabilities: { editor: true, runtime: false, debugger: false, viewport2d: true, viewport3d: true, undoRedo: true }
+    }));
+    const closeEvent = await new Promise<{ code: number; reason: string }>(resolve => {
+      ws.once('close', (code, reason) => resolve({ code, reason: reason.toString() }));
+    });
+    expect(closeEvent.code).toBe(1008);
+    expect(closeEvent.reason).toContain('Protocol mismatch');
+    expect(bridge.connected).toBe(false);
+    await bridge.stop();
+  });
+
+  it('rejects connection with project root mismatch', async () => {
+    const session = createSession('C:/Games/Test');
+    const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+    const { port } = await bridge.start();
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+    await new Promise<void>((resolve, reject) => {
+      ws.once('open', resolve);
+      ws.once('error', reject);
+    });
+    ws.send(JSON.stringify({
+      type: 'hello', token: 'a'.repeat(64), protocol: 1,
+      addonVersion: '0.1.0', godotVersion: '4.7.2.stable.official',
+      projectRoot: 'C:/Other/Project',
+      capabilities: { editor: true, runtime: false, debugger: false, viewport2d: true, viewport3d: true, undoRedo: true }
+    }));
+    const closeEvent = await new Promise<{ code: number; reason: string }>(resolve => {
+      ws.once('close', (code, reason) => resolve({ code, reason: reason.toString() }));
+    });
+    expect(closeEvent.code).toBe(1008);
+    expect(closeEvent.reason).toContain('Project mismatch');
+    expect(bridge.connected).toBe(false);
+    await bridge.stop();
+  });
+
+  it('rejects a second concurrent editor connection', async () => {
+    const session = createSession('C:/Games/Test');
+    const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+    const ws1 = await connect(bridge);
+    await bridge.waitUntilConnected(1000);
+    expect(bridge.connected).toBe(true);
+
+    const { port } = await bridge.start();
+    const ws2 = new WebSocket(`ws://127.0.0.1:${port}`);
+    await new Promise<void>((resolve, reject) => {
+      ws2.once('open', resolve);
+      ws2.once('error', reject);
+    });
+    const closeEvent = await new Promise<{ code: number; reason: string }>(resolve => {
+      ws2.once('close', (code, reason) => resolve({ code, reason: reason.toString() }));
+    });
+    expect(closeEvent.code).toBe(1008);
+    expect(closeEvent.reason).toContain('Only one Godot addon connection is allowed');
+
+    ws1.close();
+    await bridge.stop();
+  });
 });

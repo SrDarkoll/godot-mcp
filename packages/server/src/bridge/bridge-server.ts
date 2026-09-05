@@ -99,6 +99,11 @@ export class BridgeServer {
       return;
     }
 
+    if (typeof payload === 'object' && payload !== null && 'protocol' in payload && (payload as { protocol: unknown }).protocol !== 1) {
+      socket.close(1008, 'Protocol mismatch');
+      return;
+    }
+
     const parsed = AddonHelloSchema.safeParse ? AddonHelloSchema.safeParse(payload) : null;
     let hello;
     if (parsed) {
