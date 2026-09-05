@@ -78,6 +78,15 @@ describe('MCP server', () => {
     expect(toolNames).toContain('project.input.list');
     expect(toolNames).toContain('project.input.add_action');
     expect(toolNames).toContain('project.input.remove_action');
+    expect(toolNames).toContain('editor.get_active_scene');
+    expect(toolNames).toContain('editor.get_open_scenes');
+    expect(toolNames).toContain('editor.get_selected_nodes');
+    expect(toolNames).toContain('editor.select_node');
+    expect(toolNames).toContain('editor.change_scene');
+    expect(toolNames).toContain('editor.undo');
+    expect(toolNames).toContain('editor.redo');
+    expect(toolNames).toContain('editor.get_filesystem');
+    expect(toolNames).toContain('editor.scan_filesystem');
     const status = await client.callTool({ name: 'session.status', arguments: {} });
     expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
     const project = await client.callTool({ name: 'project.info', arguments: {} });

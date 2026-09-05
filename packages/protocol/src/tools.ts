@@ -340,3 +340,45 @@ export interface InputRemoveActionResult {
   action: string;
   removed: boolean;
 }
+
+export interface EditorActiveSceneResult {
+  path: string | null;
+  root_name: string | null;
+  root_type: string | null;
+}
+
+export interface EditorOpenScenesResult {
+  scenes: string[];
+}
+
+export interface EditorSelectedNodeInfo {
+  name: string;
+  type: string;
+  path: string;
+}
+
+export interface EditorSelectedNodesResult {
+  nodes: EditorSelectedNodeInfo[];
+}
+
+export interface EditorSelectNodeResult {
+  node_path: string;
+  selected: boolean;
+}
+
+export interface EditorChangeSceneResult {
+  path: string;
+  switched: boolean;
+}
+
+export interface EditorUndoRedoResult {
+  performed: boolean;
+}
+
+export interface EditorFilesystemResult {
+  root: Record<string, unknown>;
+}
+
+export interface EditorScanFilesystemResult {
+  scanned: boolean;
+}
