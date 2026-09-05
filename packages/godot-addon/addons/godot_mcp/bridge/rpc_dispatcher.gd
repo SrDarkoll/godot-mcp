@@ -10,6 +10,7 @@ var _resource_handlers
 var _script_handlers
 var _signal_handlers
 var _project_handlers
+var _editor_handlers
 
 func _init(editor_interface) -> void:
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
@@ -21,6 +22,7 @@ func _init(editor_interface) -> void:
     _script_handlers = preload("res://addons/godot_mcp/bridge/handlers/script_handlers.gd").new(editor_interface)
     _signal_handlers = preload("res://addons/godot_mcp/bridge/handlers/signal_handlers.gd").new(editor_interface)
     _project_handlers = preload("res://addons/godot_mcp/bridge/handlers/project_handlers.gd").new(editor_interface)
+    _editor_handlers = preload("res://addons/godot_mcp/bridge/handlers/editor_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -139,6 +141,24 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _project_handlers.add_input_action(params)
         "project.input.remove_action":
             result = _project_handlers.remove_input_action(params)
+        "editor.get_active_scene":
+            result = _editor_handlers.get_active_scene(params)
+        "editor.get_open_scenes":
+            result = _editor_handlers.get_open_scenes(params)
+        "editor.get_selected_nodes":
+            result = _editor_handlers.get_selected_nodes(params)
+        "editor.select_node":
+            result = _editor_handlers.select_node(params)
+        "editor.change_scene":
+            result = _editor_handlers.change_scene(params)
+        "editor.undo":
+            result = _editor_handlers.undo(params)
+        "editor.redo":
+            result = _editor_handlers.redo(params)
+        "editor.get_filesystem":
+            result = _editor_handlers.get_filesystem(params)
+        "editor.scan_filesystem":
+            result = _editor_handlers.scan_filesystem(params)
         _:
             return _failure(request_id, "METHOD_NOT_FOUND", "Unknown method: %s" % method)
 

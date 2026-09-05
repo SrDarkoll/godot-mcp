@@ -65,6 +65,17 @@ import {
   addInputAction,
   removeInputAction
 } from '../tools/project-settings-tools.js';
+import {
+  getActiveScene,
+  getOpenScenes,
+  getSelectedNodes,
+  selectNode,
+  changeScene,
+  editorUndo,
+  editorRedo,
+  getFilesystem,
+  scanFilesystem
+} from '../tools/editor-tools.js';
 import { toolError, toolSuccess } from './tool-result.js';
 
 export interface McpServerContext {
@@ -737,6 +748,110 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
   }, async (args) => {
     try {
       return toolSuccess(await removeInputAction(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.get_active_scene', {
+    description: 'Get information about the currently active edited scene tab.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await getActiveScene(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.get_open_scenes', {
+    description: 'Get list of open scene paths in the editor.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await getOpenScenes(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.get_selected_nodes', {
+    description: 'Get currently selected nodes in the editor scene tree.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await getSelectedNodes(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.select_node', {
+    description: 'Select a node in the editor scene tree.',
+    inputSchema: z.object({
+      node_path: z.string(),
+      additive: z.boolean().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await selectNode(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.change_scene', {
+    description: 'Switch active scene tab to a given scene path.',
+    inputSchema: z.object({
+      path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await changeScene(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.undo', {
+    description: 'Trigger Undo in the Godot editor.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await editorUndo(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.redo', {
+    description: 'Trigger Redo in the Godot editor.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await editorRedo(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.get_filesystem', {
+    description: 'Get filesystem directory and file structure under res://.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await getFilesystem(ctx.bridge.rpc, {}));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('editor.scan_filesystem', {
+    description: 'Request a rescan of the project filesystem in the editor.',
+    inputSchema: z.object({})
+  }, async () => {
+    try {
+      return toolSuccess(await scanFilesystem(ctx.bridge.rpc, {}));
     } catch (error) {
       return toolError(error);
     }
