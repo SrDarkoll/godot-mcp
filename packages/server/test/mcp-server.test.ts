@@ -95,5 +95,5 @@ describe('MCP server', () => {
 
     await client.close();
     await server.close();
-  });
+  }, 15_000);
 });

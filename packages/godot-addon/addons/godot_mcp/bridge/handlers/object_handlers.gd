@@ -33,13 +33,13 @@ func resolve_target(params: Dictionary) -> Object:
         return instance_from_id(obj_id)
     return null
 
-func get_class(params: Dictionary) -> Dictionary:
+func handle_get_class(params: Dictionary) -> Dictionary:
     var target := resolve_target(params)
     if target == null:
         return {"__error": {"code": "OBJECT_NOT_FOUND", "message": "Target object could not be resolved"}}
     return {"class": target.get_class()}
 
-func get_property_list(params: Dictionary) -> Dictionary:
+func handle_get_property_list(params: Dictionary) -> Dictionary:
     var target := resolve_target(params)
     if target == null:
         return {"__error": {"code": "OBJECT_NOT_FOUND", "message": "Target object could not be resolved"}}
@@ -54,7 +54,7 @@ func get_property_list(params: Dictionary) -> Dictionary:
         })
     return {"properties": props}
 
-func get_method_list(params: Dictionary) -> Dictionary:
+func handle_get_method_list(params: Dictionary) -> Dictionary:
     var target := resolve_target(params)
     if target == null:
         return {"__error": {"code": "OBJECT_NOT_FOUND", "message": "Target object could not be resolved"}}
@@ -73,7 +73,7 @@ func get_method_list(params: Dictionary) -> Dictionary:
         })
     return {"methods": methods}
 
-func get_signal_list(params: Dictionary) -> Dictionary:
+func handle_get_signal_list(params: Dictionary) -> Dictionary:
     var target := resolve_target(params)
     if target == null:
         return {"__error": {"code": "OBJECT_NOT_FOUND", "message": "Target object could not be resolved"}}
@@ -123,7 +123,7 @@ func call_method(params: Dictionary) -> Dictionary:
     if not SafetyPolicy.is_method_allowed(target, method_name):
         return {
             "__error": {
-                "code": "UNAUTHORIZED",
+                "code": "SAFETY_VIOLATION",
                 "message": "Method '%s' is blocked by safety policy" % method_name
             }
         }

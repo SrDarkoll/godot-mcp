@@ -219,3 +219,112 @@ static func deserialize(data):
             return null
         _:
             return val
+
+static func encode(val):
+    match typeof(val):
+        TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING:
+            return val
+        TYPE_STRING_NAME, TYPE_NODE_PATH:
+            return str(val)
+        TYPE_VECTOR2, TYPE_VECTOR2I:
+            return {"x": val.x, "y": val.y}
+        TYPE_VECTOR3, TYPE_VECTOR3I:
+            return {"x": val.x, "y": val.y, "z": val.z}
+        TYPE_VECTOR4, TYPE_VECTOR4I:
+            return {"x": val.x, "y": val.y, "z": val.z, "w": val.w}
+        TYPE_RECT2, TYPE_RECT2I:
+            return {"x": val.position.x, "y": val.position.y, "width": val.size.x, "height": val.size.y}
+        TYPE_COLOR:
+            return {"r": val.r, "g": val.g, "b": val.b, "a": val.a}
+        TYPE_QUATERNION:
+            return {"x": val.x, "y": val.y, "z": val.z, "w": val.w}
+        TYPE_BASIS:
+            return {
+                "x": {"x": val.x.x, "y": val.x.y, "z": val.x.z},
+                "y": {"x": val.y.x, "y": val.y.y, "z": val.y.z},
+                "z": {"x": val.z.x, "y": val.z.y, "z": val.z.z}
+            }
+        TYPE_TRANSFORM2D:
+            return {
+                "x": {"x": val.x.x, "y": val.x.y},
+                "y": {"x": val.y.x, "y": val.y.y},
+                "origin": {"x": val.origin.x, "y": val.origin.y}
+            }
+        TYPE_TRANSFORM3D:
+            return {
+                "basis": {
+                    "x": {"x": val.basis.x.x, "y": val.basis.x.y, "z": val.basis.x.z},
+                    "y": {"x": val.basis.y.x, "y": val.basis.y.y, "z": val.basis.y.z},
+                    "z": {"x": val.basis.z.x, "y": val.basis.z.y, "z": val.basis.z.z}
+                },
+                "origin": {"x": val.origin.x, "y": val.origin.y, "z": val.origin.z}
+            }
+        TYPE_ARRAY:
+            var arr: Array = []
+            for item in val:
+                arr.append(encode(item))
+            return arr
+        TYPE_DICTIONARY:
+            var d: Dictionary = {}
+            for k in val.keys():
+                d[str(k)] = encode(val[k])
+            return d
+        TYPE_PACKED_BYTE_ARRAY, TYPE_PACKED_INT32_ARRAY, TYPE_PACKED_INT64_ARRAY, \
+        TYPE_PACKED_FLOAT32_ARRAY, TYPE_PACKED_FLOAT64_ARRAY, TYPE_PACKED_STRING_ARRAY:
+            return Array(val)
+        TYPE_PACKED_VECTOR2_ARRAY:
+            var arr: Array = []
+            for v in val:
+                arr.append({"x": v.x, "y": v.y})
+            return arr
+        TYPE_PACKED_VECTOR3_ARRAY:
+            var arr: Array = []
+            for v in val:
+                arr.append({"x": v.x, "y": v.y, "z": v.z})
+            return arr
+        TYPE_PACKED_COLOR_ARRAY:
+            var arr: Array = []
+            for c in val:
+                arr.append({"r": c.r, "g": c.g, "b": c.b, "a": c.a})
+            return arr
+        TYPE_OBJECT:
+            if val == null:
+                return null
+            if val is Resource:
+                if not val.resource_path.is_empty():
+                    return val.resource_path
+                return val.get_class()
+            if val is Node:
+                return str(val.get_path())
+            return val.get_class()
+        _:
+            return str(val)
+
+static func decode(data):
+    if typeof(data) != TYPE_DICTIONARY:
+        if typeof(data) == TYPE_ARRAY:
+            var arr: Array = []
+            for item in data:
+                arr.append(decode(item))
+            return arr
+        return data
+
+    if data.has("type") and data.has("value"):
+        return deserialize(data)
+
+    if data.has("x") and data.has("y"):
+        if data.has("z"):
+            if data.has("w"):
+                return Vector4(float(data["x"]), float(data["y"]), float(data["z"]), float(data["w"]))
+            return Vector3(float(data["x"]), float(data["y"]), float(data["z"]))
+        if data.has("width") and data.has("height"):
+            return Rect2(float(data["x"]), float(data["y"]), float(data["width"]), float(data["height"]))
+        return Vector2(float(data["x"]), float(data["y"]))
+
+    if data.has("r") and data.has("g") and data.has("b"):
+        return Color(float(data["r"]), float(data["g"]), float(data["b"]), float(data.get("a", 1.0)))
+
+    var dict: Dictionary = {}
+    for k in data.keys():
+        dict[k] = decode(data[k])
+    return dict
