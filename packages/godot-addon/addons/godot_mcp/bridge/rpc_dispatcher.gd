@@ -12,6 +12,7 @@ var _signal_handlers
 var _project_handlers
 var _editor_handlers
 var _visual_handlers
+var _ui_handlers
 var _runtime
 var _recovery
 
@@ -29,6 +30,7 @@ func _init(editor_interface, runtime = null) -> void:
     _project_handlers = preload("res://addons/godot_mcp/bridge/handlers/project_handlers.gd").new(editor_interface)
     _editor_handlers = preload("res://addons/godot_mcp/bridge/handlers/editor_handlers.gd").new(editor_interface)
     _visual_handlers = preload("res://addons/godot_mcp/bridge/handlers/visual_handlers.gd").new(editor_interface)
+    _ui_handlers = preload("res://addons/godot_mcp/bridge/handlers/ui_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -73,6 +75,18 @@ func dispatch(raw_text: String) -> Dictionary:
             result = await _visual_handlers.handle_capture_viewport_2d(params)
         "visual.capture_viewport_3d":
             result = await _visual_handlers.handle_capture_viewport_3d(params)
+        "ui.inspect_layout":
+            result = _ui_handlers.inspect_layout(params)
+        "ui.set_layout_preset":
+            result = _ui_handlers.set_layout_preset(params)
+        "ui.set_anchors":
+            result = _ui_handlers.set_anchors(params)
+        "ui.set_offsets":
+            result = _ui_handlers.set_offsets(params)
+        "ui.set_size_flags":
+            result = _ui_handlers.set_size_flags(params)
+        "ui.set_focus_neighbor":
+            result = _ui_handlers.set_focus_neighbor(params)
         "project.info":
             result = _project_info.run(params)
         "scene.get_tree":
