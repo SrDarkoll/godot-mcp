@@ -25,6 +25,7 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
   let positionalSeen = false;
   for (let i = 1; i < argv.length; i++) {
     const arg = argv[i];
+    if (arg === undefined) continue;
     if (arg === '--godot') {
       const value = argv[++i];
       if (!value) throw new Error('--godot requires an executable path');
