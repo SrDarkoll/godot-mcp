@@ -2,6 +2,8 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { cp, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { Client } from '@modelcontextprotocol/client';
+import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { afterEach, describe, expect, test } from 'vitest';
 import { initProject } from '../../packages/cli/src/init/init-project.js';
 import { BridgeServer } from '../../packages/server/src/bridge/bridge-server.js';
@@ -17,13 +19,13 @@ import { getSceneTree } from '../../packages/server/src/tools/scene-tree.js';
 const fixtureRoot = path.resolve('fixtures/empty-project');
 const tempRoots: string[] = [];
 
-async function waitFor(predicate: () => boolean, timeoutMs: number): Promise<boolean> {
+async function waitFor(predicate: () => boolean | Promise<boolean>, timeoutMs: number): Promise<boolean> {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
-    if (predicate()) return true;
-    await new Promise(resolve => setTimeout(resolve, 25));
+    if (await predicate()) return true;
+    await new Promise(resolve => setTimeout(resolve, 50));
   }
-  return predicate();
+  return await predicate();
 }
 
 async function stopProcess(child: ChildProcess | null): Promise<void> {
@@ -62,13 +64,21 @@ describe('Godot editor handshake', () => {
       const { port } = await bridge.start();
       await descriptor.write({ port, token, sessionId: session.id });
       godot = spawn(godotBin, ['--headless', '--path', tempRoot, '--editor', 'res://main.tscn'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: 'inherit',
         windowsHide: true
       });
 
-      expect(await waitFor(() => bridge.connected, 10_000)).toBe(true);
+      expect(await waitFor(() => bridge.connected, 15_000)).toBe(true);
       expect(await getProjectInfo(bridge.rpc)).toMatchObject({ name: 'Godot MCP Fixture' });
-      expect(await getSceneTree(bridge.rpc)).toMatchObject({
+
+      let tree = await getSceneTree(bridge.rpc);
+      const deadline = Date.now() + 10_000;
+      while (!tree.root && Date.now() < deadline) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        tree = await getSceneTree(bridge.rpc);
+      }
+
+      expect(tree).toMatchObject({
         root: {
           name: 'Main',
           type: 'Node2D',
@@ -89,5 +99,86 @@ describe('Godot editor handshake', () => {
     await stat(manifestPath);
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as { sessionId: string };
     expect(manifest.sessionId).toBe(session.id);
-  }, 20_000);
+  }, 25_000);
+
+  test('serves session.status, project.info, and scene.get_tree over stdio MCP client to live Godot editor and cleans up on EOF', async () => {
+    const godotBin = process.env.GODOT_BIN;
+    if (!godotBin) throw new Error('GODOT_BIN must be set by scripts/run-integration.mjs');
+
+    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'godot-mcp-e2e-'));
+    tempRoots.push(tempRoot);
+    await cp(fixtureRoot, tempRoot, { recursive: true });
+    await initProject({ projectRoot: tempRoot, godotBin, enable: true });
+
+    const serverEntry = path.resolve('packages/server/dist/index.js');
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [serverEntry, '--project', tempRoot, '--bridge-port', '0']
+    });
+    const client = new Client({ name: 'integration-test', version: '0.1.0' });
+    await client.connect(transport);
+
+    const descriptorPath = path.join(tempRoot, '.godot-mcp', 'runtime', 'bridge.json');
+    let godot: ChildProcess | null = null;
+
+    try {
+      // 1. session.status works while editor is disconnected
+      const initialStatus = await client.callTool({ name: 'session.status', arguments: {} });
+      const initialStatusData = initialStatus.structuredContent as Record<string, unknown>;
+      expect(initialStatusData['editorConnected']).toBe(false);
+
+      // Verify descriptor exists
+      expect(await waitFor(() => stat(descriptorPath).then(() => true, () => false), 5_000)).toBe(true);
+
+      // 2. Launch Godot editor headless
+      godot = spawn(godotBin, ['--headless', '--path', tempRoot, '--editor', 'res://main.tscn'], {
+        stdio: 'inherit',
+        windowsHide: true
+      });
+
+      // 3. Wait for editor to connect via session.status
+      const connected = await waitFor(async () => {
+        const res = await client.callTool({ name: 'session.status', arguments: {} });
+        return (res.structuredContent as Record<string, unknown>)['editorConnected'] === true;
+      }, 15_000);
+      expect(connected).toBe(true);
+
+      // 4. project.info returns fixture project info
+      const projectInfo = await client.callTool({ name: 'project.info', arguments: {} });
+      expect(projectInfo.structuredContent).toMatchObject({ name: 'Godot MCP Fixture' });
+
+      // 5. scene.get_tree returns expected nodes
+      let tree = await client.callTool({ name: 'scene.get_tree', arguments: {} });
+      const deadline = Date.now() + 10_000;
+      while (!(tree.structuredContent as Record<string, unknown>)['root'] && Date.now() < deadline) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        tree = await client.callTool({ name: 'scene.get_tree', arguments: {} });
+      }
+      expect(tree.structuredContent).toMatchObject({
+        root: {
+          name: 'Main',
+          type: 'Node2D',
+          children: [{
+            name: 'Player',
+            type: 'CharacterBody2D',
+            children: [{ name: 'Camera2D', type: 'Camera2D' }]
+          }]
+        }
+      });
+    } finally {
+      await stopProcess(godot);
+      await client.close();
+    }
+
+    // 6. Verify bridge descriptor is cleaned up and not left behind
+    const descriptorCleaned = await waitFor(async () => {
+      try {
+        await stat(descriptorPath);
+        return false;
+      } catch {
+        return true;
+      }
+    }, 5_000);
+    expect(descriptorCleaned).toBe(true);
+  }, 35_000);
 });

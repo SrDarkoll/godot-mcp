@@ -42,19 +42,15 @@ if (!/^4(?:\.|$)/.test(versionText)) {
   process.exit(1);
 }
 
-const vitestBin = path.resolve(
-  'node_modules',
-  '.bin',
-  process.platform === 'win32' ? 'vitest.cmd' : 'vitest'
-);
+const vitestEntry = path.resolve('node_modules', 'vitest', 'vitest.mjs');
 try {
-  await access(vitestBin);
+  await access(vitestEntry);
 } catch {
   console.error('Integration failed: Vitest is not installed. Run npm install first.');
   process.exit(1);
 }
 
-const result = spawnSync(vitestBin, ['run', 'tests/integration/editor-handshake.test.ts'], {
+const result = spawnSync(process.execPath, [vitestEntry, 'run', 'tests/integration/editor-handshake.test.ts'], {
   stdio: 'inherit',
   env: { ...process.env, GODOT_BIN: godotBin },
   windowsHide: true
