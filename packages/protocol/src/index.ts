@@ -12,3 +12,5 @@ export * from './events.js';
 export * from './recovery.js';
 export * from './security.js';
 export * from './management.js';
+
+export * from './workflow.js';
