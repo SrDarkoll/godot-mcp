@@ -15,6 +15,7 @@ import { registerRuntimeTools } from '../tools/runtime-tools.js';
 import { registerSecurityTools } from '../tools/security-tools.js';
 import { VisualTools } from '../tools/visual-tools.js';
 import { WorkflowService } from '../workflow/workflow-service.js';
+import { registerAnimationTools } from './register-animation-tools.js';
 import { registerCoreTools } from './register-core-tools.js';
 import { registerEditorTools } from './register-editor-tools.js';
 import { registerNodeTools } from './register-node-tools.js';
@@ -24,6 +25,7 @@ import { registerResourceTools } from './register-resource-tools.js';
 import { registerSceneTools } from './register-scene-tools.js';
 import { registerScriptTools } from './register-script-tools.js';
 import { registerSignalTools } from './register-signal-tools.js';
+import { registerUiTools } from './register-ui-tools.js';
 import { registerVisualTools } from './register-visual-tools.js';
 import { registerWorkflowTools } from './register-workflow-tools.js';
 export interface McpServerContext {
@@ -61,6 +63,8 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerVisualTools(registrar, visual, ctx.sessions, ctx.session);
     registerWorkflowTools(registrar, workflow);
     registerCoreTools(registrar, rpc, ctx.session);
+    registerUiTools(registrar, rpc);
+    registerAnimationTools(registrar, rpc);
     registerObjectTools(registrar, rpc);
     registerSceneTools(registrar, rpc);
     registerNodeTools(registrar, rpc);

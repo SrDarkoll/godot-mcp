@@ -17,7 +17,7 @@ const READS = new Set([
     'editor.get_selected_nodes', 'editor.get_filesystem', 'runtime.status', 'runtime.scene_tree',
     'runtime.inspect_node', 'runtime.get_property', 'debug.output', 'debug.errors', 'debug.warnings',
     'debug.performance', 'permissions.status', 'risk.preview', 'transaction.status', 'transaction.preview',
-    'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since'
+    'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since', 'ui.inspect_layout', 'animation.list', 'animation.inspect'
 ]);
 const CONTROLS = new Set([
     'runtime.status', 'runtime.stop', 'project.stop', 'session.status', 'permissions.status',
@@ -31,7 +31,9 @@ const NORMAL_MUTATIONS = new Set([
     'editor.change_scene', 'editor.scan_filesystem', 'project.run', 'project.run_scene',
     'runtime.pause', 'runtime.resume', 'runtime.restart', 'visual.capture_game', 'visual.capture_viewport_2d',
     'visual.capture_viewport_3d', 'workflow.snapshot', 'workflow.run_check', 'transaction.begin', 'transaction.write_file', 'transaction.delete_file',
-    'transaction.rollback', 'checkpoint.create', 'permissions.set', 'permissions.enable', 'permissions.disable'
+    'transaction.rollback', 'checkpoint.create', 'permissions.set', 'permissions.enable', 'permissions.disable',
+    'ui.set_layout_preset', 'ui.set_anchors', 'ui.set_offsets', 'ui.set_size_flags', 'ui.set_focus_neighbor',
+    'animation.create', 'animation.remove', 'animation.configure', 'animation.add_track', 'animation.insert_key', 'animation.remove_key'
 ]);
 const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||

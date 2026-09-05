@@ -43,6 +43,14 @@ describe('MCP server', () => {
         const tools = await client.listTools();
         const toolNames = tools.tools.map(tool => tool.name).sort();
         expect(toolNames).toEqual([
+            'animation.add_track',
+            'animation.configure',
+            'animation.create',
+            'animation.insert_key',
+            'animation.inspect',
+            'animation.list',
+            'animation.remove',
+            'animation.remove_key',
             'checkpoint.create',
             'checkpoint.inspect',
             'checkpoint.list',
@@ -134,6 +142,12 @@ describe('MCP server', () => {
             'transaction.rollback',
             'transaction.status',
             'transaction.write_file',
+            'ui.inspect_layout',
+            'ui.set_anchors',
+            'ui.set_focus_neighbor',
+            'ui.set_layout_preset',
+            'ui.set_offsets',
+            'ui.set_size_flags',
             'visual.capture_game',
             'visual.capture_viewport_2d',
             'visual.capture_viewport_3d',
