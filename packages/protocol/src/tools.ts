@@ -302,3 +302,41 @@ export interface SignalDisconnectResult {
   target_node_path: string;
   target_method: string;
 }
+
+export interface ProjectSettingGetResult {
+  setting: string;
+  value: unknown;
+}
+
+export interface ProjectSettingSetResult {
+  setting: string;
+  previous_value?: unknown;
+  new_value?: unknown;
+  saved: boolean;
+}
+
+export interface InputEventInfo {
+  type: string;
+  keycode?: number | undefined;
+  button_index?: number | undefined;
+}
+
+export interface InputActionInfo {
+  name: string;
+  deadzone: number;
+  events: InputEventInfo[];
+}
+
+export interface InputListResult {
+  actions: InputActionInfo[];
+}
+
+export interface InputAddActionResult {
+  action: string;
+  added: boolean;
+}
+
+export interface InputRemoveActionResult {
+  action: string;
+  removed: boolean;
+}
