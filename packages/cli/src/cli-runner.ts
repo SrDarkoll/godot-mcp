@@ -27,27 +27,10 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    await runServer(['--project',root,...(args.bridgePort===undefined?[]:['--bridge-port',String(args.bridgePort)])]);
    return 0;
   }
-  const config=await readProjectConfig(root);
-  const godot=args.godotBin?path.resolve(args.godotBin):config.godotBin??process.env.GODOT_BIN??null;
+  const cliGodot=args.godotBin?path.resolve(args.godotBin):null;
   switch(args.command){
-   case 'init':case 'addon.install':case 'addon.update':{
-    const result=await initProject({projectRoot:root,godotBin:godot,enable:true});
-    emit(result,[`Initialized Godot MCP in ${root}`,...result.warnings.map(w=>`Warning: ${w}`),...(result.backupPath?[`Previous addon files: ${result.backupPath}`]:[])].join('\n'));
-    return 0;
-   }
-   case 'doctor':{
-    const report=await doctor({projectRoot:root,godotBin:godot});
-    emit(report,report.checks.map(c=>`${c.ok?'OK':c.required===false?'INFO':'FAIL'} ${c.id}: ${c.detail}`).join('\n'));
-    return report.ok?0:1;
-   }
    case 'status':emit(await serverStatus(root));return 0;
    case 'stop':emit(await stopServer(root));return 0;
-   case 'config':{
-    const changes={...(args.godotBin?{godotBin:path.resolve(args.godotBin)}:{}),...(args.bridgePort===undefined?{}:{bridgePort:args.bridgePort})};
-    const saved=Object.keys(changes).length>0;
-    const value=saved?await writeProjectConfig(root,changes):config;
-    emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,saved,restartRequired:saved});return 0;
-   }
    case 'permissions':{
     const status=await serverStatus(root);
     emit(status.state==='offline'?{source:'defaults',permissions:DEFAULT_PERMISSIONS}:{source:'live',sessionId:status.sessionId,permissions:status.permissions});return 0;
@@ -57,6 +40,29 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    case 'setup.codex':{
     const recipe=codexRecipe(root);
     emit(recipe,'Codex configuration recipe (profile not modified):\n\n'+recipe.toml+'\nCommand arguments:\n'+JSON.stringify(recipe.command));return 0;
+   }
+   case 'doctor':{
+    let godot=cliGodot;
+    if(!godot){
+     try{godot=(await readProjectConfig(root)).godotBin??process.env.GODOT_BIN??null;}catch{godot=process.env.GODOT_BIN??null;}
+    }
+    const report=await doctor({projectRoot:root,godotBin:godot});
+    emit(report,report.checks.map(c=>`${c.ok?'OK':c.required===false?'INFO':'FAIL'} ${c.id}: ${c.detail}`).join('\n'));
+    return report.ok?0:1;
+   }
+   case 'init':case 'addon.install':case 'addon.update':{
+    const config=await readProjectConfig(root);
+    const godot=cliGodot??config.godotBin??process.env.GODOT_BIN??null;
+    const result=await initProject({projectRoot:root,godotBin:godot,enable:true});
+    emit(result,[`Initialized Godot MCP in ${root}`,...result.warnings.map(w=>`Warning: ${w}`),...(result.backupPath?[`Previous addon files: ${result.backupPath}`]:[])].join('\n'));
+    return 0;
+   }
+   case 'config':{
+    const config=await readProjectConfig(root);
+    const changes={...(args.godotBin?{godotBin:path.resolve(args.godotBin)}:{}),...(args.bridgePort===undefined?{}:{bridgePort:args.bridgePort})};
+    const saved=Object.keys(changes).length>0;
+    const value=saved?await writeProjectConfig(root,changes):config;
+    emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,saved,restartRequired:saved});return 0;
    }
   }
  }catch(error){
