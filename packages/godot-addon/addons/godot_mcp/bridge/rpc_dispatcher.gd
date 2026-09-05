@@ -13,6 +13,7 @@ var _project_handlers
 var _editor_handlers
 var _visual_handlers
 var _ui_handlers
+var _animation_handlers
 var _runtime
 var _recovery
 
@@ -31,6 +32,7 @@ func _init(editor_interface, runtime = null) -> void:
     _editor_handlers = preload("res://addons/godot_mcp/bridge/handlers/editor_handlers.gd").new(editor_interface)
     _visual_handlers = preload("res://addons/godot_mcp/bridge/handlers/visual_handlers.gd").new(editor_interface)
     _ui_handlers = preload("res://addons/godot_mcp/bridge/handlers/ui_handlers.gd").new(editor_interface)
+    _animation_handlers = preload("res://addons/godot_mcp/bridge/handlers/animation_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -75,6 +77,22 @@ func dispatch(raw_text: String) -> Dictionary:
             result = await _visual_handlers.handle_capture_viewport_2d(params)
         "visual.capture_viewport_3d":
             result = await _visual_handlers.handle_capture_viewport_3d(params)
+        "animation.list":
+            result = _animation_handlers.list(params)
+        "animation.inspect":
+            result = _animation_handlers.inspect(params)
+        "animation.create":
+            result = _animation_handlers.create(params)
+        "animation.remove":
+            result = _animation_handlers.remove(params)
+        "animation.configure":
+            result = _animation_handlers.configure(params)
+        "animation.add_track":
+            result = _animation_handlers.add_track(params)
+        "animation.insert_key":
+            result = _animation_handlers.insert_key(params)
+        "animation.remove_key":
+            result = _animation_handlers.remove_key(params)
         "ui.inspect_layout":
             result = _ui_handlers.inspect_layout(params)
         "ui.set_layout_preset":
