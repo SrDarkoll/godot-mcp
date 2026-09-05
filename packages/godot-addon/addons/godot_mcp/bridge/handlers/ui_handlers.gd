@@ -316,7 +316,8 @@ func set_focus_neighbor(params: Dictionary) -> Dictionary:
 	var side := _side(str(params.get("side", "")))
 	if side < 0:
 		return _error("INVALID_ARGUMENT", "Unknown focus side")
-	var neighbor_path := str(params.get("neighbor_path", ""))
+	var raw_neighbor = params.get("neighbor_path", null)
+	var neighbor_path := "" if raw_neighbor == null else str(raw_neighbor)
 	var next_path := NodePath("")
 	if not neighbor_path.is_empty():
 		var neighbor = _resolve_control(root, neighbor_path)
