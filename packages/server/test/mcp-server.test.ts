@@ -47,6 +47,17 @@ describe('MCP server', () => {
     expect(toolNames).toContain('scene.reload');
     expect(toolNames).toContain('scene.instantiate');
     expect(toolNames).toContain('scene.get_root');
+    expect(toolNames).toContain('node.create');
+    expect(toolNames).toContain('node.delete');
+    expect(toolNames).toContain('node.duplicate');
+    expect(toolNames).toContain('node.rename');
+    expect(toolNames).toContain('node.reparent');
+    expect(toolNames).toContain('node.move');
+    expect(toolNames).toContain('node.inspect');
+    expect(toolNames).toContain('node.list_children');
+    expect(toolNames).toContain('node.get_property');
+    expect(toolNames).toContain('node.set_property');
+    expect(toolNames).toContain('node.get_properties');
     const status = await client.callTool({ name: 'session.status', arguments: {} });
     expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
     const project = await client.callTool({ name: 'project.info', arguments: {} });

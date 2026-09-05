@@ -5,12 +5,14 @@ var _project_info
 var _scene_tree
 var _object_handlers
 var _scene_handlers
+var _node_handlers
 
 func _init(editor_interface) -> void:
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
     _scene_tree = preload("res://addons/godot_mcp/bridge/handlers/scene_tree.gd").new(editor_interface)
     _object_handlers = preload("res://addons/godot_mcp/bridge/handlers/object_handlers.gd").new(editor_interface)
     _scene_handlers = preload("res://addons/godot_mcp/bridge/handlers/scene_handlers.gd").new(editor_interface)
+    _node_handlers = preload("res://addons/godot_mcp/bridge/handlers/node_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -67,6 +69,28 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _scene_handlers.instantiate(params)
         "scene.get_root":
             result = _scene_handlers.get_root(params)
+        "node.create":
+            result = _node_handlers.create(params)
+        "node.delete":
+            result = _node_handlers.delete(params)
+        "node.duplicate":
+            result = _node_handlers.duplicate(params)
+        "node.rename":
+            result = _node_handlers.rename(params)
+        "node.reparent":
+            result = _node_handlers.reparent(params)
+        "node.move":
+            result = _node_handlers.move(params)
+        "node.inspect":
+            result = _node_handlers.inspect(params)
+        "node.list_children":
+            result = _node_handlers.list_children(params)
+        "node.get_property":
+            result = _node_handlers.get_property(params)
+        "node.set_property":
+            result = _node_handlers.set_property(params)
+        "node.get_properties":
+            result = _node_handlers.get_properties(params)
         _:
             return _failure(request_id, "METHOD_NOT_FOUND", "Unknown method: %s" % method)
 
