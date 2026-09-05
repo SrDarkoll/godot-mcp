@@ -125,3 +125,73 @@ export interface SceneGetRootResult {
   path: string;
   scene_file_path: string | null;
 }
+
+export interface NodeCreateResult {
+  name: string;
+  type: string;
+  path: string;
+}
+
+export interface NodeDeleteResult {
+  path: string;
+  deleted: boolean;
+}
+
+export interface NodeDuplicateResult {
+  name: string;
+  type: string;
+  path: string;
+}
+
+export interface NodeRenameResult {
+  old_path: string;
+  new_path: string;
+  name: string;
+}
+
+export interface NodeReparentResult {
+  old_path: string;
+  new_path: string;
+}
+
+export interface NodeMoveResult {
+  path: string;
+  index: number;
+}
+
+export interface NodeInspectResult {
+  name: string;
+  type: string;
+  path: string;
+  scene_file_path: string | null;
+  script: string | null;
+  groups: string[];
+  children_count: number;
+  properties: Record<string, unknown>;
+}
+
+export interface NodeChildItem {
+  name: string;
+  type: string;
+  path: string;
+}
+
+export interface NodeListChildrenResult {
+  node_path: string;
+  children: NodeChildItem[];
+}
+
+export interface NodeGetPropertyResult {
+  property: string;
+  value: unknown;
+}
+
+export interface NodeSetPropertyResult {
+  property: string;
+  previous_value?: unknown;
+  new_value?: unknown;
+}
+
+export interface NodeGetPropertiesResult {
+  properties: Record<string, unknown>;
+}
