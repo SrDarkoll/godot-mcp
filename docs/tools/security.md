@@ -15,12 +15,13 @@ Risky tools use MCP's native input-required/elicitation flow. The server does **
 For each approval request the server:
 
 1. computes a SHA-256 fingerprint over the session, tool name, arguments, relevant on-disk file fingerprints and editor/recovery state;
-2. seals the tool name and fingerprint into MCP `requestState` with the SDK HMAC codec and a five-minute TTL;
-3. asks the MCP host to present a boolean approval to the user;
-4. on re-entry, verifies the signed state and recomputes the current operation fingerprint;
-5. executes only when the user accepted and both fingerprints still match.
+2. seals the tool name, fingerprint and a random one-time nonce into MCP `requestState` with the SDK HMAC codec and a five-minute TTL; the codec is also bound to the active Godot MCP session and originating MCP method;
+3. asks the MCP host to present a boolean approval to the user, including targets and a bounded argument preview; large/sensitive payloads are represented by size/type plus a short SHA-256 digest instead of being dumped into the prompt;
+4. on re-entry, verifies the signed/bound state and recomputes the current operation fingerprint;
+5. consumes the approval nonce before execution, so an accepted approval cannot be replayed;
+6. executes only when the user accepted and the current fingerprint still matches the approved operation.
 
-If files or relevant editor state that the operation declares change while approval is pending, the old approval is stale and a new approval is required. Reflective `object.call` approvals bind the target, method and serialized arguments; they do not snapshot the implementation bytes of an attached user script, so project code remains inside the trusted project boundary.
+If files or relevant editor state that the operation declares change while approval is pending, the old approval is stale and a new approval is required. Replaying a previously accepted approval fails with `APPROVAL_REPLAYED` and never re-executes the tool. Reflective `object.call` approvals bind the target, method and serialized arguments; they do not snapshot the implementation bytes of an attached user script, so project code remains inside the trusted project boundary.
 
 A client that does not support MCP elicitation cannot execute risky operations through this flow; it fails closed.
 

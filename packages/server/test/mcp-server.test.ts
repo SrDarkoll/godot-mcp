@@ -1,10 +1,13 @@
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { BridgeServer } from '../src/bridge/bridge-server.js';
 import { createMcpServer } from '../src/mcp/create-server.js';
 import { getProjectInfo } from '../src/tools/project-info.js';
 import { getSessionStatus } from '../src/tools/session-status.js';
-import type { Session } from '../src/session/session.js';
+import { createSession, type Session } from '../src/session/session.js';
 import { SessionStore } from '../src/session/session-store.js';
 function disconnectedSession(): Session {
     return {
@@ -12,6 +15,13 @@ function disconnectedSession(): Session {
         editorConnected: false, runtimeConnected: false,
         godotVersion: null, addonVersion: null, protocolVersion: 1
     };
+}
+async function persistedDisconnectedSession(): Promise<{ session: Session; sessions: SessionStore }> {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'godot-mcp-mcp-test-'));
+    const session = createSession(root);
+    const sessions = new SessionStore(root);
+    await sessions.create(session);
+    return { session, sessions };
 }
 it('returns session status without requiring an editor connection', async () => {
     expect(getSessionStatus(disconnectedSession())).toMatchObject({ sessionId: 's1', editorConnected: false });
@@ -137,14 +147,15 @@ describe('MCP server', () => {
         await server.close();
     }, 15000);
     it('elicits host approval for risky tools without exposing a bearer confirmation token', async () => {
-        const session = disconnectedSession();
+        const { session, sessions } = await persistedDisconnectedSession();
         const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
-        const server = createMcpServer({ session, bridge, sessions: new SessionStore(session.projectRoot) });
+        const server = createMcpServer({ session, bridge, sessions });
         const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
         const client = new Client({ name: 'approval-test', version: '1.0.0' }, { capabilities: { elicitation: { form: {} } } });
         client.setRequestHandler('elicitation/create', async (request) => {
             expect(request.params.message).toContain('permissions.enable');
             expect(request.params.message).toContain('permission:filesystem.external');
+            expect(request.params.message).toContain('Arguments: permission=\"filesystem.external\"');
             return { action: 'accept', content: { confirm: true } };
         });
         await server.connect(serverTransport);
@@ -159,10 +170,102 @@ describe('MCP server', () => {
         await client.close();
         await server.close();
     });
-    it('does not execute a risky tool when host approval is declined', async () => {
-        const session = disconnectedSession();
+    it('does not let approval state for one risky tool authorize another tool', async () => {
+        const { session, sessions } = await persistedDisconnectedSession();
         const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
-        const server = createMcpServer({ session, bridge, sessions: new SessionStore(session.projectRoot) });
+        const server = createMcpServer({ session, bridge, sessions });
+        const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+        const client = new Client(
+            { name: 'approval-tool-binding-test', version: '1.0.0' },
+            { capabilities: { elicitation: { form: {} } }, inputRequired: { autoFulfill: false } }
+        );
+        await server.connect(serverTransport);
+        await client.connect(clientTransport);
+
+        const first = await client.request(
+            {
+                method: 'tools/call',
+                params: { name: 'permissions.enable', arguments: { permission: 'filesystem.external' } }
+            } as never,
+            { allowInputRequired: true } as never
+        ) as any;
+        expect(first.requestState).toEqual(expect.any(String));
+
+        const mismatched = await client.request(
+            {
+                method: 'tools/call',
+                params: {
+                    name: 'permissions.enable',
+                    arguments: { permission: 'process.shell' },
+                    requestState: first.requestState,
+                    inputResponses: {
+                        riskApproval: { action: 'accept', content: { confirm: true } }
+                    }
+                }
+            } as never,
+            { allowInputRequired: true } as never
+        ) as any;
+        expect(mismatched.requestState).toEqual(expect.any(String));
+        expect(mismatched.inputRequests?.riskApproval).toBeDefined();
+        expect((await sessions.read(session.id)).permissionChanges).toHaveLength(0);
+
+        await client.close();
+        await server.close();
+    });
+
+    it('rejects replay of an already-consumed risky approval state', async () => {
+        const { session, sessions } = await persistedDisconnectedSession();
+        const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+        const server = createMcpServer({ session, bridge, sessions });
+        const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+        const client = new Client(
+            { name: 'approval-replay-test', version: '1.0.0' },
+            { capabilities: { elicitation: { form: {} } }, inputRequired: { autoFulfill: false } }
+        );
+        await server.connect(serverTransport);
+        await client.connect(clientTransport);
+
+        const first = await client.request(
+            {
+                method: 'tools/call',
+                params: { name: 'permissions.enable', arguments: { permission: 'filesystem.external' } }
+            } as never,
+            { allowInputRequired: true } as never
+        ) as any;
+        expect(first.requestState).toEqual(expect.any(String));
+        expect(first.inputRequests?.riskApproval).toBeDefined();
+
+        const approvedParams = {
+            name: 'permissions.enable',
+            arguments: { permission: 'filesystem.external' },
+            requestState: first.requestState,
+            inputResponses: {
+                riskApproval: { action: 'accept', content: { confirm: true } }
+            }
+        };
+        const approved = await client.request(
+            { method: 'tools/call', params: approvedParams } as never,
+            { allowInputRequired: true } as never
+        ) as any;
+        expect(approved.isError).not.toBe(true);
+        expect((await sessions.read(session.id)).permissionChanges).toHaveLength(1);
+
+        const replay = await client.request(
+            { method: 'tools/call', params: approvedParams } as never,
+            { allowInputRequired: true } as never
+        ) as any;
+        expect(replay.isError).toBe(true);
+        expect(replay.structuredContent).toMatchObject({ error: { code: 'APPROVAL_REPLAYED' } });
+        expect((await sessions.read(session.id)).permissionChanges).toHaveLength(1);
+
+        await client.close();
+        await server.close();
+    });
+
+    it('does not execute a risky tool when host approval is declined', async () => {
+        const { session, sessions } = await persistedDisconnectedSession();
+        const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+        const server = createMcpServer({ session, bridge, sessions });
         const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
         const client = new Client({ name: 'approval-decline-test', version: '1.0.0' }, { capabilities: { elicitation: { form: {} } } });
         client.setRequestHandler('elicitation/create', async () => ({ action: 'decline' }));

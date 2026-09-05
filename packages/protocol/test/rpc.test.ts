@@ -35,7 +35,8 @@ describe('RPC protocol', () => {
         expect(KNOWN_BRIDGE_ERROR_CODES).toEqual(expect.arrayContaining([
             'CAPTURE_FAILED',
             'CAPTURE_TIMEOUT',
-            'RESULT_TOO_LARGE'
+            'RESULT_TOO_LARGE',
+            'APPROVAL_REPLAYED'
         ]));
     });
     it('rejects arbitrary or malformed bridge error codes', () => {

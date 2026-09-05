@@ -56,7 +56,7 @@ export interface ToolAssessment {
 export interface ToolAuthorization {
     approvedFingerprint?: string;
 }
-export type ApprovalAuditOutcome = 'approval_required' | 'approval_approved' | 'approval_declined' | 'approval_stale';
+export type ApprovalAuditOutcome = 'approval_required' | 'approval_approved' | 'approval_declined' | 'approval_stale' | 'approval_replayed';
 export class ToolPolicy {
     private closing = false;
     private readonly flags = { ...DEFAULT_PERMISSIONS };

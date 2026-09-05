@@ -4,6 +4,7 @@ import { createRequestStateCodec, McpServer } from '@modelcontextprotocol/server
 import type { BridgeServer } from '../bridge/bridge-server.js';
 import { RecoveryService } from '../recovery/recovery-service.js';
 import { RuntimeService } from '../runtime/runtime-service.js';
+import { approvalStateBinding } from '../security/approval-state.js';
 import { ToolPolicy } from '../security/tool-policy.js';
 import { guardedRegistrar } from '../security/tool-registrar.js';
 import type { SessionStore } from '../session/session-store.js';
@@ -37,9 +38,11 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
         kind: 'risk-approval';
         tool: string;
         fingerprint: string;
+        nonce: string;
     }>({
         key: randomBytes(32),
-        ttlSeconds: 300
+        ttlSeconds: 300,
+        bind: requestContext => approvalStateBinding(ctx.session.id, requestContext)
     });
     const server = new McpServer({ name: 'godot-mcp', version: SERVER_VERSION }, { requestState: { verify: approvalState.verify } });
     const recovery = ctx.recovery ?? new RecoveryService(ctx.session, ctx.sessions, ctx.bridge);
