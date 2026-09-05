@@ -14,7 +14,9 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.1.0"
+    "@godot-mcp/protocol": "0.1.0",
+    "ws": "^8.18.0",
+    "zod": "^4.0.0"
   },
   "exports": {
     ".": {
@@ -25,5 +27,8 @@
       "types": "./dist/project/project-root.d.ts",
       "import": "./dist/project/project-root.js"
     }
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.0"
   }
 }
