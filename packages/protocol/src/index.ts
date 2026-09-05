@@ -3,3 +3,4 @@ export * from './errors.js';
 export * from './rpc.js';
 export * from './capabilities.js';
 export * from './tools.js';
+export * from './variant.js';
