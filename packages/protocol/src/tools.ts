@@ -28,3 +28,64 @@ export interface SceneTreeResult {
   scenePath: string | null;
   root: SceneTreeNode | null;
 }
+
+export interface ObjectTargetParams {
+  node_path?: string | undefined;
+  resource_path?: string | undefined;
+  object_id?: number | undefined;
+}
+
+export interface ObjectClassResult {
+  class: string;
+}
+
+export interface ObjectPropertyInfo {
+  name: string;
+  type: string;
+  hint?: number | undefined;
+  hint_string?: string | undefined;
+  usage?: number | undefined;
+}
+
+export interface ObjectPropertyListResult {
+  properties: ObjectPropertyInfo[];
+}
+
+export interface ObjectMethodArgInfo {
+  name: string;
+  type: string;
+}
+
+export interface ObjectMethodInfo {
+  name: string;
+  return_type?: string | undefined;
+  args?: ObjectMethodArgInfo[] | undefined;
+}
+
+export interface ObjectMethodListResult {
+  methods: ObjectMethodInfo[];
+}
+
+export interface ObjectSignalInfo {
+  name: string;
+  args?: ObjectMethodArgInfo[] | undefined;
+}
+
+export interface ObjectSignalListResult {
+  signals: ObjectSignalInfo[];
+}
+
+export interface ObjectGetResult {
+  property: string;
+  value: unknown;
+}
+
+export interface ObjectSetResult {
+  property: string;
+  previous_value?: unknown;
+  new_value?: unknown;
+}
+
+export interface ObjectCallResult {
+  result: unknown;
+}
