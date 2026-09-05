@@ -52,13 +52,13 @@ func dispatch(raw_text: String) -> Dictionary:
         "scene.get_tree":
             result = _scene_tree.run(params)
         "object.get_class":
-            result = _object_handlers.get_class(params)
+            result = _object_handlers.handle_get_class(params)
         "object.get_property_list":
-            result = _object_handlers.get_property_list(params)
+            result = _object_handlers.handle_get_property_list(params)
         "object.get_method_list":
-            result = _object_handlers.get_method_list(params)
+            result = _object_handlers.handle_get_method_list(params)
         "object.get_signal_list":
-            result = _object_handlers.get_signal_list(params)
+            result = _object_handlers.handle_get_signal_list(params)
         "object.get":
             result = _object_handlers.get_property(params)
         "object.set":

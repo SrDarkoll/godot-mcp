@@ -50,7 +50,7 @@ try {
   process.exit(1);
 }
 
-const result = spawnSync(process.execPath, [vitestEntry, 'run', 'tests/integration/editor-handshake.test.ts'], {
+const result = spawnSync(process.execPath, [vitestEntry, 'run', 'tests/integration'], {
   stdio: 'inherit',
   env: { ...process.env, GODOT_BIN: godotBin },
   windowsHide: true

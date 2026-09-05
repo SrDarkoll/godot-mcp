@@ -67,12 +67,12 @@ tests/
 - Create: `packages/godot-addon/addons/godot_mcp/serialization/variant_serializer.gd`
 - Test: `packages/protocol/test/variant.test.ts`
 
-- [ ] **Step 1: Write failing protocol tests for Variant serialization/deserialization**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement TypeScript Variant schemas and codecs in protocol**
-- [ ] **Step 4: Implement GDScript VariantSerializer in addon**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing protocol tests for Variant serialization/deserialization**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement TypeScript Variant schemas and codecs in protocol**
+- [x] **Step 4: Implement GDScript VariantSerializer in addon**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 2: Generic Object introspection and safety policy
 
@@ -82,12 +82,12 @@ tests/
 - Create: `packages/server/src/tools/object-tools.ts`
 - Test: `packages/server/test/object-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for object introspection and call safety**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement safety policy and GDScript object handlers**
-- [ ] **Step 4: Implement server object tools and register in MCP**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for object introspection and call safety**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement safety policy and GDScript object handlers**
+- [x] **Step 4: Implement server object tools and register in MCP**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 3: Scene operations (create, open, save, save_as, reload, instantiate)
 
@@ -96,12 +96,12 @@ tests/
 - Create: `packages/server/src/tools/scene-tools.ts`
 - Test: `packages/server/test/scene-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for scene tool schemas and handlers**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript scene handlers**
-- [ ] **Step 4: Implement server scene tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for scene tool schemas and handlers**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript scene handlers**
+- [x] **Step 4: Implement server scene tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 4: Node operations with native EditorUndoRedoManager integration
 
@@ -110,12 +110,12 @@ tests/
 - Create: `packages/server/src/tools/node-tools.ts`
 - Test: `packages/server/test/node-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for node operations and undo/redo routing**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript node handlers with EditorUndoRedoManager**
-- [ ] **Step 4: Implement server node tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for node operations and undo/redo routing**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript node handlers with EditorUndoRedoManager**
+- [x] **Step 4: Implement server node tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 5: Generic Resource operations (load, inspect, create, set_property, save, duplicate)
 
@@ -124,12 +124,12 @@ tests/
 - Create: `packages/server/src/tools/resource-tools.ts`
 - Test: `packages/server/test/resource-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for resource tools**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript resource handlers**
-- [ ] **Step 4: Implement server resource tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for resource tools**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript resource handlers**
+- [x] **Step 4: Implement server resource tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 6: Script operations with Godot-aware syntax validation and diagnostics
 
@@ -138,12 +138,12 @@ tests/
 - Create: `packages/server/src/tools/script-tools.ts`
 - Test: `packages/server/test/script-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for script tools and diagnostic reporting**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript script handlers with syntax validation**
-- [ ] **Step 4: Implement server script tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for script tools and diagnostic reporting**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript script handlers with syntax validation**
+- [x] **Step 4: Implement server script tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 7: Signal introspection and connections (with Undo/Redo)
 
@@ -152,12 +152,12 @@ tests/
 - Create: `packages/server/src/tools/signal-tools.ts`
 - Test: `packages/server/test/signal-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for signal tools**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript signal handlers**
-- [ ] **Step 4: Implement server signal tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for signal tools**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript signal handlers**
+- [x] **Step 4: Implement server signal tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 8: Project settings and Input Map actions
 
@@ -166,12 +166,12 @@ tests/
 - Create: `packages/server/src/tools/project-settings-tools.ts`
 - Test: `packages/server/test/project-settings-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for project settings and input actions**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript project settings handlers**
-- [ ] **Step 4: Implement server project settings tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for project settings and input actions**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript project settings handlers**
+- [x] **Step 4: Implement server project settings tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 9: Editor state and control operations
 
@@ -180,12 +180,12 @@ tests/
 - Create: `packages/server/src/tools/editor-tools.ts`
 - Test: `packages/server/test/editor-tools.test.ts`
 
-- [ ] **Step 1: Write failing tests for editor control tools**
-- [ ] **Step 2: Run test to verify it fails**
-- [ ] **Step 3: Implement GDScript editor handlers**
-- [ ] **Step 4: Implement server editor tools**
-- [ ] **Step 5: Run tests and verify they pass**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing tests for editor control tools**
+- [x] **Step 2: Run test to verify it fails**
+- [x] **Step 3: Implement GDScript editor handlers**
+- [x] **Step 4: Implement server editor tools**
+- [x] **Step 5: Run tests and verify they pass**
+- [x] **Step 6: Commit**
 
 ### Task 10: Full vertical slice integration tests with real Godot 4.x
 
@@ -193,6 +193,6 @@ tests/
 - Create: `tests/integration/editor-mutation.test.ts`
 - Modify: `scripts/run-integration.mjs`
 
-- [ ] **Step 1: Write comprehensive integration test covering complete 12-step mutation lifecycle and error suite**
-- [ ] **Step 2: Run integration test and verify all steps pass against real Godot 4.x engine**
-- [ ] **Step 3: Commit**
+- [x] **Step 1: Write comprehensive integration test covering complete 12-step mutation lifecycle and error suite**
+- [x] **Step 2: Run integration test and verify all steps pass against real Godot 4.x engine**
+- [x] **Step 3: Commit**
