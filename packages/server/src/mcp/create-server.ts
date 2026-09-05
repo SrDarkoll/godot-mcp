@@ -52,6 +52,12 @@ import {
   inspectScript,
   validateScript
 } from '../tools/script-tools.js';
+import {
+  listSignals,
+  getSignalConnections,
+  connectSignal,
+  disconnectSignal
+} from '../tools/signal-tools.js';
 import { toolError, toolSuccess } from './tool-result.js';
 
 export interface McpServerContext {
@@ -597,6 +603,66 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
   }, async (args) => {
     try {
       return toolSuccess(await validateScript(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('signal.list', {
+    description: 'List all signals declared on a node and its script.',
+    inputSchema: z.object({
+      node_path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await listSignals(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('signal.connections', {
+    description: 'List active signal connections on a node.',
+    inputSchema: z.object({
+      node_path: z.string(),
+      signal_name: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await getSignalConnections(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('signal.connect', {
+    description: 'Connect a signal from a source node to a target node method with Undo/Redo support.',
+    inputSchema: z.object({
+      source_node_path: z.string(),
+      signal_name: z.string(),
+      target_node_path: z.string(),
+      target_method: z.string(),
+      flags: z.number().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await connectSignal(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('signal.disconnect', {
+    description: 'Disconnect a signal between two nodes with Undo/Redo support.',
+    inputSchema: z.object({
+      source_node_path: z.string(),
+      signal_name: z.string(),
+      target_node_path: z.string(),
+      target_method: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await disconnectSignal(ctx.bridge.rpc, args));
     } catch (error) {
       return toolError(error);
     }
