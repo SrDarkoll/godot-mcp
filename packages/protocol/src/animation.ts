@@ -4,8 +4,10 @@ import type {Variant} from './variant.js';
 export const AnimationLoopModeSchema=z.enum(['none','linear','pingpong']);
 export type AnimationLoopMode=z.infer<typeof AnimationLoopModeSchema>;
 
-export const AnimationTrackTypeSchema=z.enum(['value','position_3d','rotation_3d','scale_3d','blend_shape','method','bezier','animation']);
+export const AnimationTrackTypeSchema=z.enum(['value','position_3d','rotation_3d','scale_3d','blend_shape','method','bezier','audio','animation']);
 export type AnimationTrackType=z.infer<typeof AnimationTrackTypeSchema>;
+export const AnimationEditableTrackTypeSchema=z.enum(['value','position_3d','rotation_3d','scale_3d','blend_shape','method','bezier','animation']);
+export type AnimationEditableTrackType=z.infer<typeof AnimationEditableTrackTypeSchema>;
 
 export const AnimationInterpolationSchema=z.enum(['nearest','linear','cubic','linear_angle','cubic_angle']);
 export type AnimationInterpolation=z.infer<typeof AnimationInterpolationSchema>;

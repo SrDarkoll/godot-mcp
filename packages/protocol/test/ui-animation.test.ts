@@ -1,6 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {
   AnimationLoopModeSchema,
+  AnimationEditableTrackTypeSchema,
   AnimationTrackTypeSchema,
   UiLayoutPresetSchema,
   UiSizeFlagSchema
@@ -21,6 +22,7 @@ describe('UI and animation power-tool protocol',()=>{
     expect(AnimationTrackTypeSchema.parse('rotation_3d')).toBe('rotation_3d');
     expect(AnimationTrackTypeSchema.parse('animation')).toBe('animation');
     expect(()=>AnimationLoopModeSchema.parse('repeat')).toThrow();
-    expect(()=>AnimationTrackTypeSchema.parse('audio')).toThrow();
+    expect(AnimationTrackTypeSchema.parse('audio')).toBe('audio');
+    expect(()=>AnimationEditableTrackTypeSchema.parse('audio')).toThrow();
   });
 });

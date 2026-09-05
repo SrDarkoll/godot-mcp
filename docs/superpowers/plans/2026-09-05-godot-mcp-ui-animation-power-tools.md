@@ -44,7 +44,7 @@
 
 - [ ] **Step 1: Write failing protocol tests**
 
-Add tests that import `UiLayoutPresetSchema`, `UiSizeFlagSchema`, `AnimationTrackTypeSchema`, and `AnimationLoopModeSchema`, accept all documented values, and reject unknown values.
+Add tests that import `UiLayoutPresetSchema`, `UiSizeFlagSchema`, `AnimationTrackTypeSchema`, `AnimationEditableTrackTypeSchema`, and `AnimationLoopModeSchema`, accept all documented values, and reject unknown values.
 
 - [ ] **Step 2: Run the protocol test and verify RED**
 

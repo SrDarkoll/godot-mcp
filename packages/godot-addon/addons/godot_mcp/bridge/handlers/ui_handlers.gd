@@ -117,13 +117,13 @@ func _side(value: String) -> int:
 
 func _size_flags_to_names(flags: int) -> Array:
 	var result: Array = []
-	if flags & Control.SIZE_FILL != 0:
+	if (flags & Control.SIZE_FILL) != 0:
 		result.append("fill")
-	if flags & Control.SIZE_EXPAND != 0:
+	if (flags & Control.SIZE_EXPAND) != 0:
 		result.append("expand")
-	if flags & Control.SIZE_SHRINK_CENTER != 0:
+	if (flags & Control.SIZE_SHRINK_CENTER) != 0:
 		result.append("shrink_center")
-	if flags & Control.SIZE_SHRINK_END != 0:
+	if (flags & Control.SIZE_SHRINK_END) != 0:
 		result.append("shrink_end")
 	return result
 
@@ -145,7 +145,7 @@ func _focus_neighbor(root: Node, control: Control, side: int):
 	if path == NodePath(""):
 		return null
 	var neighbor := control.get_node_or_null(path)
-	if neighbor and root.is_ancestor_of(neighbor) or neighbor == root:
+	if neighbor and (root.is_ancestor_of(neighbor) or neighbor == root):
 		return _logical_path(root, neighbor)
 	return str(path)
 
@@ -201,7 +201,7 @@ func set_layout_preset(params: Dictionary) -> Dictionary:
 	var before := _layout_snapshot(control)
 	var undo_redo := _undo_redo()
 	if undo_redo:
-		undo_redo.create_action("Set UI Layout Preset: " + control.name)
+		undo_redo.create_action("Set UI Layout Preset: " + control.name, 0, control)
 		undo_redo.add_do_method(self, "_apply_layout_preset", control, preset, resize_mode, margin)
 		undo_redo.add_undo_method(self, "_restore_layout", control, before)
 		undo_redo.commit_action()
@@ -228,7 +228,7 @@ func set_anchors(params: Dictionary) -> Dictionary:
 	var before := _layout_snapshot(control)
 	var undo_redo := _undo_redo()
 	if undo_redo:
-		undo_redo.create_action("Set UI Anchors: " + control.name)
+		undo_redo.create_action("Set UI Anchors: " + control.name, 0, control)
 		undo_redo.add_do_method(self, "_apply_anchors", control, values, keep_offsets)
 		undo_redo.add_undo_method(self, "_restore_layout", control, before)
 		undo_redo.commit_action()
@@ -258,7 +258,7 @@ func set_offsets(params: Dictionary) -> Dictionary:
 	var before := _layout_snapshot(control)
 	var undo_redo := _undo_redo()
 	if undo_redo:
-		undo_redo.create_action("Set UI Offsets: " + control.name)
+		undo_redo.create_action("Set UI Offsets: " + control.name, 0, control)
 		undo_redo.add_do_method(self, "_apply_offsets", control, values)
 		undo_redo.add_undo_method(self, "_restore_layout", control, before)
 		undo_redo.commit_action()
@@ -297,7 +297,7 @@ func set_size_flags(params: Dictionary) -> Dictionary:
 	var before_ratio := control.size_flags_stretch_ratio
 	var undo_redo := _undo_redo()
 	if undo_redo:
-		undo_redo.create_action("Set UI Size Flags: " + control.name)
+		undo_redo.create_action("Set UI Size Flags: " + control.name, 0, control)
 		undo_redo.add_do_method(self, "_apply_size_flags", control, horizontal, vertical, stretch_ratio)
 		undo_redo.add_undo_method(self, "_apply_size_flags", control, before_h, before_v, before_ratio)
 		undo_redo.commit_action()
@@ -326,7 +326,7 @@ func set_focus_neighbor(params: Dictionary) -> Dictionary:
 	var previous := control.get_focus_neighbor(side)
 	var undo_redo := _undo_redo()
 	if undo_redo:
-		undo_redo.create_action("Set UI Focus Neighbor: " + control.name)
+		undo_redo.create_action("Set UI Focus Neighbor: " + control.name, 0, control)
 		undo_redo.add_do_method(control, "set_focus_neighbor", side, next_path)
 		undo_redo.add_undo_method(control, "set_focus_neighbor", side, previous)
 		undo_redo.commit_action()

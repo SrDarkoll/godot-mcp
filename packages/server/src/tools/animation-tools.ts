@@ -1,11 +1,11 @@
-import type {AnimationInspectResult,AnimationInterpolation,AnimationListResult,AnimationLoopMode,AnimationMutationResult,AnimationTrackMutationResult,AnimationKeyMutationResult,AnimationTrackType,Variant} from '@godot-mcp/protocol';
+import type {AnimationInspectResult,AnimationInterpolation,AnimationListResult,AnimationLoopMode,AnimationMutationResult,AnimationTrackMutationResult,AnimationKeyMutationResult,AnimationEditableTrackType,Variant} from '@godot-mcp/protocol';
 import type {RpcRouter} from '../bridge/rpc-router.js';
 type Rpc=Pick<RpcRouter,'call'>;
 export interface AnimationPlayerParams{player_path:string;}
 export interface AnimationTargetParams extends AnimationPlayerParams{animation:string;library?:string;}
 export interface AnimationCreateParams extends AnimationTargetParams{length?:number;loop_mode?:AnimationLoopMode;step?:number;}
 export interface AnimationConfigureParams extends AnimationTargetParams{length?:number;loop_mode?:AnimationLoopMode;step?:number;}
-export interface AnimationAddTrackParams extends AnimationTargetParams{type:AnimationTrackType;path:string;at_position?:number;interpolation?:AnimationInterpolation;loop_wrap?:boolean;}
+export interface AnimationAddTrackParams extends AnimationTargetParams{type:AnimationEditableTrackType;path:string;at_position?:number;interpolation?:AnimationInterpolation;loop_wrap?:boolean;}
 export interface AnimationInsertKeyParams extends AnimationTargetParams{track_index:number;time:number;value:Variant|unknown;transition?:number;}
 export interface AnimationRemoveKeyParams extends AnimationTargetParams{track_index:number;key_index:number;}
 const call=<T>(rpc:Rpc,name:string,params:object)=>rpc.call(name,params as Record<string,unknown>) as Promise<T>;

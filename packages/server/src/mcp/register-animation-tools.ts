@@ -1,5 +1,5 @@
 import * as z from 'zod/v4';
-import {AnimationInterpolationSchema,AnimationLoopModeSchema,AnimationTrackTypeSchema} from '@godot-mcp/protocol';
+import {AnimationEditableTrackTypeSchema,AnimationInterpolationSchema,AnimationLoopModeSchema} from '@godot-mcp/protocol';
 import type {BridgeServer} from '../bridge/bridge-server.js';
 import type {ToolRegistrar} from '../security/tool-registrar.js';
 import {addAnimationTrack,configureAnimation,createAnimation,inspectAnimation,insertAnimationKey,listAnimations,removeAnimation,removeAnimationKey} from '../tools/animation-tools.js';
@@ -28,7 +28,7 @@ export function registerAnimationTools(registrar:ToolRegistrar,rpc:BridgeServer[
   registrar.registerTool('animation.configure',{description:'Set Animation length, loop mode or step with Undo/Redo support.',inputSchema:configureSchema},async args=>{
     try{return toolSuccess(await configureAnimation(rpc,args));}catch(error){return toolError(error);}
   });
-  registrar.registerTool('animation.add_track',{description:'Add and configure a non-audio Animation track with Undo/Redo support.',inputSchema:z.object({...target,type:AnimationTrackTypeSchema,path:z.string().min(1).max(1024),at_position:z.number().int().min(-1).optional(),interpolation:AnimationInterpolationSchema.optional(),loop_wrap:z.boolean().optional()})},async args=>{
+  registrar.registerTool('animation.add_track',{description:'Add and configure a non-audio Animation track with Undo/Redo support.',inputSchema:z.object({...target,type:AnimationEditableTrackTypeSchema,path:z.string().min(1).max(1024),at_position:z.number().int().min(-1).optional(),interpolation:AnimationInterpolationSchema.optional(),loop_wrap:z.boolean().optional()})},async args=>{
     try{return toolSuccess(await addAnimationTrack(rpc,args));}catch(error){return toolError(error);}
   });
   registrar.registerTool('animation.insert_key',{description:'Insert a new Animation key at an unused timestamp with Undo/Redo support.',inputSchema:z.object({...target,track_index:z.number().int().nonnegative(),time:nonnegative,value:z.unknown(),transition:positive.optional()})},async args=>{
