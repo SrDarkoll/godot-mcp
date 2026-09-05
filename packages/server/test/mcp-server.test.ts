@@ -5,6 +5,7 @@ import { createMcpServer } from '../src/mcp/create-server.js';
 import { getProjectInfo } from '../src/tools/project-info.js';
 import { getSessionStatus } from '../src/tools/session-status.js';
 import type { Session } from '../src/session/session.js';
+import { SessionStore } from '../src/session/session-store.js';
 
 function disconnectedSession(): Session {
   return {
@@ -28,7 +29,7 @@ describe('MCP server', () => {
   it('lists exactly the foundation tools and returns structured disconnected errors', async () => {
     const session = disconnectedSession();
     const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
-    const server = createMcpServer({ session, bridge });
+    const server = createMcpServer({ session, bridge, sessions:new SessionStore(session.projectRoot) });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: 'test-harness', version: '1.0.0' });
     await server.connect(serverTransport);

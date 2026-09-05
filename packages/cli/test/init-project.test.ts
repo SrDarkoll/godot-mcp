@@ -15,7 +15,7 @@ it('installs addon and local config without deleting existing project files', as
   await initProject({ projectRoot: root, enable: false });
   await expect(stat(path.join(root, 'addons', 'godot_mcp', 'plugin.cfg'))).resolves.toBeDefined();
   const config = JSON.parse(await readFile(path.join(root, '.godot-mcp', 'config.json'), 'utf8'));
-  expect(config).toEqual({ protocol: 1, bridgePort: 61337 });
+  expect(config).toEqual({ protocol: 1, bridgePort: 61337, godotBin:null });
   expect(await readFile(path.join(root, 'project.godot'), 'utf8')).toContain('config/name');
 });
 
@@ -28,6 +28,14 @@ it('preserves unrelated config keys and existing addon files', async () => {
   await initProject({ projectRoot: root, enable: false });
   const config = JSON.parse(await readFile(path.join(root, '.godot-mcp', 'config.json'), 'utf8'));
   expect(config.custom).toBe(true);
-  expect(config.bridgePort).toBe(61337);
+  expect(config.bridgePort).toBe(9999);
   expect(await readFile(path.join(root, 'addons', 'godot_mcp', 'user-note.txt'), 'utf8')).toBe('keep');
+});
+it('backs up changed managed addon files before updating them',async()=>{
+ const root=await createTempGodotProject();await initProject({projectRoot:root,enable:false});
+ await writeFile(path.join(root,'addons/godot_mcp/plugin.gd'),'custom addon code');
+ const updated=await initProject({projectRoot:root,enable:false});
+ expect(updated.backupPath).toEqual(expect.any(String));
+ expect(await readFile(path.join(updated.backupPath!,'files/plugin.gd'),'utf8')).toBe('custom addon code');
+ expect(await readFile(path.join(root,'addons/godot_mcp/plugin.gd'),'utf8')).toContain('extends EditorPlugin');
 });

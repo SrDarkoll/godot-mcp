@@ -1,0 +1,45 @@
+name: Windows validation
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    env:
+      REQUIRE_GODOT_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Install verified Godot
+        shell: pwsh
+        run: ./scripts/ci-install-godot.ps1 -Destination "$env:RUNNER_TEMP/godot-mcp-engine"
+      - run: npm run check:godot
+      - run: npm run test:integration
+      - run: npm run test:distribution
+      - name: Retain test and package evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-node-${{ matrix.node }}
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            .godot-mcp/distribution/**
+            .godot-mcp/*-test-runs/**
+            !.godot-mcp/**/.godot-mcp/runtime/**
+            !.godot-mcp/**/.godot-mcp/config.json
+            !.godot-mcp/**/node_modules/**

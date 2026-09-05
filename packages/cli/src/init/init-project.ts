@@ -1,8 +1,11 @@
 import { createRequire } from 'node:module';
-import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { resolveProjectRoot } from '@godot-mcp/server/project-root';
 import { enablePlugin } from './enable-plugin.js';
+import {readProjectConfig,writeProjectConfig,ensureProjectDirectory} from '@godot-mcp/server/project-config';
+import {serverStatus} from '@godot-mcp/server/management';
+import {installAddon} from './install-addon.js';
 
 export interface InitProjectOptions {
   projectRoot: string;
@@ -15,6 +18,7 @@ export interface InitProjectResult {
   addonPath: string;
   enabled: boolean;
   warnings: string[];
+  backupPath?: string;
 }
 
 function addonTemplateRoot(): string {
@@ -42,7 +46,7 @@ async function ensureProjectGitignore(projectRoot: string): Promise<void> {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
   }
 
-  const lines = ['.godot-mcp/runtime/', '.godot-mcp/sessions/'];
+  const lines = ['.godot-mcp/runtime/', '.godot-mcp/sessions/', '.godot-mcp/generated/', '.godot-mcp/config.json', '.godot-mcp/addon-backups/'];
   let updated = current;
   if (updated.length > 0 && !updated.endsWith('\n')) updated += '\n';
   for (const line of lines) {
@@ -54,30 +58,27 @@ async function ensureProjectGitignore(projectRoot: string): Promise<void> {
 
 export async function initProject(options: InitProjectOptions): Promise<InitProjectResult> {
   const projectRoot = await resolveProjectRoot(options.projectRoot);
+  const status=await serverStatus(projectRoot);
+  if(status.state!=='offline'&&status.editorConnected)throw new Error('Close the connected editor before updating the addon');
+  const config=await readProjectConfig(projectRoot);
+  const godotBin=options.godotBin??config.godotBin;
   const addonPath = path.join(projectRoot, 'addons', 'godot_mcp');
-  await mkdir(path.dirname(addonPath), { recursive: true });
-  await cp(addonTemplateRoot(), addonPath, { recursive: true, force: true, errorOnExist: false });
-
-  const localRoot = path.join(projectRoot, '.godot-mcp');
-  const configPath = path.join(localRoot, 'config.json');
-  await mkdir(path.join(localRoot, 'runtime'), { recursive: true });
-  await mkdir(path.join(localRoot, 'sessions'), { recursive: true });
-  const config = await readJsonObject(configPath);
-  config.protocol = 1;
-  config.bridgePort = 61337;
-  await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
+  const backupPath=await installAddon(projectRoot,addonTemplateRoot());
+  await ensureProjectDirectory(projectRoot,['.godot-mcp','runtime']);
+  await ensureProjectDirectory(projectRoot,['.godot-mcp','sessions']);
+  await writeProjectConfig(projectRoot,{godotBin});
   await ensureProjectGitignore(projectRoot);
 
   const warnings: string[] = [];
   let enabled = false;
   if (options.enable !== false) {
-    if (options.godotBin) {
-      await enablePlugin(projectRoot, options.godotBin);
+    if (godotBin) {
+      await enablePlugin(projectRoot, godotBin);
       enabled = true;
     } else {
       warnings.push('Godot executable is not configured; enable godot_mcp in Project Settings > Plugins.');
     }
   }
 
-  return { projectRoot, addonPath, enabled, warnings };
+  return { projectRoot, addonPath, enabled, warnings,...(backupPath?{backupPath}:{}) };
 }

@@ -1,10 +1,11 @@
 import { access, readFile } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
+import {runCommand} from '../process/run-command.js';
 import path from 'node:path';
 import { resolveProjectRoot } from '@godot-mcp/server/project-root';
+import {serverStatus} from '@godot-mcp/server/management';
 
-export type DoctorCheckId = 'node' | 'project' | 'addon' | 'godot' | 'protocol';
-export interface DoctorCheck { id: DoctorCheckId; ok: boolean; detail: string; }
+export type DoctorCheckId = 'node' | 'project' | 'addon' | 'godot' | 'protocol' | 'runtime' | 'bridge' | 'runtimeConnection';
+export interface DoctorCheck { id: DoctorCheckId; ok: boolean; detail: string; required?:boolean; }
 export interface DoctorReport { ok: boolean; checks: DoctorCheck[]; }
 export interface DoctorOptions { projectRoot: string; godotBin?: string | null; }
 
@@ -13,16 +14,9 @@ async function exists(file: string): Promise<boolean> {
 }
 
 async function godotVersion(bin: string): Promise<string> {
-  return await new Promise<string>((resolve, reject) => {
-    const child = spawn(bin, ['--version'], { windowsHide: true });
-    let output = '';
-    child.stdout.setEncoding('utf8');
-    child.stderr.setEncoding('utf8');
-    child.stdout.on('data', chunk => { output += chunk; });
-    child.stderr.on('data', chunk => { output += chunk; });
-    child.once('error', reject);
-    child.once('close', code => code === 0 ? resolve(output.trim()) : reject(new Error(`exit ${code ?? 'unknown'}`)));
-  });
+  const result=await runCommand(bin,['--version'],{timeoutMs:5000,maxOutputBytes:64*1024});
+  if(result.code!==0)throw new Error(`exit ${result.code??'unknown'}`);
+  return (result.stdout+result.stderr).trim();
 }
 
 export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
@@ -43,6 +37,11 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
     const gd = path.join(projectRoot, 'addons', 'godot_mcp', 'plugin.gd');
     const addonOk = await exists(cfg) && await exists(gd);
     checks.push({ id: 'addon', ok: addonOk, detail: addonOk ? 'Godot MCP addon installed' : 'Missing addons/godot_mcp/plugin.cfg or plugin.gd' });
+    const settings=await readFile(path.join(projectRoot,'project.godot'),'utf8');
+    const autoload=settings.match(/\[autoload\]([^]*?)(?=\n\[|$)/)?.[1]??'';
+    const runtimeOk=/GodotMcpRuntime\s*=\s*"\*res:\/\/addons\/godot_mcp\/runtime\/runtime_agent\.gd"/.test(autoload)&&await exists(path.join(projectRoot,'addons/godot_mcp/runtime/runtime_agent.gd'));
+    const logger=await exists(path.join(projectRoot,'.godot-mcp/generated/runtime_logger.gd'));
+    checks.push({id:'runtime',ok:runtimeOk,detail:!runtimeOk?'Runtime autoload not installed; run init with --godot':logger?'Runtime autoload and native diagnostic adapter installed':'Runtime installed; native diagnostics unavailable until init with a compatible Godot executable'});
 
     const configPath = path.join(projectRoot, '.godot-mcp', 'config.json');
     if (await exists(configPath)) {
@@ -58,6 +57,7 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
     }
   } else {
     checks.push({ id: 'addon', ok: false, detail: 'Project unavailable' });
+    checks.push({ id: 'runtime', ok: false, detail: 'Project unavailable' });
     checks.push({ id: 'protocol', ok: false, detail: 'Project unavailable' });
   }
 
@@ -74,5 +74,6 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
     }
   }
 
-  return { ok: checks.every(check => check.ok), checks };
+  if(projectRoot){try{const status=await serverStatus(projectRoot);checks.push({id:'bridge',ok:status.state!=='offline',required:false,detail:status.state==='offline'?'Server not running':`Authenticated server; editor connected: ${status.editorConnected}`});checks.push({id:'runtimeConnection',ok:status.runtimeConnected,required:false,detail:status.runtimeConnected?'Runtime agent connected':'Runtime agent not connected'});}catch{checks.push({id:'bridge',ok:false,required:false,detail:'Descriptor exists but live management could not be verified'});}}
+  return { ok: checks.every(check => check.ok||check.required===false), checks };
 }

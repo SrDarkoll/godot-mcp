@@ -1,4 +1,15 @@
-import { SERVER_VERSION } from '@godot-mcp/protocol';
+import { SERVER_VERSION, Capture2DParamsSchema, Capture3DParamsSchema } from '@godot-mcp/protocol';
+import { SessionStore } from '../session/session-store.js';
+import { VisualTools } from '../tools/visual-tools.js';
+import { getSessionManifest } from '../tools/session-manifest.js';
+import {RuntimeService} from '../runtime/runtime-service.js';
+import {registerRuntimeTools} from '../tools/runtime-tools.js';
+import {registerDebugTools} from '../tools/debug-tools.js';
+import {RecoveryService} from '../recovery/recovery-service.js';
+import {ToolPolicy} from '../security/tool-policy.js';
+import {guardedRegistrar} from '../security/tool-registrar.js';
+import {registerRecoveryTools} from '../tools/recovery-tools.js';
+import {registerSecurityTools} from '../tools/security-tools.js';
 import { McpServer } from '@modelcontextprotocol/server';
 import * as z from 'zod/v4';
 import type { BridgeServer } from '../bridge/bridge-server.js';
@@ -76,22 +87,60 @@ import {
   getFilesystem,
   scanFilesystem
 } from '../tools/editor-tools.js';
-import { toolError, toolSuccess } from './tool-result.js';
+import { toolError, toolSuccess, toolImageSuccess } from './tool-result.js';
 
 export interface McpServerContext {
   session: Session;
   bridge: BridgeServer;
+  sessions: SessionStore;
+  visual?: VisualTools;
+  runtime?: RuntimeService;
+  recovery?: RecoveryService;
+  policy?: ToolPolicy;
 }
 
 export function createMcpServer(ctx: McpServerContext): McpServer {
   const server = new McpServer({ name: 'godot-mcp', version: SERVER_VERSION });
+  const recovery=ctx.recovery??new RecoveryService(ctx.session,ctx.sessions,ctx.bridge);
+  const policy=ctx.policy??new ToolPolicy(ctx.session,ctx.sessions,recovery);
+  const registrar=guardedRegistrar(server,policy);
+  const runtime=ctx.runtime??new RuntimeService(ctx.session,ctx.sessions,ctx.bridge);
+  const visual = ctx.visual ?? new VisualTools(ctx.session,ctx.sessions,ctx.bridge,runtime);
+  registerRuntimeTools(registrar,runtime);
+  registerDebugTools(registrar,runtime);
+  registerRecoveryTools(registrar,recovery,ctx.bridge.rpc);
+  registerSecurityTools(registrar,policy);
+  registrar.registerTool('visual.capture_game',{description:'Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.',inputSchema:Capture2DParamsSchema},async args=>{
+    try{const capture=await visual.capture('game',args);return toolImageSuccess(capture.result,capture.data);}catch(error){return toolError(error);}
+  });
+  registrar.registerTool('session.manifest', {
+    description:'Read the persistent manifest of the current session, including screenshots and visual checkpoints.',
+    inputSchema:z.strictObject({})
+  },async () => {
+    try {return toolSuccess(await getSessionManifest(ctx.sessions,ctx.session.id));}
+    catch(error) {return toolError(error);}
+  });
+  registrar.registerTool('visual.capture_viewport_2d', {
+    description:'Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor.',
+    inputSchema:Capture2DParamsSchema
+  },async args => {
+    try {const capture=await visual.capture('editor_2d',args);return toolImageSuccess(capture.result,capture.data);}
+    catch(error) {return toolError(error);}
+  });
+  registrar.registerTool('visual.capture_viewport_3d', {
+    description:'Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG.',
+    inputSchema:Capture3DParamsSchema
+  },async args => {
+    try {const capture=await visual.capture('editor_3d',args);return toolImageSuccess(capture.result,capture.data);}
+    catch(error) {return toolError(error);}
+  });
 
-  server.registerTool('session.status', {
+  registrar.registerTool('session.status', {
     description: 'Return the active Godot MCP session and editor/runtime connection state.',
     inputSchema: z.object({})
   }, async () => toolSuccess(getSessionStatus(ctx.session)));
 
-  server.registerTool('project.info', {
+  registrar.registerTool('project.info', {
     description: 'Inspect the active Godot project through the connected editor addon.',
     inputSchema: z.object({})
   }, async () => {
@@ -102,7 +151,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.get_tree', {
+  registrar.registerTool('scene.get_tree', {
     description: 'Return the active edited scene tree with node names, classes, paths, and scripts.',
     inputSchema: z.object({})
   }, async () => {
@@ -113,7 +162,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.get_class', {
+  registrar.registerTool('object.get_class', {
     description: 'Get the Godot class name of an object (node, resource, or instance id).',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -128,7 +177,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.get_property_list', {
+  registrar.registerTool('object.get_property_list', {
     description: 'Get the list of properties for an object.',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -143,7 +192,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.get_method_list', {
+  registrar.registerTool('object.get_method_list', {
     description: 'Get the list of methods for an object.',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -158,7 +207,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.get_signal_list', {
+  registrar.registerTool('object.get_signal_list', {
     description: 'Get the list of signals for an object.',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -173,7 +222,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.get', {
+  registrar.registerTool('object.get', {
     description: 'Get a property value on an object.',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -189,7 +238,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.set', {
+  registrar.registerTool('object.set', {
     description: 'Set a property value on an object.',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -206,7 +255,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('object.call', {
+  registrar.registerTool('object.call', {
     description: 'Call an allowed method on an object.',
     inputSchema: z.object({
       node_path: z.string().optional(),
@@ -223,7 +272,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.create', {
+  registrar.registerTool('scene.create', {
     description: 'Create a new scene with specified root node type and optional path.',
     inputSchema: z.object({
       root_type: z.string().default('Node2D'),
@@ -238,7 +287,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.open', {
+  registrar.registerTool('scene.open', {
     description: 'Open a scene file in the Godot editor.',
     inputSchema: z.object({
       path: z.string()
@@ -251,7 +300,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.save', {
+  registrar.registerTool('scene.save', {
     description: 'Save the currently edited scene.',
     inputSchema: z.object({
       path: z.string().optional()
@@ -264,7 +313,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.save_as', {
+  registrar.registerTool('scene.save_as', {
     description: 'Save the currently edited scene to a new path.',
     inputSchema: z.object({
       path: z.string()
@@ -277,7 +326,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.reload', {
+  registrar.registerTool('scene.reload', {
     description: 'Reload a scene from disk in the editor.',
     inputSchema: z.object({
       path: z.string().optional()
@@ -290,7 +339,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.instantiate', {
+  registrar.registerTool('scene.instantiate', {
     description: 'Instantiate a scene as a child of a node in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       path: z.string(),
@@ -305,7 +354,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('scene.get_root', {
+  registrar.registerTool('scene.get_root', {
     description: 'Get the root node info of the currently edited scene.',
     inputSchema: z.object({})
   }, async () => {
@@ -316,7 +365,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.create', {
+  registrar.registerTool('node.create', {
     description: 'Create a new node as a child of a parent node in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       parent_path: z.string().optional(),
@@ -331,7 +380,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.delete', {
+  registrar.registerTool('node.delete', {
     description: 'Delete a node from the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string()
@@ -344,7 +393,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.duplicate', {
+  registrar.registerTool('node.duplicate', {
     description: 'Duplicate a node in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -358,7 +407,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.rename', {
+  registrar.registerTool('node.rename', {
     description: 'Rename a node in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -372,7 +421,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.reparent', {
+  registrar.registerTool('node.reparent', {
     description: 'Reparent a node to a new parent in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -387,7 +436,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.move', {
+  registrar.registerTool('node.move', {
     description: 'Move a node to a specific child index with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -401,7 +450,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.inspect', {
+  registrar.registerTool('node.inspect', {
     description: 'Inspect full details of a node (class, script, groups, children count, exported properties).',
     inputSchema: z.object({
       node_path: z.string()
@@ -414,7 +463,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.list_children', {
+  registrar.registerTool('node.list_children', {
     description: 'List immediate children of a node.',
     inputSchema: z.object({
       node_path: z.string().optional()
@@ -427,7 +476,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.get_property', {
+  registrar.registerTool('node.get_property', {
     description: 'Get a single property value of a node.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -441,7 +490,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.set_property', {
+  registrar.registerTool('node.set_property', {
     description: 'Set a property value on a node with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -456,7 +505,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('node.get_properties', {
+  registrar.registerTool('node.get_properties', {
     description: 'Get multiple or all exported property values of a node.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -470,7 +519,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('resource.load', {
+  registrar.registerTool('resource.load', {
     description: 'Load a resource file and inspect its exported properties.',
     inputSchema: z.object({
       path: z.string(),
@@ -484,7 +533,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('resource.inspect', {
+  registrar.registerTool('resource.inspect', {
     description: 'Inspect properties of a resource file.',
     inputSchema: z.object({
       path: z.string()
@@ -497,7 +546,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('resource.create', {
+  registrar.registerTool('resource.create', {
     description: 'Create and save a new resource of a specified type.',
     inputSchema: z.object({
       type: z.string(),
@@ -512,7 +561,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('resource.set_property', {
+  registrar.registerTool('resource.set_property', {
     description: 'Set a property on a resource file and save it.',
     inputSchema: z.object({
       path: z.string(),
@@ -527,7 +576,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('resource.save', {
+  registrar.registerTool('resource.save', {
     description: 'Save a loaded resource.',
     inputSchema: z.object({
       path: z.string(),
@@ -541,7 +590,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('resource.duplicate', {
+  registrar.registerTool('resource.duplicate', {
     description: 'Duplicate a resource to a new path.',
     inputSchema: z.object({
       source_path: z.string(),
@@ -556,7 +605,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('script.create', {
+  registrar.registerTool('script.create', {
     description: 'Create a new script file with an optional template.',
     inputSchema: z.object({
       path: z.string(),
@@ -571,7 +620,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('script.attach', {
+  registrar.registerTool('script.attach', {
     description: 'Attach a script to a node in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -585,7 +634,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('script.detach', {
+  registrar.registerTool('script.detach', {
     description: 'Detach a script from a node in the edited scene with Undo/Redo support.',
     inputSchema: z.object({
       node_path: z.string()
@@ -598,7 +647,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('script.inspect', {
+  registrar.registerTool('script.inspect', {
     description: 'Inspect structure of a script (methods, properties, signals, base type).',
     inputSchema: z.object({
       path: z.string().optional(),
@@ -612,7 +661,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('script.validate', {
+  registrar.registerTool('script.validate', {
     description: 'Validate GDScript syntax and compile checks without saving.',
     inputSchema: z.object({
       content: z.string(),
@@ -626,7 +675,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('signal.list', {
+  registrar.registerTool('signal.list', {
     description: 'List all signals declared on a node and its script.',
     inputSchema: z.object({
       node_path: z.string()
@@ -639,7 +688,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('signal.connections', {
+  registrar.registerTool('signal.connections', {
     description: 'List active signal connections on a node.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -653,7 +702,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('signal.connect', {
+  registrar.registerTool('signal.connect', {
     description: 'Connect a signal from a source node to a target node method with Undo/Redo support.',
     inputSchema: z.object({
       source_node_path: z.string(),
@@ -670,7 +719,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('signal.disconnect', {
+  registrar.registerTool('signal.disconnect', {
     description: 'Disconnect a signal between two nodes with Undo/Redo support.',
     inputSchema: z.object({
       source_node_path: z.string(),
@@ -686,7 +735,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('project.settings.get', {
+  registrar.registerTool('project.settings.get', {
     description: 'Get a project setting value from project.godot.',
     inputSchema: z.object({
       setting: z.string()
@@ -699,7 +748,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('project.settings.set', {
+  registrar.registerTool('project.settings.set', {
     description: 'Set a project setting value and optionally save to project.godot.',
     inputSchema: z.object({
       setting: z.string(),
@@ -714,7 +763,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('project.input.list', {
+  registrar.registerTool('project.input.list', {
     description: 'List all input actions and their assigned events from InputMap.',
     inputSchema: z.object({})
   }, async () => {
@@ -725,7 +774,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('project.input.add_action', {
+  registrar.registerTool('project.input.add_action', {
     description: 'Add an action to the InputMap and persist in project settings.',
     inputSchema: z.object({
       action: z.string(),
@@ -740,7 +789,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('project.input.remove_action', {
+  registrar.registerTool('project.input.remove_action', {
     description: 'Remove an action from the InputMap and project settings.',
     inputSchema: z.object({
       action: z.string()
@@ -753,7 +802,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.get_active_scene', {
+  registrar.registerTool('editor.get_active_scene', {
     description: 'Get information about the currently active edited scene tab.',
     inputSchema: z.object({})
   }, async () => {
@@ -764,7 +813,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.get_open_scenes', {
+  registrar.registerTool('editor.get_open_scenes', {
     description: 'Get list of open scene paths in the editor.',
     inputSchema: z.object({})
   }, async () => {
@@ -775,7 +824,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.get_selected_nodes', {
+  registrar.registerTool('editor.get_selected_nodes', {
     description: 'Get currently selected nodes in the editor scene tree.',
     inputSchema: z.object({})
   }, async () => {
@@ -786,7 +835,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.select_node', {
+  registrar.registerTool('editor.select_node', {
     description: 'Select a node in the editor scene tree.',
     inputSchema: z.object({
       node_path: z.string(),
@@ -800,7 +849,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.change_scene', {
+  registrar.registerTool('editor.change_scene', {
     description: 'Switch active scene tab to a given scene path.',
     inputSchema: z.object({
       path: z.string()
@@ -813,7 +862,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.undo', {
+  registrar.registerTool('editor.undo', {
     description: 'Trigger Undo in the Godot editor.',
     inputSchema: z.object({})
   }, async () => {
@@ -824,7 +873,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.redo', {
+  registrar.registerTool('editor.redo', {
     description: 'Trigger Redo in the Godot editor.',
     inputSchema: z.object({})
   }, async () => {
@@ -835,7 +884,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.get_filesystem', {
+  registrar.registerTool('editor.get_filesystem', {
     description: 'Get filesystem directory and file structure under res://.',
     inputSchema: z.object({})
   }, async () => {
@@ -846,7 +895,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     }
   });
 
-  server.registerTool('editor.scan_filesystem', {
+  registrar.registerTool('editor.scan_filesystem', {
     description: 'Request a rescan of the project filesystem in the editor.',
     inputSchema: z.object({})
   }, async () => {

@@ -6,6 +6,7 @@ import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { afterEach, describe, expect, test } from 'vitest';
 import { initProject } from '../../packages/cli/src/init/init-project.js';
+import {confirmFixtureOperation} from './helpers/confirm-fixture-operation.js';
 
 const fixtureRoot = path.resolve('fixtures/empty-project');
 const tempRoots: string[] = [];
@@ -173,7 +174,7 @@ func test_method() -> void:
       expect(saveRes.structuredContent).toMatchObject({ saved: true });
 
       // Step 8: Reload scene
-      const reloadRes = await client.callTool({ name: 'scene.reload', arguments: {} });
+      const reloadRes = await confirmFixtureOperation(client,'scene.reload',{});
       expect(reloadRes.structuredContent).toMatchObject({ reloaded: true });
 
       // Step 9: Verify values after reload

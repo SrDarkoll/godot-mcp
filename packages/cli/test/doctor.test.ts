@@ -12,4 +12,5 @@ it('reports project/addon/node checks independently', async () => {
   expect(report.checks.find(c => c.id === 'project')?.ok).toBe(true);
   expect(report.checks.find(c => c.id === 'addon')?.ok).toBe(false);
   expect(report.checks.find(c => c.id === 'godot')?.ok).toBe(false);
+  expect(report.checks.find(c => c.id === 'runtime')?.ok).toBe(false);
 });

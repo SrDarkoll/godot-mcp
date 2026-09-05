@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import {RuntimeFeaturesSchema} from './runtime.js';
 
 export const AddonCapabilitiesSchema = z.object({
   editor: z.boolean(),
@@ -6,7 +7,8 @@ export const AddonCapabilitiesSchema = z.object({
   debugger: z.boolean(),
   viewport2d: z.boolean(),
   viewport3d: z.boolean(),
-  undoRedo: z.boolean()
+  undoRedo: z.boolean(),
+  runtimeFeatures: RuntimeFeaturesSchema.optional()
 });
 
 export const AddonHelloSchema = z.object({

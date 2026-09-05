@@ -6,3 +6,11 @@ coverage/
 .godot/
 .godot-mcp/runtime/
 .godot-mcp/sessions/
+.godot-mcp/visual-test-runs/
+.godot-mcp/runtime-test-runs/
+.godot-mcp/recovery-test-runs/
+.godot-mcp/generated/
+.godot-mcp/config.json
+.godot-mcp/addon-backups/
+.godot-mcp/cli-test-runs/
+.godot-mcp/distribution/

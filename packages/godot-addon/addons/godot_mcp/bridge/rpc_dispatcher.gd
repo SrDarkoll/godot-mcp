@@ -11,8 +11,13 @@ var _script_handlers
 var _signal_handlers
 var _project_handlers
 var _editor_handlers
+var _visual_handlers
+var _runtime
+var _recovery
 
-func _init(editor_interface) -> void:
+func _init(editor_interface, runtime = null) -> void:
+    _runtime = runtime
+    _recovery = preload("res://addons/godot_mcp/bridge/handlers/recovery_handlers.gd").new(editor_interface)
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
     _scene_tree = preload("res://addons/godot_mcp/bridge/handlers/scene_tree.gd").new(editor_interface)
     _object_handlers = preload("res://addons/godot_mcp/bridge/handlers/object_handlers.gd").new(editor_interface)
@@ -23,6 +28,7 @@ func _init(editor_interface) -> void:
     _signal_handlers = preload("res://addons/godot_mcp/bridge/handlers/signal_handlers.gd").new(editor_interface)
     _project_handlers = preload("res://addons/godot_mcp/bridge/handlers/project_handlers.gd").new(editor_interface)
     _editor_handlers = preload("res://addons/godot_mcp/bridge/handlers/editor_handlers.gd").new(editor_interface)
+    _visual_handlers = preload("res://addons/godot_mcp/bridge/handlers/visual_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -47,6 +53,26 @@ func dispatch(raw_text: String) -> Dictionary:
     var params: Dictionary = request.get("params", {})
     var result
     match method:
+        "recovery.prepare":
+            result = _recovery.prepare(params)
+        "recovery.editor_state":
+            result = _recovery.editor_state()
+        "recovery.validate":
+            result = _recovery.validate(params)
+        "editor.close_scene":
+            result = _recovery.close_scene()
+        "runtime.status":
+            result = _runtime.snapshot()
+        "runtime.start":
+            result = await _runtime.launch(params)
+        "runtime.stop", "project.stop":
+            result = await _runtime.stop_run()
+        "runtime.scene_tree", "runtime.inspect_node", "runtime.get_property", "runtime.pause", "runtime.resume", "debug.performance", "visual.capture_game":
+            result = await _runtime.forward(method,params)
+        "visual.capture_viewport_2d":
+            result = await _visual_handlers.handle_capture_viewport_2d(params)
+        "visual.capture_viewport_3d":
+            result = await _visual_handlers.handle_capture_viewport_3d(params)
         "project.info":
             result = _project_info.run(params)
         "scene.get_tree":

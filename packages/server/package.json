@@ -27,10 +27,32 @@
     "./project-root": {
       "types": "./dist/project/project-root.d.ts",
       "import": "./dist/project/project-root.js"
+    },
+    "./project-config": {
+      "types": "./dist/project/project-config.d.ts",
+      "import": "./dist/project/project-config.js"
+    },
+    "./management": {
+      "types": "./dist/management/client.d.ts",
+      "import": "./dist/management/client.js"
+    },
+    "./sessions": {
+      "types": "./dist/session/session-reader.d.ts",
+      "import": "./dist/session/session-reader.js"
     }
   },
   "devDependencies": {
     "@types/ws": "^8.5.0",
     "@modelcontextprotocol/client": "^2.0.0"
+  },
+  "license": "MIT",
+  "description": "Godot MCP server package (Windows-first pre-alpha)",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
   }
 }

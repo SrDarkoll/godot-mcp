@@ -1,5 +1,7 @@
 # Foundation Architecture
 
+Historical Plan 1 scope. The subsequent [visual capture guide](../tools/visual-capture.md) and [visual protocol](../protocol/visual-capture-rpc.md) describe Plan 3's implemented extension.
+
 This document describes the Plan 1 foundation milestone. It intentionally covers only the read-only editor handshake and the infrastructure needed by later mutation, runtime, visual, transaction, and security milestones.
 
 ## Data flow

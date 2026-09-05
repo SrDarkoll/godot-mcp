@@ -1,5 +1,7 @@
 # Foundation Bridge RPC Protocol
 
+This document describes the historical foundation surface. Plan 3 adds the [visual capture RPC methods](visual-capture-rpc.md) without changing protocol version 1.
+
 Protocol version: `1`
 
 The foundation bridge is JSON over a localhost WebSocket. Node owns the listening socket; the Godot addon connects outbound. Requests and responses are structured data. Arbitrary executable GDScript is not part of the protocol.

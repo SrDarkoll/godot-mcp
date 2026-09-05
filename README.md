@@ -1,12 +1,18 @@
 # Godot MCP
 
-**Status: Pre-alpha / foundation milestone**
+**Status: Pre-alpha / editor, runtime and file recovery milestones**
 
 Godot MCP is an open-source MCP bridge for controlling Godot 4.x from agentic clients such as Codex. The foundation milestone establishes a standard MCP stdio server, a localhost-only Node.js ↔ Godot EditorPlugin bridge, per-project addon installation, persistent session manifests, and read-only project/scene inspection.
 
-> This is not yet the full autonomous Godot agent described by the project design. Runtime mutation, screenshots, transactions/rollback, risk permissions, debugger control, resource/scene mutation, and release automation are planned for later milestones.
+The editor mutation surface and persistent 2D/3D editor viewport captures are now implemented. See the [visual capture guide](docs/tools/visual-capture.md) for arguments, image delivery, session manifests and limits.
 
-## Current foundation capabilities
+Runtime execution, inspection, native diagnostics and game screenshots are available; see the [runtime guide](docs/tools/runtime-debugger.md).
+
+Declared-file transactions, recoverable file checkpoints and session risk/permissions are implemented; see the [recovery guide](docs/tools/transactions-recovery.md).
+
+> Unsaved editor-state recovery, debugger stepping and release automation remain future milestones. Visual checkpoints index images; file checkpoints restore selected on-disk files.
+
+## Current capabilities
 
 - Windows-first architecture for Godot 4.x.
 - Node.js 22+ TypeScript monorepo.
@@ -20,6 +26,14 @@ Godot MCP is an open-source MCP bridge for controlling Godot 4.x from agentic cl
   - `session.status`
   - `project.info`
   - `scene.get_tree`
+  - Scene, node, object, resource, script, signal, project settings/input and editor operations from Plan 2
+  - `visual.capture_viewport_2d`
+  - `visual.capture_viewport_3d`
+  - `session.manifest`
+  - `project.run`, `project.run_scene`, `project.stop`, `runtime.*` inspection/control
+  - `debug.output`, `debug.errors`, `debug.warnings`, `debug.performance`
+  - `visual.capture_game`
+  - `transaction.*`, file `checkpoint.*`, `permissions.*` and `risk.preview`
 - CLI commands:
   - `godot-mcp init`
   - `godot-mcp doctor`
@@ -81,6 +95,10 @@ npm run test:integration
 The real integration test installs/enables the addon in a temporary deterministic project, opens `main.tscn` in a headless editor, waits for the authenticated bridge handshake, and verifies live `project.info` and `scene.get_tree` responses.
 
 ## Repository layout
+
+For the native editor/game debugger tests, set `GODOT_RUNTIME_INTEGRATION=1` with `GODOT_BIN` and run `npm run test:integration:runtime`. Re-run init with `--godot` to install the development runtime autoload and compatible native logger adapter.
+
+For real viewport rendering on Windows, set `GODOT_VISUAL_INTEGRATION=1` alongside `GODOT_BIN` and run `npm run test:integration:visual`. This tier requires graphical rendering and does not pass by skipping. `npm run check:godot` checks every addon script against the configured executable. Captures and graphical test evidence are retained locally; no automatic deletion occurs.
 
 ```text
 packages/
