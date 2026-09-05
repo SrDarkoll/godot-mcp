@@ -31,6 +31,8 @@ A client that does not support MCP elicitation cannot execute risky operations t
 
 The MCP additionally blocks private methods and direct reflective/structural bypasses such as `free`, `queue_free`, `call`, `callv`, `set`, `set_script`, deferred call/set variants, RPC escape methods, and direct child/reparent mutations. Use the dedicated node/property/signal tools instead so safety policy, Undo/Redo and audit behavior remain visible.
 
+`editor.undo` and `editor.redo` are also risky operations. Godot's active/global UndoRedo history can contain manual editor work, and the current bridge cannot prove that the next history entry was created by this MCP session. They therefore require host/user approval until action provenance is tracked explicitly.
+
 ## Trust boundary
 
 The local MCP host is part of the trusted computing base. Elicitation is intended to be surfaced to a human operator. A host configured to auto-approve elicitation removes that human-approval guarantee.

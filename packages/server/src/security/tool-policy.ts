@@ -28,7 +28,7 @@ const NORMAL_MUTATIONS = new Set([
     'object.set', 'scene.create', 'scene.open', 'scene.save', 'scene.instantiate', 'resource.create', 'resource.save',
     'resource.duplicate', 'resource.set_property', 'script.create', 'script.attach', 'script.detach', 'signal.connect',
     'signal.disconnect', 'project.input.add_action', 'project.input.remove_action', 'editor.select_node',
-    'editor.change_scene', 'editor.undo', 'editor.redo', 'editor.scan_filesystem', 'project.run', 'project.run_scene',
+    'editor.change_scene', 'editor.scan_filesystem', 'project.run', 'project.run_scene',
     'runtime.pause', 'runtime.resume', 'runtime.restart', 'visual.capture_game', 'visual.capture_viewport_2d',
     'visual.capture_viewport_3d', 'transaction.begin', 'transaction.write_file', 'transaction.delete_file',
     'transaction.rollback', 'checkpoint.create', 'permissions.set', 'permissions.enable', 'permissions.disable'
@@ -200,8 +200,8 @@ export class ToolPolicy {
                 fingerprints[target] = await this.recovery.files.fingerprint(target);
         }
         let risk: Risk = READS.has(name) || NORMAL_MUTATIONS.has(name) || CONTROLS.has(name) ? 'normal' : 'risky';
-        if (['object.call', 'scene.reload', 'editor.close_scene', 'project.settings.set', 'transaction.commit',
-            'transaction.recover', 'checkpoint.restore'].includes(name)) {
+        if (['object.call', 'scene.reload', 'editor.close_scene', 'editor.undo', 'editor.redo', 'project.settings.set',
+            'transaction.commit', 'transaction.recover', 'checkpoint.restore'].includes(name)) {
             risk = 'risky';
         }
         if (['script.create', 'resource.create', 'resource.save', 'scene.create', 'scene.save_as'].includes(name) &&

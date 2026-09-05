@@ -184,7 +184,7 @@ func test_method() -> void:
                 }
             });
             expect(preUndoSet.isError).toBeFalsy();
-            const undo1 = await client.callTool({ name: 'editor.undo', arguments: {} });
+            const undo1 = await confirmFixtureOperation(client, 'editor.undo', {});
             expect(undo1.structuredContent).toMatchObject({ performed: true });
             const postUndoGet = await client.callTool({
                 name: 'node.get_property',
@@ -195,7 +195,7 @@ func test_method() -> void:
                 value: { x: 150, y: 250 }
             });
             // Step 11: Redo operations
-            const redo1 = await client.callTool({ name: 'editor.redo', arguments: {} });
+            const redo1 = await confirmFixtureOperation(client, 'editor.redo', {});
             expect(redo1.structuredContent).toMatchObject({ performed: true });
             const postRedoGet = await client.callTool({
                 name: 'node.get_property',

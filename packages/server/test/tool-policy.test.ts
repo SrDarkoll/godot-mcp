@@ -94,3 +94,14 @@ it('blocks reflective engine escape methods while keeping user methods risky', a
     expect(custom.risk).toBe('risky');
     expect(custom.targets).toContain('method:recalculate_damage');
 });
+
+it('requires approval before undoing or redoing editor history it cannot prove it owns', async () => {
+    const { policy } = await setup();
+    for (const tool of ['editor.undo', 'editor.redo']) {
+        const assessment = await policy.assess(tool, {});
+        expect(assessment.risk).toBe('risky');
+        expect(assessment.targets).toContain('editor:active_scene');
+        await expect(policy.execute(tool, {}, async () => ({ performed: true })))
+            .rejects.toMatchObject({ code: 'APPROVAL_REQUIRED' });
+    }
+});
