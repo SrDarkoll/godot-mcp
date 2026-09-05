@@ -6,6 +6,7 @@ var _scene_tree
 var _object_handlers
 var _scene_handlers
 var _node_handlers
+var _resource_handlers
 
 func _init(editor_interface) -> void:
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
@@ -13,6 +14,7 @@ func _init(editor_interface) -> void:
     _object_handlers = preload("res://addons/godot_mcp/bridge/handlers/object_handlers.gd").new(editor_interface)
     _scene_handlers = preload("res://addons/godot_mcp/bridge/handlers/scene_handlers.gd").new(editor_interface)
     _node_handlers = preload("res://addons/godot_mcp/bridge/handlers/node_handlers.gd").new(editor_interface)
+    _resource_handlers = preload("res://addons/godot_mcp/bridge/handlers/resource_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -91,6 +93,18 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _node_handlers.set_property(params)
         "node.get_properties":
             result = _node_handlers.get_properties(params)
+        "resource.load":
+            result = _resource_handlers.load_resource(params)
+        "resource.inspect":
+            result = _resource_handlers.inspect(params)
+        "resource.create":
+            result = _resource_handlers.create(params)
+        "resource.set_property":
+            result = _resource_handlers.set_property(params)
+        "resource.save":
+            result = _resource_handlers.save(params)
+        "resource.duplicate":
+            result = _resource_handlers.duplicate(params)
         _:
             return _failure(request_id, "METHOD_NOT_FOUND", "Unknown method: %s" % method)
 

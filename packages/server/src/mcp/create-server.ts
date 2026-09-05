@@ -37,6 +37,14 @@ import {
   setNodeProperty,
   getNodeProperties
 } from '../tools/node-tools.js';
+import {
+  loadResource,
+  inspectResource,
+  createResource,
+  setResourceProperty,
+  saveResource,
+  duplicateResource
+} from '../tools/resource-tools.js';
 import { toolError, toolSuccess } from './tool-result.js';
 
 export interface McpServerContext {
@@ -426,6 +434,92 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
   }, async (args) => {
     try {
       return toolSuccess(await getNodeProperties(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('resource.load', {
+    description: 'Load a resource file and inspect its exported properties.',
+    inputSchema: z.object({
+      path: z.string(),
+      type_hint: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await loadResource(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('resource.inspect', {
+    description: 'Inspect properties of a resource file.',
+    inputSchema: z.object({
+      path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await inspectResource(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('resource.create', {
+    description: 'Create and save a new resource of a specified type.',
+    inputSchema: z.object({
+      type: z.string(),
+      path: z.string(),
+      properties: z.record(z.string(), z.unknown()).optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await createResource(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('resource.set_property', {
+    description: 'Set a property on a resource file and save it.',
+    inputSchema: z.object({
+      path: z.string(),
+      property: z.string(),
+      value: z.unknown()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await setResourceProperty(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('resource.save', {
+    description: 'Save a loaded resource.',
+    inputSchema: z.object({
+      path: z.string(),
+      flags: z.number().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await saveResource(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('resource.duplicate', {
+    description: 'Duplicate a resource to a new path.',
+    inputSchema: z.object({
+      source_path: z.string(),
+      target_path: z.string(),
+      subresources: z.boolean().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await duplicateResource(ctx.bridge.rpc, args));
     } catch (error) {
       return toolError(error);
     }

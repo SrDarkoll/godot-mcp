@@ -195,3 +195,37 @@ export interface NodeSetPropertyResult {
 export interface NodeGetPropertiesResult {
   properties: Record<string, unknown>;
 }
+
+export interface ResourceLoadResult {
+  path: string;
+  type: string;
+  properties: Record<string, unknown>;
+}
+
+export interface ResourceInspectResult {
+  path: string;
+  type: string;
+  properties: Record<string, unknown>;
+}
+
+export interface ResourceCreateResult {
+  path: string;
+  type: string;
+}
+
+export interface ResourceSetPropertyResult {
+  path: string;
+  property: string;
+  previous_value?: unknown;
+  new_value?: unknown;
+}
+
+export interface ResourceSaveResult {
+  path: string;
+  saved: boolean;
+}
+
+export interface ResourceDuplicateResult {
+  path: string;
+  type: string;
+}
