@@ -209,10 +209,10 @@ godot-mcp/
 
 The MCP server and CLI are installed once on Windows. The Godot addon is installed per project.
 
-Expected workflow:
+Expected source-install workflow after the repository is published:
 
 ```powershell
-git clone <repository>
+# Clone the published godot-mcp repository, then:
 cd godot-mcp
 npm install
 npm run build
