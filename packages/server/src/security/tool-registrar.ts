@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { acceptedContent, inputRequired, inputResponse, type McpServer, type ServerContext } from '@modelcontextprotocol/server';
+import { acceptedContent, inputRequired, inputResponse, type CallToolResult, type InputRequiredResult, type McpServer, type ServerContext } from '@modelcontextprotocol/server';
 import * as z from 'zod/v4';
 import { BridgeRpcError } from '../bridge/rpc-router.js';
 import { toolError } from '../mcp/tool-result.js';
@@ -44,7 +44,9 @@ class ConsumedApprovalStore {
 
 export function guardedRegistrar(server: McpServer, policy: ToolPolicy, approvalState: RiskApprovalStateCodec): ToolRegistrar {
     const consumedApprovals = new ConsumedApprovalStore();
-    const register = (name: string, config: any, handler: any) => server.registerTool(name, config, async (args: Record<string, unknown>, extra: any) => {
+    type GuardedToolResult = CallToolResult | InputRequiredResult;
+    type GuardedHandler = (args: Record<string, unknown>, context: ServerContext) => GuardedToolResult | Promise<GuardedToolResult>;
+    const register = (name: string, config: any, handler: GuardedHandler) => server.registerTool(name, config, async (args: Record<string, unknown>, extra: ServerContext): Promise<GuardedToolResult> => {
         try {
             const assessment = await policy.assess(name, args);
             if (assessment.risk === 'risky') {
