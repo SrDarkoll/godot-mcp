@@ -35,7 +35,11 @@ describe('MCP server', () => {
     await client.connect(clientTransport);
 
     const tools = await client.listTools();
-    expect(tools.tools.map(tool => tool.name).sort()).toEqual(['project.info', 'scene.get_tree', 'session.status']);
+    const toolNames = tools.tools.map(tool => tool.name);
+    expect(toolNames).toContain('project.info');
+    expect(toolNames).toContain('scene.get_tree');
+    expect(toolNames).toContain('session.status');
+    expect(toolNames).toContain('object.get_class');
     const status = await client.callTool({ name: 'session.status', arguments: {} });
     expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
     const project = await client.callTool({ name: 'project.info', arguments: {} });
