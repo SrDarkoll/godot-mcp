@@ -229,3 +229,38 @@ export interface ResourceDuplicateResult {
   path: string;
   type: string;
 }
+
+export interface ScriptCreateResult {
+  path: string;
+  created: boolean;
+}
+
+export interface ScriptAttachResult {
+  node_path: string;
+  script_path: string;
+  attached: boolean;
+}
+
+export interface ScriptDetachResult {
+  node_path: string;
+  detached: boolean;
+}
+
+export interface ScriptDiagnosticError {
+  line: number;
+  column: number;
+  message: string;
+}
+
+export interface ScriptValidateResult {
+  valid: boolean;
+  errors: ScriptDiagnosticError[];
+}
+
+export interface ScriptInspectResult {
+  path: string;
+  base_type: string;
+  methods: Array<{ name: string; args?: Array<{ name: string; type: string }> | undefined; return_type?: string | undefined }>;
+  properties: Array<{ name: string; type: string }>;
+  signals: Array<{ name: string; args?: Array<{ name: string; type: string }> | undefined }>;
+}

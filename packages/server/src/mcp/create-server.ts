@@ -45,6 +45,13 @@ import {
   saveResource,
   duplicateResource
 } from '../tools/resource-tools.js';
+import {
+  createScript,
+  attachScript,
+  detachScript,
+  inspectScript,
+  validateScript
+} from '../tools/script-tools.js';
 import { toolError, toolSuccess } from './tool-result.js';
 
 export interface McpServerContext {
@@ -520,6 +527,76 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
   }, async (args) => {
     try {
       return toolSuccess(await duplicateResource(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('script.create', {
+    description: 'Create a new script file with an optional template.',
+    inputSchema: z.object({
+      path: z.string(),
+      template: z.string().optional(),
+      inherits: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await createScript(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('script.attach', {
+    description: 'Attach a script to a node in the edited scene with Undo/Redo support.',
+    inputSchema: z.object({
+      node_path: z.string(),
+      script_path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await attachScript(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('script.detach', {
+    description: 'Detach a script from a node in the edited scene with Undo/Redo support.',
+    inputSchema: z.object({
+      node_path: z.string()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await detachScript(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('script.inspect', {
+    description: 'Inspect structure of a script (methods, properties, signals, base type).',
+    inputSchema: z.object({
+      path: z.string().optional(),
+      node_path: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await inspectScript(ctx.bridge.rpc, args));
+    } catch (error) {
+      return toolError(error);
+    }
+  });
+
+  server.registerTool('script.validate', {
+    description: 'Validate GDScript syntax and compile checks without saving.',
+    inputSchema: z.object({
+      content: z.string(),
+      path: z.string().optional()
+    })
+  }, async (args) => {
+    try {
+      return toolSuccess(await validateScript(ctx.bridge.rpc, args));
     } catch (error) {
       return toolError(error);
     }
