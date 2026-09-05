@@ -264,3 +264,41 @@ export interface ScriptInspectResult {
   properties: Array<{ name: string; type: string }>;
   signals: Array<{ name: string; args?: Array<{ name: string; type: string }> | undefined }>;
 }
+
+export interface SignalInfoItem {
+  name: string;
+  args: Array<{ name: string; type: string }>;
+}
+
+export interface SignalListResult {
+  node_path: string;
+  signals: SignalInfoItem[];
+}
+
+export interface SignalConnectionInfo {
+  signal: string;
+  target_path: string;
+  method: string;
+  flags: number;
+}
+
+export interface SignalConnectionsResult {
+  node_path: string;
+  connections: SignalConnectionInfo[];
+}
+
+export interface SignalConnectResult {
+  connected: boolean;
+  source_node_path: string;
+  signal_name: string;
+  target_node_path: string;
+  target_method: string;
+}
+
+export interface SignalDisconnectResult {
+  disconnected: boolean;
+  source_node_path: string;
+  signal_name: string;
+  target_node_path: string;
+  target_method: string;
+}

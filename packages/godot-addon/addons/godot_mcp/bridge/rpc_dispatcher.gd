@@ -8,6 +8,7 @@ var _scene_handlers
 var _node_handlers
 var _resource_handlers
 var _script_handlers
+var _signal_handlers
 
 func _init(editor_interface) -> void:
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
@@ -17,6 +18,7 @@ func _init(editor_interface) -> void:
     _node_handlers = preload("res://addons/godot_mcp/bridge/handlers/node_handlers.gd").new(editor_interface)
     _resource_handlers = preload("res://addons/godot_mcp/bridge/handlers/resource_handlers.gd").new(editor_interface)
     _script_handlers = preload("res://addons/godot_mcp/bridge/handlers/script_handlers.gd").new(editor_interface)
+    _signal_handlers = preload("res://addons/godot_mcp/bridge/handlers/signal_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -117,6 +119,14 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _script_handlers.inspect(params)
         "script.validate":
             result = _script_handlers.validate(params)
+        "signal.list":
+            result = _signal_handlers.list(params)
+        "signal.connections":
+            result = _signal_handlers.connections(params)
+        "signal.connect":
+            result = _signal_handlers.connect_signal(params)
+        "signal.disconnect":
+            result = _signal_handlers.disconnect_signal(params)
         _:
             return _failure(request_id, "METHOD_NOT_FOUND", "Unknown method: %s" % method)
 
