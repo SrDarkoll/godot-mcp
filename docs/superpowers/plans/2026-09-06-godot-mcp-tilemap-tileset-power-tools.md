@@ -309,7 +309,7 @@ Create all tiles as do calls and remove them as undo calls. Use `remove_tile(atl
 
 - [ ] **Step 7: Implement conservative source removal**
 
-Before removal, scan `layer.get_used_cells()` and reject if `get_cell_source_id(coords) == source_id` with `SOURCE_IN_USE`. Snapshot the exact `TileSetSource` reference, then do `remove_source(source_id)` and undo `add_source(source, source_id)`.
+Before removal, recursively inspect every edited-scene `TileMapLayer` sharing the same TileSet and reject if any `get_cell_source_id(coords) == source_id` with `SOURCE_IN_USE`. Snapshot the exact `TileSetSource` reference, then do `remove_source(source_id)` and undo `add_source(source, source_id)`.
 
 - [ ] **Step 8: Wire dispatcher and run checks**
 

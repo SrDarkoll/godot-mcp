@@ -123,6 +123,7 @@ func inspect(params: Dictionary) -> Dictionary:
 			sources.append(_atlas_summary(source_id, source))
 		else:
 			sources.append({"source_id": source_id, "type": source.get_class()})
+	sources.sort_custom(func(a: Dictionary, b: Dictionary): return int(a.source_id) < int(b.source_id))
 	return {
 		"node_path": _logical_path(root, layer),
 		"exists": true,

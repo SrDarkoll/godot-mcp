@@ -12,8 +12,10 @@ describe('TileMapLayer protocol',()=>{
   it('requires non-negative atlas coordinates and valid cell identifiers',()=>{
     expect(TileAtlasCoordinateSchema.parse({x:0,y:1})).toEqual({x:0,y:1});
     expect(()=>TileAtlasCoordinateSchema.parse({x:-1,y:0})).toThrow();
+    expect(()=>TileAtlasCoordinateSchema.parse({x:2147483648,y:0})).toThrow();
     expect(TileCellWriteSchema.parse({coords:{x:1,y:2},source_id:0,atlas_coords:{x:0,y:0},alternative_tile:0})).toEqual({coords:{x:1,y:2},source_id:0,atlas_coords:{x:0,y:0},alternative_tile:0});
     expect(()=>TileCellWriteSchema.parse({coords:{x:1,y:2},source_id:-1,atlas_coords:{x:0,y:0},alternative_tile:0})).toThrow();
+    expect(()=>TileCellWriteSchema.parse({coords:{x:1,y:2},source_id:2147483648,atlas_coords:{x:0,y:0},alternative_tile:0})).toThrow();
   });
 
   it('requires positive atlas tile sizes when supplied',()=>{

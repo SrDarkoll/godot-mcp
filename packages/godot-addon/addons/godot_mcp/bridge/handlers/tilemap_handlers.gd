@@ -349,4 +349,6 @@ func local_to_map(params: Dictionary) -> Dictionary:
 		return position
 	var layer := resolved as TileMapLayer
 	var coords := layer.local_to_map(position)
+	if coords.x < MIN_MAP_COORD or coords.x > MAX_MAP_COORD or coords.y < MIN_MAP_COORD or coords.y > MAX_MAP_COORD:
+		return _error("INVALID_ARGUMENT", "local_to_map result is outside the serializable TileMapLayer coordinate range")
 	return {"node_path": _logical_path(root, layer), "position": _vector2_dict(position), "coords": _coord_dict(coords)}

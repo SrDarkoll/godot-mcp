@@ -315,11 +315,11 @@ Input: `node_path`, `source_id`.
 Behavior:
 
 - source must exist
-- refuse removal if any cell in the layer currently references the source, returning `SOURCE_IN_USE`
+- refuse removal if any cell in any edited-scene `TileMapLayer` sharing the same TileSet currently references the source, returning `SOURCE_IN_USE`
 - remove the source in one Undo/Redo action
 - Undo restores the exact same TileSetSource resource at the same source ID
 
-This conservative rule prevents silently invalidating painted cells.
+This conservative rule prevents silently invalidating painted cells, including cells owned by another layer that shares the same TileSet resource.
 
 ## Undo/Redo model
 

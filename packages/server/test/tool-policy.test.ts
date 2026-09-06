@@ -144,3 +144,18 @@ it('does not treat Animation track paths as project filesystem paths', async () 
     expect(await policy.execute('animation.add_track', args, async () => ({ track_index: 0 })))
         .toEqual({ track_index: 0 });
 });
+
+it('fingerprints TileSet atlas texture paths as project files without confusing node paths for files', async () => {
+    const { root, policy } = await setup();
+    await fs.writeFile(path.join(root, 'tiles.png'), Buffer.from('fixture'));
+    const args = {
+        node_path: '/Main/Ground',
+        texture_path: 'res://tiles.png',
+        texture_region_size: { x: 16, y: 16 }
+    };
+    const assessment = await policy.assess('tileset.add_atlas_source', args);
+    expect(assessment.risk).toBe('normal');
+    expect(assessment.targets).toContain('res://tiles.png');
+    expect(assessment.targets).toContain('node_path:/Main/Ground');
+    expect(assessment.targets).not.toContain('/Main/Ground');
+});

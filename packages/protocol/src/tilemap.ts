@@ -1,21 +1,22 @@
 import {z} from 'zod/v4';
 
 const mapAxis=z.number().int().min(-32768).max(32767);
-const atlasAxis=z.number().int().nonnegative();
+const int32Nonnegative=z.number().int().min(0).max(2147483647);
+const atlasAxis=int32Nonnegative;
 export const TileMapCoordinateSchema=z.object({x:mapAxis,y:mapAxis});
 export type TileMapCoordinate=z.infer<typeof TileMapCoordinateSchema>;
 export const TileAtlasCoordinateSchema=z.object({x:atlasAxis,y:atlasAxis});
 export type TileAtlasCoordinate=z.infer<typeof TileAtlasCoordinateSchema>;
-export const TilePositiveSizeSchema=z.object({x:z.number().int().positive(),y:z.number().int().positive()});
+export const TilePositiveSizeSchema=z.object({x:z.number().int().min(1).max(2147483647),y:z.number().int().min(1).max(2147483647)});
 export type TilePositiveSize=z.infer<typeof TilePositiveSizeSchema>;
 export const TileVector2Schema=z.object({x:z.number().finite(),y:z.number().finite()});
 export type TileVector2=z.infer<typeof TileVector2Schema>;
 
 export const TileCellWriteSchema=z.object({
   coords:TileMapCoordinateSchema,
-  source_id:z.number().int().nonnegative(),
+  source_id:int32Nonnegative,
   atlas_coords:TileAtlasCoordinateSchema,
-  alternative_tile:z.number().int().nonnegative().default(0)
+  alternative_tile:int32Nonnegative.default(0)
 });
 export type TileCellWrite=z.infer<typeof TileCellWriteSchema>;
 
