@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import {describe,expect,it,vi} from 'vitest';
 import {
   configureCamera3d,configureLight3d,inspectMesh3d,setCollision3dShape,setMesh3dPrimitive,setNode3dTransform
@@ -32,4 +34,14 @@ describe('3D/material RPC forwarders',()=>{
       'material3d.set_standard','material3d.configure_standard','material3d.clear','shader3d.set_code','shader3d.inspect','shader3d.set_parameter'
     ]);
   });
+
+  it('keeps Phase 3 RPC forwarder results typed before MCP wrapping',()=>{
+    const powerSource=fs.readFileSync(path.resolve(import.meta.dirname,'../src/tools/power3d-tools.ts'),'utf8');
+    const materialSource=fs.readFileSync(path.resolve(import.meta.dirname,'../src/tools/material3d-tools.ts'),'utf8');
+    for(const resultType of ['Node3dTransformResult','Mesh3dResult','Camera3dResult','Collision3dResult','Light3dResult'])
+      expect(powerSource).toContain(`call<${resultType}>`);
+    expect(materialSource).toContain('call<Material3dResult>');
+    expect(materialSource).toContain('call<Shader3dResult>');
+  });
+
 });
