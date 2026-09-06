@@ -46,7 +46,7 @@ func _init(editor_interface, runtime = null) -> void:
     _power2d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power2d_handlers.gd").new(editor_interface)
     _power3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power3d_handlers.gd").new(editor_interface)
     _material3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/material3d_handlers.gd").new(editor_interface)
-    _navigation_handlers = preload("res://addons/godot_mcp/bridge/handlers/navigation_handlers.gd").new(editor_interface)
+    _navigation_handlers = preload("res://addons/godot_mcp/bridge/handlers/navigation_handlers.gd").new(editor_interface, _compatibility)
 
 func compatibility_manifest() -> Dictionary:
     return _compatibility.manifest()

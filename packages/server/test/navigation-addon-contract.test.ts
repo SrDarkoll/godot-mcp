@@ -25,11 +25,15 @@ describe('navigation addon contract',()=>{
     expect(source).toContain('_commit_resource_change');
   });
 
-  it('keeps NavigationAgent3D keep_y_velocity persistent only when 3D avoidance is disabled',()=>{
+  it('delegates NavigationAgent3D compatibility semantics to the shared core',()=>{
     const source=fs.readFileSync(file,'utf8');
+    expect(source).toContain('_compatibility.status(KEEP_Y_CAPABILITY)');
+    expect(source).toContain('_compatibility.quirk_active(KEEP_Y_QUIRK)');
+    expect(source).toContain('CAPABILITY_UNAVAILABLE');
     expect(source).toContain('keep_y_velocity is unavailable when use_3d_avoidance is true');
     expect(source).toContain('result.erase("keep_y_velocity")');
     expect(source).toContain('after.keep_y_velocity = true');
+    expect(source).not.toContain('Engine.get_version_info');
   });
 
 });

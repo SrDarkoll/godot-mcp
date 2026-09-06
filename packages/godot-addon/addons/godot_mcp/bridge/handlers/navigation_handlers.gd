@@ -1,10 +1,15 @@
 @tool
 extends RefCounted
 
-var _editor_interface
+const KEEP_Y_CAPABILITY := "navigation.agent3d.keep_y_velocity"
+const KEEP_Y_QUIRK := "navigation.agent3d.keep_y_velocity.hidden_with_3d_avoidance"
 
-func _init(editor_interface) -> void:
+var _editor_interface
+var _compatibility
+
+func _init(editor_interface, compatibility) -> void:
 	_editor_interface = editor_interface
+	_compatibility = compatibility
 
 func _error(code: String, message: String) -> Dictionary:
 	return {"__error": {"code": code, "message": message}}
@@ -438,7 +443,8 @@ func _agent_snapshot(agent) -> Dictionary:
 	if agent is NavigationAgent3D:
 		state.height = agent.height
 		state.use_3d_avoidance = agent.use_3d_avoidance
-		state.keep_y_velocity = agent.keep_y_velocity
+		if _compatibility.status(KEEP_Y_CAPABILITY) != "unsupported":
+			state.keep_y_velocity = agent.keep_y_velocity
 		state.path_height_offset = agent.path_height_offset
 	return state
 
@@ -463,7 +469,7 @@ func _commit_agent_change(action_name: String, target_node: Node, before: Dictio
 
 func _agent_result(root: Node, agent) -> Dictionary:
 	var result := _agent_snapshot(agent)
-	if agent is NavigationAgent3D and agent.use_3d_avoidance:
+	if agent is NavigationAgent3D and (agent.use_3d_avoidance or _compatibility.status(KEEP_Y_CAPABILITY) == "unsupported"):
 		result.erase("keep_y_velocity")
 	result.node_path = _logical_path(root, agent)
 	result.type = agent.get_class()
@@ -500,6 +506,8 @@ func configure_agent(params: Dictionary) -> Dictionary:
 	var effective_use_3d_avoidance := false
 	if agent is NavigationAgent3D:
 		effective_use_3d_avoidance = bool(params.get("use_3d_avoidance", agent.use_3d_avoidance))
+		if params.has("keep_y_velocity") and _compatibility.status(KEEP_Y_CAPABILITY) == "unsupported":
+			return _error("CAPABILITY_UNAVAILABLE", _compatibility.reason(KEEP_Y_CAPABILITY))
 		if effective_use_3d_avoidance and params.has("keep_y_velocity"):
 			return _error("INVALID_ARGUMENT", "keep_y_velocity is unavailable when use_3d_avoidance is true because Godot does not persist it in that mode")
 	var before := _agent_snapshot(agent)
@@ -511,7 +519,7 @@ func configure_agent(params: Dictionary) -> Dictionary:
 		for key in ["height", "use_3d_avoidance", "keep_y_velocity", "path_height_offset"]:
 			if params.has(key):
 				after[key] = params[key]
-		if effective_use_3d_avoidance:
+		if effective_use_3d_avoidance and _compatibility.quirk_active(KEEP_Y_QUIRK):
 			after.keep_y_velocity = true
 	_commit_agent_change("Configure Navigation Agent", agent, before, after)
 	return _agent_result(root, agent)
