@@ -46,7 +46,7 @@ describe('compatibility addon contract', () => {
     expect(visual).toContain('visual.viewport3d.capture');
     expect(visual).not.toContain('DisplayServer.get_name() == "headless"');
     expect(visual).not.toContain('_editor_interface.has_method(method)');
-    expect(bridge).toContain('var compatibility := _dispatcher.compatibility_manifest()');
+    expect(bridge).toContain('var compatibility: Dictionary = _dispatcher.compatibility_manifest()');
     expect(bridge).not.toContain('DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_2d")');
     expect(bridge).not.toContain('DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_3d")');
   });

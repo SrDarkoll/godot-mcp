@@ -107,7 +107,7 @@ func _send_hello() -> void:
     var descriptor := _connection_descriptor
     if descriptor.is_empty() or _socket == null:
         return
-    var compatibility := _dispatcher.compatibility_manifest()
+    var compatibility: Dictionary = _dispatcher.compatibility_manifest()
     var effective_capabilities: Dictionary = compatibility.get("capabilities", {})
     var viewport2d: Dictionary = effective_capabilities.get("visual.viewport2d.capture", {})
     var viewport3d: Dictionary = effective_capabilities.get("visual.viewport3d.capture", {})
