@@ -1,0 +1,186 @@
+# Generated Godot MCP Tool Inventory
+
+> **Generated file. Do not edit directly.** Source: `scripts/tool-contracts.json`. Regenerate with `npm run generate:tool-contracts`.
+
+Total public tools: **165**
+
+## Profile counts
+
+- `minimal`: 5
+- `core`: 78
+- `2d`: 121
+- `3d`: 107
+- `navigation`: 67
+- `ui`: 81
+- `runtime`: 30
+- `full`: 165
+
+## Tools
+
+| Tool | Domain | Profiles | Description |
+| --- | --- | --- | --- |
+| `animation.add_track` | animation | 2d, 3d, ui, full | Add and configure a non-audio Animation track with Undo/Redo support. |
+| `animation.configure` | animation | 2d, 3d, ui, full | Set Animation length, loop mode or step with Undo/Redo support. |
+| `animation.create` | animation | 2d, 3d, ui, full | Create an Animation in an AnimationMixer library with Undo/Redo support. |
+| `animation.insert_key` | animation | 2d, 3d, ui, full | Insert a new Animation key at an unused timestamp with Undo/Redo support. |
+| `animation.inspect` | animation | 2d, 3d, ui, full | Inspect an Animation resource, including tracks and bounded key values. |
+| `animation.list` | animation | 2d, 3d, ui, full | List AnimationMixer libraries and animation names. |
+| `animation.remove` | animation | 2d, 3d, ui, full | Remove an Animation from an AnimationMixer library with Undo/Redo support. |
+| `animation.remove_key` | animation | 2d, 3d, ui, full | Remove an Animation key by track/key index with Undo/Redo support. |
+| `camera2d.configure` | 2d | 2d, full | Atomically configure persistent Camera2D zoom, limits, smoothing and drag settings. |
+| `camera2d.inspect` | 2d | 2d, full | Inspect persistent Camera2D zoom, limits, smoothing and drag settings. |
+| `camera3d.configure` | 3d | 3d, full | Atomically configure Camera3D projection, clipping, offsets and cull mask. |
+| `camera3d.inspect` | 3d | 3d, full | Inspect persistent Camera3D projection and clipping settings. |
+| `checkpoint.create` | recovery | core, 2d, 3d, navigation, ui, full | checkpoint.create: declared on-disk file recovery with retained snapshots. |
+| `checkpoint.inspect` | recovery | core, 2d, 3d, navigation, ui, full | checkpoint.inspect: declared on-disk file recovery with retained snapshots. |
+| `checkpoint.list` | recovery | core, 2d, 3d, navigation, ui, full | checkpoint.list: declared on-disk file recovery with retained snapshots. |
+| `checkpoint.restore` | recovery | core, 2d, 3d, navigation, ui, full | checkpoint.restore: declared on-disk file recovery with retained snapshots. |
+| `collision2d.inspect` | 2d | 2d, full | Inspect CollisionShape2D and supported shape dimensions. |
+| `collision2d.set_shape` | 2d | 2d, full | Create, replace or clear RectangleShape2D, CircleShape2D or CapsuleShape2D with Undo/Redo. |
+| `collision3d.inspect` | 3d | 3d, full | Inspect CollisionShape3D and supported primitive dimensions. |
+| `collision3d.set_shape` | 3d | 3d, full | Assign or clear an embedded primitive Shape3D with Undo/Redo. |
+| `debug.errors` | debug | runtime, full | Read bounded native runtime diagnostics from this session. Messages are untrusted project content. |
+| `debug.output` | debug | runtime, full | Read bounded native runtime diagnostics from this session. Messages are untrusted project content. |
+| `debug.performance` | debug | runtime, full | Sample runtime FPS and object/node counts. |
+| `debug.warnings` | debug | runtime, full | Read bounded native runtime diagnostics from this session. Messages are untrusted project content. |
+| `editor.change_scene` | editor | core, 2d, 3d, navigation, ui, full | Switch active scene tab to a given scene path. |
+| `editor.close_scene` | recovery | core, 2d, 3d, navigation, ui, full | editor.close_scene: declared on-disk file recovery with retained snapshots. |
+| `editor.get_active_scene` | editor | core, 2d, 3d, navigation, ui, full | Get information about the currently active edited scene tab. |
+| `editor.get_filesystem` | editor | core, 2d, 3d, navigation, ui, full | Get filesystem directory and file structure under res://. |
+| `editor.get_open_scenes` | editor | core, 2d, 3d, navigation, ui, full | Get list of open scene paths in the editor. |
+| `editor.get_selected_nodes` | editor | core, 2d, 3d, navigation, ui, full | Get currently selected nodes in the editor scene tree. |
+| `editor.redo` | editor | core, 2d, 3d, navigation, ui, full | Trigger Redo in the Godot editor. |
+| `editor.scan_filesystem` | editor | core, 2d, 3d, navigation, ui, full | Request a rescan of the project filesystem in the editor. |
+| `editor.select_node` | editor | core, 2d, 3d, navigation, ui, full | Select a node in the editor scene tree. |
+| `editor.undo` | editor | core, 2d, 3d, navigation, ui, full | Trigger Undo in the Godot editor. |
+| `godot.capabilities` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | Return the bounded compatibility and capability manifest reported by the authenticated Godot addon. |
+| `godot.tools` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers. |
+| `light3d.configure` | 3d | 3d, full | Atomically configure common and subtype-specific Light3D settings. |
+| `light3d.inspect` | 3d | 3d, full | Inspect DirectionalLight3D, OmniLight3D or SpotLight3D settings. |
+| `material3d.clear` | materials | 3d, full | Clear the selected MeshInstance3D material override with Undo/Redo. |
+| `material3d.configure_standard` | materials | 3d, full | Copy-on-write configure the selected StandardMaterial3D. |
+| `material3d.inspect` | materials | 3d, full | Inspect a MeshInstance3D material override or surface override. |
+| `material3d.set_standard` | materials | 3d, full | Create and assign a fresh embedded StandardMaterial3D. |
+| `mesh3d.inspect` | 3d | 3d, full | Inspect MeshInstance3D mesh type, primitive dimensions and surfaces. |
+| `mesh3d.set_primitive` | 3d | 3d, full | Assign or clear an embedded primitive Mesh on MeshInstance3D with Undo/Redo. |
+| `navigation.agent.configure` | navigation | 2d, 3d, navigation, full | Atomically configure persistent NavigationAgent2D/3D pathfinding and avoidance settings. |
+| `navigation.agent.inspect` | navigation | 2d, 3d, navigation, full | Inspect persistent NavigationAgent2D/3D pathfinding and avoidance settings without advancing a path. |
+| `navigation.mesh.bake` | navigation | 2d, 3d, navigation, full | Copy-on-write parse and synchronously bake navigation geometry from an explicit scene source root. |
+| `navigation.mesh.clear` | navigation | 2d, 3d, navigation, full | Copy-on-write clear baked navigation geometry while preserving resource configuration and 2D outlines. |
+| `navigation.mesh.configure` | navigation | 2d, 3d, navigation, full | Copy-on-write configure NavigationPolygon/NavigationMesh bake settings. |
+| `navigation.mesh.inspect` | navigation | 2d, 3d, navigation, full | Inspect the NavigationPolygon or NavigationMesh assigned to a navigation region. |
+| `navigation.mesh.set` | navigation | 2d, 3d, navigation, full | Create and assign a fresh embedded NavigationPolygon or NavigationMesh matching the region dimension. |
+| `navigation.mesh.set_outlines` | navigation | 2d, 3d, navigation, full | Atomically replace bounded NavigationPolygon outlines for a 2D navigation region. |
+| `navigation.region.configure` | navigation | 2d, 3d, navigation, full | Atomically configure common NavigationRegion2D/3D properties with Undo/Redo. |
+| `navigation.region.inspect` | navigation | 2d, 3d, navigation, full | Inspect a NavigationRegion2D or NavigationRegion3D and its navigation resource. |
+| `node.create` | node | core, 2d, 3d, navigation, ui, full | Create a new node as a child of a parent node in the edited scene with Undo/Redo support. |
+| `node.delete` | node | core, 2d, 3d, navigation, ui, full | Delete a node from the edited scene with Undo/Redo support. |
+| `node.duplicate` | node | core, 2d, 3d, navigation, ui, full | Duplicate a node in the edited scene with Undo/Redo support. |
+| `node.get_properties` | node | core, 2d, 3d, navigation, ui, full | Get multiple or all exported property values of a node. |
+| `node.get_property` | node | core, 2d, 3d, navigation, ui, full | Get a single property value of a node. |
+| `node.inspect` | node | core, 2d, 3d, navigation, ui, full | Inspect full details of a node (class, script, groups, children count, exported properties). |
+| `node.list_children` | node | core, 2d, 3d, navigation, ui, full | List immediate children of a node. |
+| `node.move` | node | core, 2d, 3d, navigation, ui, full | Move a node to a specific child index with Undo/Redo support. |
+| `node.rename` | node | core, 2d, 3d, navigation, ui, full | Rename a node in the edited scene with Undo/Redo support. |
+| `node.reparent` | node | core, 2d, 3d, navigation, ui, full | Reparent a node to a new parent in the edited scene with Undo/Redo support. |
+| `node.set_property` | node | core, 2d, 3d, navigation, ui, full | Set a property value on a node with Undo/Redo support. |
+| `node2d.inspect_transform` | 2d | 2d, full | Inspect local and global Node2D transform values. |
+| `node2d.set_transform` | 2d | 2d, full | Atomically set local Node2D position, rotation, scale or skew with Undo/Redo. |
+| `node3d.inspect_transform` | 3d | 3d, full | Inspect local and global Node3D transforms. |
+| `node3d.set_transform` | 3d | 3d, full | Atomically set local Node3D position, rotation or stable scale with Undo/Redo. |
+| `object.call` | object | core, full | Call an allowed method on an object. |
+| `object.get` | object | core, full | Get a property value on an object. |
+| `object.get_class` | object | core, full | Get the Godot class name of an object (node, resource, or instance id). |
+| `object.get_method_list` | object | core, full | Get the list of methods for an object. |
+| `object.get_property_list` | object | core, full | Get the list of properties for an object. |
+| `object.get_signal_list` | object | core, full | Get the list of signals for an object. |
+| `object.set` | object | core, full | Set a property value on an object. |
+| `parallax2d.configure` | 2d | 2d, full | Atomically configure Parallax2D repeat, scrolling, viewport following and limits. |
+| `parallax2d.inspect` | 2d | 2d, full | Inspect Parallax2D repeat, scrolling, viewport following and limits. |
+| `permissions.disable` | security | core, 2d, 3d, navigation, ui, runtime, full | Change a session-only permission. |
+| `permissions.enable` | security | core, 2d, 3d, navigation, ui, runtime, full | Change a session-only permission. |
+| `permissions.set` | security | core, 2d, 3d, navigation, ui, runtime, full | Change a permission for this MCP session only. |
+| `permissions.status` | security | core, 2d, 3d, navigation, ui, runtime, full | Session-only tool permissions. These do not sandbox project code or add missing capabilities. |
+| `project.info` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | Inspect the active Godot project through the connected editor addon. |
+| `project.input.add_action` | project | core, 2d, 3d, full | Add an action to the InputMap and persist in project settings. |
+| `project.input.list` | project | core, 2d, 3d, full | List all input actions and their assigned events from InputMap. |
+| `project.input.remove_action` | project | core, 2d, 3d, full | Remove an action from the InputMap and project settings. |
+| `project.run` | runtime | runtime, full | Structured Godot project.run operation on the current runtime session. |
+| `project.run_scene` | runtime | runtime, full | Structured Godot project.run_scene operation on the current runtime session. |
+| `project.settings.get` | project | core, 2d, 3d, full | Get a project setting value from project.godot. |
+| `project.settings.set` | project | core, 2d, 3d, full | Set a project setting value and optionally save to project.godot. |
+| `project.stop` | runtime | runtime, full | Structured Godot project.stop operation on the current runtime session. |
+| `resource.create` | resource | core, 2d, 3d, navigation, ui, full | Create and save a new resource of a specified type. |
+| `resource.duplicate` | resource | core, 2d, 3d, navigation, ui, full | Duplicate a resource to a new path. |
+| `resource.inspect` | resource | core, 2d, 3d, navigation, ui, full | Inspect properties of a resource file. |
+| `resource.load` | resource | core, 2d, 3d, navigation, ui, full | Load a resource file and inspect its exported properties. |
+| `resource.save` | resource | core, 2d, 3d, navigation, ui, full | Save a loaded resource. |
+| `resource.set_property` | resource | core, 2d, 3d, navigation, ui, full | Set a property on a resource file and save it. |
+| `risk.preview` | security | core, 2d, 3d, navigation, ui, runtime, full | Read the risk, targets and required permissions of an operation without executing it. |
+| `runtime.get_property` | runtime | runtime, full | Structured Godot runtime.get_property operation on the current runtime session. |
+| `runtime.inspect_node` | runtime | runtime, full | Structured Godot runtime.inspect_node operation on the current runtime session. |
+| `runtime.pause` | runtime | runtime, full | Structured Godot runtime.pause operation on the current runtime session. |
+| `runtime.restart` | runtime | runtime, full | Structured Godot runtime.restart operation on the current runtime session. |
+| `runtime.resume` | runtime | runtime, full | Structured Godot runtime.resume operation on the current runtime session. |
+| `runtime.scene_tree` | runtime | runtime, full | Structured Godot runtime.scene_tree operation on the current runtime session. |
+| `runtime.status` | runtime | runtime, full | Structured Godot runtime.status operation on the current runtime session. |
+| `runtime.stop` | runtime | runtime, full | Structured Godot runtime.stop operation on the current runtime session. |
+| `scene.create` | scene | core, 2d, 3d, navigation, ui, full | Create a new scene with specified root node type and optional path. |
+| `scene.get_root` | scene | core, 2d, 3d, navigation, ui, full | Get the root node info of the currently edited scene. |
+| `scene.get_tree` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | Return the active edited scene tree with node names, classes, paths, and scripts. |
+| `scene.instantiate` | scene | core, 2d, 3d, navigation, ui, full | Instantiate a scene as a child of a node in the edited scene with Undo/Redo support. |
+| `scene.open` | scene | core, 2d, 3d, navigation, ui, full | Open a scene file in the Godot editor. |
+| `scene.reload` | scene | core, 2d, 3d, navigation, ui, full | Reload a scene from disk in the editor. |
+| `scene.save` | scene | core, 2d, 3d, navigation, ui, full | Save the currently edited scene. |
+| `scene.save_as` | scene | core, 2d, 3d, navigation, ui, full | Save the currently edited scene to a new path. |
+| `script.attach` | script | core, 2d, 3d, ui, full | Attach a script to a node in the edited scene with Undo/Redo support. |
+| `script.create` | script | core, 2d, 3d, ui, full | Create a new script file with an optional template. |
+| `script.detach` | script | core, 2d, 3d, ui, full | Detach a script from a node in the edited scene with Undo/Redo support. |
+| `script.inspect` | script | core, 2d, 3d, ui, full | Inspect structure of a script (methods, properties, signals, base type). |
+| `script.validate` | script | core, 2d, 3d, ui, full | Validate GDScript syntax and compile checks without saving. |
+| `session.manifest` | session | core, 2d, 3d, navigation, ui, runtime, full | Read the persistent manifest of the current session, including screenshots and visual checkpoints. |
+| `session.status` | session | minimal, core, 2d, 3d, navigation, ui, runtime, full | Return the active Godot MCP session and editor/runtime connection state. |
+| `shader3d.inspect` | materials | 3d, full | Inspect spatial ShaderMaterial code, uniforms and current parameters. |
+| `shader3d.set_code` | materials | 3d, full | Create or copy-on-write update an embedded spatial ShaderMaterial. |
+| `shader3d.set_parameter` | materials | 3d, full | Copy-on-write set a declared spatial shader uniform using canonical Variant encoding. |
+| `signal.connect` | signal | core, 2d, 3d, ui, full | Connect a signal from a source node to a target node method with Undo/Redo support. |
+| `signal.connections` | signal | core, 2d, 3d, ui, full | List active signal connections on a node. |
+| `signal.disconnect` | signal | core, 2d, 3d, ui, full | Disconnect a signal between two nodes with Undo/Redo support. |
+| `signal.list` | signal | core, 2d, 3d, ui, full | List all signals declared on a node and its script. |
+| `sprite2d.configure` | 2d | 2d, full | Atomically configure Sprite2D frame grid, region, flip, centering and offset. |
+| `sprite2d.inspect` | 2d | 2d, full | Inspect Sprite2D texture, frame, region, flip and offset state. |
+| `sprite2d.set_texture` | 2d | 2d, full | Assign or clear a project Texture2D on Sprite2D with Undo/Redo. |
+| `tilemap.clear` | tilemap | 2d, full | Clear a TileMapLayer with bounded exact Undo/Redo. |
+| `tilemap.erase_cells` | tilemap | 2d, full | Atomically erase up to 4096 TileMapLayer cells with exact Undo/Redo. |
+| `tilemap.get_cells` | tilemap | 2d, full | Inspect selected TileMapLayer cells or enumerate all used cells up to 4096. |
+| `tilemap.inspect` | tilemap | 2d, full | Inspect a modern Godot TileMapLayer without enumerating every cell. |
+| `tilemap.local_to_map` | tilemap | 2d, full | Convert a TileMapLayer local pixel position to map coordinate. |
+| `tilemap.map_to_local` | tilemap | 2d, full | Convert a TileMapLayer map coordinate to local pixel position. |
+| `tilemap.set_cell` | tilemap | 2d, full | Set one TileMapLayer cell with Undo/Redo support. |
+| `tilemap.set_cells` | tilemap | 2d, full | Atomically set up to 4096 TileMapLayer cells in one Undo/Redo action. |
+| `tileset.add_atlas_source` | tileset | 2d, full | Add a project texture as a TileSetAtlasSource with Undo/Redo support. |
+| `tileset.create_atlas_tiles` | tileset | 2d, full | Create up to 4096 base atlas tiles atomically with Undo/Redo. |
+| `tileset.ensure_for_layer` | tileset | 2d, full | Ensure a TileMapLayer has an embedded TileSet without replacing an existing one. |
+| `tileset.inspect` | tileset | 2d, full | Inspect the TileSet assigned to a TileMapLayer and summarize its sources. |
+| `tileset.inspect_atlas_source` | tileset | 2d, full | Inspect one TileSetAtlasSource and its base atlas tiles. |
+| `tileset.remove_source` | tileset | 2d, full | Remove an unused TileSet source conservatively with Undo/Redo support. |
+| `transaction.begin` | recovery | core, 2d, 3d, navigation, ui, full | transaction.begin: declared on-disk file recovery with retained snapshots. |
+| `transaction.commit` | recovery | core, 2d, 3d, navigation, ui, full | Publish and validate staged files; failed validation triggers exact-byte compensation. |
+| `transaction.delete_file` | recovery | core, 2d, 3d, navigation, ui, full | transaction.delete_file: declared on-disk file recovery with retained snapshots. |
+| `transaction.preview` | recovery | core, 2d, 3d, navigation, ui, full | transaction.preview: declared on-disk file recovery with retained snapshots. |
+| `transaction.recover` | recovery | core, 2d, 3d, navigation, ui, full | transaction.recover: declared on-disk file recovery with retained snapshots. |
+| `transaction.rollback` | recovery | core, 2d, 3d, navigation, ui, full | transaction.rollback: declared on-disk file recovery with retained snapshots. |
+| `transaction.status` | recovery | core, 2d, 3d, navigation, ui, full | transaction.status: declared on-disk file recovery with retained snapshots. |
+| `transaction.write_file` | recovery | core, 2d, 3d, navigation, ui, full | transaction.write_file: declared on-disk file recovery with retained snapshots. |
+| `ui.inspect_layout` | ui | 2d, ui, full | Inspect Control anchors, offsets, rectangles, size flags, focus neighbors and parent Container ownership. |
+| `ui.set_anchors` | ui | 2d, ui, full | Set all four Control anchors atomically with Undo/Redo support. |
+| `ui.set_focus_neighbor` | ui | 2d, ui, full | Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support. |
+| `ui.set_layout_preset` | ui | 2d, ui, full | Apply a Godot Control layout preset with Undo/Redo support. |
+| `ui.set_offsets` | ui | 2d, ui, full | Set one or more Control offsets and report whether a parent Container manages layout. |
+| `ui.set_size_flags` | ui | 2d, ui, full | Set Control horizontal/vertical size flags and optional stretch ratio with Undo/Redo support. |
+| `visual.capture_game` | visual | runtime, full | Capture the running game viewport to a persistent PNG; requires an owned graphical runtime. |
+| `visual.capture_viewport_2d` | visual | 2d, ui, full | Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor. |
+| `visual.capture_viewport_3d` | visual | 3d, full | Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG. |
+| `workflow.diff_since` | workflow | runtime, full | Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project. |
+| `workflow.run_check` | workflow | runtime, full | Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict. |
+| `workflow.snapshot` | workflow | runtime, full | Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture. |

@@ -7,6 +7,7 @@ describe('tool catalog', () => {
     expect(new Set(names).size).toBe(names.length);
     expect(TOOL_PROFILES).toEqual(['minimal','core','2d','3d','navigation','ui','runtime','full']);
     expect(TOOL_CATALOG.every(entry => entry.profiles.includes('full'))).toBe(true);
+    expect(TOOL_CATALOG.every(entry => entry.description.trim().length > 0)).toBe(true);
     expect(Object.fromEntries(TOOL_PROFILES.map(profile => [profile, toolNamesForProfile(profile).length]))).toEqual({
       minimal:5, core:78, '2d':121, '3d':107, navigation:67, ui:81, runtime:30, full:165
     });
@@ -31,6 +32,8 @@ describe('tool catalog', () => {
     expect(runtime.has('debug.errors')).toBe(true);
     expect(runtime.has('workflow.run_check')).toBe(true);
     expect(runtime.has('scene.save')).toBe(false);
+
+    expect(TOOL_CATALOG.find(entry => entry.name === 'godot.tools')?.description).toBe('Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers.');
 
     expect(toolNamesForProfile('minimal')).toEqual([
       'godot.capabilities','godot.tools','project.info','scene.get_tree','session.status'
