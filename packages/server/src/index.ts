@@ -10,6 +10,7 @@ import { createSession } from './session/session.js';
 import { SessionStore } from './session/session-store.js';
 import { VisualTools } from './tools/visual-tools.js';
 import {RuntimeService} from './runtime/runtime-service.js';
+import {HeadlessProcessManager} from './headless/headless-process-manager.js';
 import {RecoveryService} from './recovery/recovery-service.js';
 import {ToolPolicy} from './security/tool-policy.js';
 import {readProjectConfig} from './project/project-config.js';
@@ -72,12 +73,14 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   runtime=new RuntimeService(session,sessions,bridge);
   const visual = new VisualTools(session,sessions,bridge,runtime);
   const recovery=new RecoveryService(session,sessions,bridge);
-  const policy=new ToolPolicy(session,sessions,recovery);
+  const godotBin=config.godotBin ?? (process.env.GODOT_BIN?.trim() || null);
+  const headless=new HeadlessProcessManager(session,sessions,{godotBin});
+  const policy=new ToolPolicy(session,sessions,recovery,()=>headless.status());
   const descriptor = new BridgeDescriptorStore(projectRoot);
   const { port } = await bridge.start();
   await descriptor.write({ port, token, sessionId: session.id });
 
-  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, recovery, policy, toolProfile }), {
+  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, recovery, headless, policy, toolProfile }), {
     onerror: error => console.error(`[godot-mcp] MCP error: ${error.message}`)
   });
 
@@ -85,7 +88,7 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const shutdown = async (exitCode = 0) => {
     if (shuttingDown) return;
     shuttingDown = true;
-    const steps = [() => policy.close(),() => recovery.close(),() => runtime.close(),() => visual.close(),() => policy.flush(),() => bridge.stop(),
+    const steps = [async() => { await Promise.all([policy.close(),headless.close()]); },() => recovery.close(),() => runtime.close(),() => visual.close(),() => policy.flush(),() => bridge.stop(),
       () => sessions.finish(session.id,new Date().toISOString()),() => sessions.flush(),
       () => descriptor.remove(),() => stdio.close()];
     for (const step of steps) {

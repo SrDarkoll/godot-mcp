@@ -63,7 +63,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     const server = new McpServer({ name: 'godot-mcp', version: SERVER_VERSION }, { requestState: { verify: approvalState.verify } });
     const recovery = ctx.recovery ?? new RecoveryService(ctx.session, ctx.sessions, ctx.bridge);
     const headless = ctx.headless ?? new HeadlessProcessManager(ctx.session, ctx.sessions, { godotBin: null });
-    const policy = ctx.policy ?? new ToolPolicy(ctx.session, ctx.sessions, recovery);
+    const policy = ctx.policy ?? new ToolPolicy(ctx.session, ctx.sessions, recovery, () => headless.status());
     const runtime = ctx.runtime ?? new RuntimeService(ctx.session, ctx.sessions, ctx.bridge);
     const visual = ctx.visual ?? new VisualTools(ctx.session, ctx.sessions, ctx.bridge, runtime);
     const workflow = new WorkflowService(ctx.session, ctx.sessions, ctx.bridge, runtime, visual);

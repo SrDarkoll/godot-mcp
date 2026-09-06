@@ -1,10 +1,12 @@
 @tool
 extends EditorPlugin
 
-var _bridge: Node
-var _debugger
+var _bridge: Node = null
+var _debugger = null
 
 func _enter_tree() -> void:
+    if OS.get_environment("GODOT_MCP_HEADLESS_CHILD") == "1":
+        return
     _debugger = preload("res://addons/godot_mcp/debugger/editor_debugger.gd").new()
     _debugger.configure(EditorInterface)
     add_debugger_plugin(_debugger)

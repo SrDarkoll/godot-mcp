@@ -221,3 +221,108 @@ it('sources static risk classifications from generated contract metadata', async
     expect(source).not.toMatch(/const CONTROLS = new Set\(\[/);
     expect(source).not.toMatch(/const NORMAL_MUTATIONS = new Set\(\[/);
 });
+
+it('classifies headless process operations with only project and Godot process permissions', async () => {
+    const { policy } = await setup();
+    const status = await policy.assess('headless.status', {});
+    const output = await policy.assess('headless.get_output', {});
+    expect(status.risk).toBe('normal');
+    expect(status.permissions).toEqual([]);
+    expect(output.risk).toBe('normal');
+    expect(output.permissions).toEqual([]);
+
+    const cases: Array<[string, Record<string, unknown>]> = [
+        ['headless.validate_project', {}],
+        ['headless.import', {}],
+        ['headless.run', {}],
+        ['headless.run_scene', { scene_path: 'res://main.tscn' }],
+        ['headless.run_tests', { script_path: 'res://tests/smoke.gd' }],
+        ['headless.stop', {}]
+    ];
+    for (const [name, args] of cases) {
+        const assessment = await policy.assess(name, args);
+        expect(assessment.risk, name).toBe('risky');
+        expect(assessment.permissions, name).toEqual(['filesystem.project', 'process.godot']);
+        expect(assessment.permissions, name).not.toContain('network.local');
+        expect(assessment.permissions, name).not.toContain('process.shell');
+        expect(assessment.permissions, name).not.toContain('process.external');
+        expect(assessment.permissions, name).not.toContain('editor.modify');
+        expect(assessment.permissions, name).not.toContain('runtime.modify');
+        if (['headless.validate_project','headless.import','headless.run'].includes(name))
+            expect(assessment.targets, name).toContain('res://project.godot');
+        if (name === 'headless.run_scene') expect(assessment.targets).toContain('res://main.tscn');
+        if (name === 'headless.run_tests') expect(assessment.targets).toContain('res://tests/smoke.gd');
+    }
+});
+
+it('blocks headless process execution before the operation when a required process permission is disabled', async () => {
+    for (const permission of ['process.godot', 'filesystem.project'] as const) {
+        const { policy } = await setup();
+        await policy.setPermission(permission, false);
+        const operation = vi.fn(async () => ({ started: true }));
+        const assessment = await policy.assess('headless.run', {});
+        expect(assessment.risk, permission).toBe('blocked');
+        expect(assessment.permissions, permission).toEqual(['filesystem.project', 'process.godot']);
+        await expect(policy.execute('headless.run', {}, operation)).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
+        expect(operation, permission).not.toHaveBeenCalled();
+    }
+});
+
+it('keeps headless observation and stop available during an open transaction while blocking new starts', async () => {
+    const { recovery, policy } = await setup();
+    await recovery.begin({ label: 'headless-barrier', paths: ['res://staged.txt'], atomic: true });
+
+    const observe = vi.fn(async () => ({ ok: true }));
+    await expect(policy.execute('headless.status', {}, observe)).resolves.toEqual({ ok: true });
+    await expect(policy.execute('headless.get_output', {}, observe)).resolves.toEqual({ ok: true });
+
+    for (const [name, args] of [
+        ['headless.validate_project', {}],
+        ['headless.import', {}],
+        ['headless.run', {}],
+        ['headless.run_scene', { scene_path: 'res://main.tscn' }],
+        ['headless.run_tests', { script_path: 'res://tests/smoke.gd' }]
+    ] as Array<[string, Record<string, unknown>]>) {
+        await expect(policy.execute(name, args, async () => ({ started: true }))).rejects.toMatchObject({ code: 'TRANSACTION_ACTIVE' });
+    }
+
+    const stopAssessment = await policy.assess('headless.stop', {});
+    await expect(policy.execute('headless.stop', {}, async () => ({ stopped: true }), { approvedFingerprint: stopAssessment.fingerprint }))
+        .resolves.toEqual({ stopped: true });
+});
+
+
+it('keeps headless observation and stop available during recovery barriers while start operations fail closed', async () => {
+    const { recovery, policy } = await setup();
+    const barrierError = Object.assign(new Error('recovery required'), { code: 'RECOVERY_REQUIRED' });
+    const barrier = vi.spyOn(recovery, 'requireNoBarrier').mockRejectedValue(barrierError);
+
+    await expect(policy.execute('headless.status', {}, async () => ({ ok: true }))).resolves.toEqual({ ok: true });
+    await expect(policy.execute('headless.get_output', {}, async () => ({ ok: true }))).resolves.toEqual({ ok: true });
+    const stopAssessment = await policy.assess('headless.stop', {});
+    await expect(policy.execute('headless.stop', {}, async () => ({ stopped: true }), { approvedFingerprint: stopAssessment.fingerprint }))
+        .resolves.toEqual({ stopped: true });
+    expect(barrier).not.toHaveBeenCalled();
+
+    await expect(policy.execute('headless.run', {}, async () => ({ started: true }))).rejects.toMatchObject({ code: 'RECOVERY_REQUIRED' });
+    expect(barrier).toHaveBeenCalledTimes(1);
+});
+
+it('binds headless.stop approval fingerprints and targets to the active execution id', async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), 'godot-mcp-policy-headless-stop-'));
+    const session = createSession(root);
+    const sessions = new SessionStore(root);
+    await sessions.create(session);
+    const recovery = new RecoveryService(session, sessions, { connected: false, rpc: { call: async () => ({}) } });
+    let executionId = '11111111-1111-4111-8111-111111111111';
+    const policy = new ToolPolicy(session, sessions, recovery, async () => ({ active: { executionId } }));
+
+    const first = await policy.assess('headless.stop', {});
+    expect(first.risk).toBe('risky');
+    expect(first.targets).toContain(`execution:${executionId}`);
+
+    executionId = '22222222-2222-4222-8222-222222222222';
+    const second = await policy.assess('headless.stop', {});
+    expect(second.targets).toContain(`execution:${executionId}`);
+    expect(second.fingerprint).not.toBe(first.fingerprint);
+});

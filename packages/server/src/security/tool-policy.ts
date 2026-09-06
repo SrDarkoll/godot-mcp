@@ -14,7 +14,9 @@ const CONTROLS = new Set(CONTROL_TOOL_NAMES);
 const NORMAL_MUTATIONS = new Set(NORMAL_MUTATION_TOOL_NAMES);
 const LOCAL = (name: string): boolean => name === 'godot.tools' || /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
+    ['headless.status','headless.get_output'].includes(name) ||
     /^debug\.(output|errors|warnings)$/.test(name);
+const HEADLESS_PROCESS_TOOLS = new Set(['headless.validate_project','headless.import','headless.run','headless.run_scene','headless.run_tests','headless.stop']);
 const NON_FILESYSTEM_PATH_TOOLS = new Set(['animation.add_track']);
 const filesystemPathKeys = (name: string): string[] => {
     const keys = NON_FILESYSTEM_PATH_TOOLS.has(name)
@@ -22,6 +24,7 @@ const filesystemPathKeys = (name: string): string[] => {
         : ['path', 'resource_path', 'script_path', 'source_path', 'target_path'];
     if (['tileset.add_atlas_source','sprite2d.set_texture'].includes(name)) return [...keys, 'texture_path'];
     if (['material3d.set_standard','material3d.configure_standard'].includes(name)) return [...keys, 'albedo_texture_path', 'normal_texture_path'];
+    if (name === 'headless.run_scene') return [...keys, 'scene_path'];
     return keys;
 };
 function canonical(value: unknown): string {
@@ -45,16 +48,18 @@ export interface ToolAuthorization {
     approvedFingerprint?: string;
 }
 export type ApprovalAuditOutcome = 'approval_required' | 'approval_approved' | 'approval_declined' | 'approval_stale' | 'approval_replayed';
+export type HeadlessStatusResolver = () => Promise<{ active: { executionId: string } | null }>;
 export class ToolPolicy {
     private closing = false;
     private readonly flags = { ...DEFAULT_PERMISSIONS };
     private readonly gate = new OperationGate();
     private auditQueue: Promise<void> = Promise.resolve();
-    constructor(private readonly session: Session, private readonly sessions: SessionStore, private readonly recovery: RecoveryService) { }
+    constructor(private readonly session: Session, private readonly sessions: SessionStore, private readonly recovery: RecoveryService, private readonly headlessStatus?: HeadlessStatusResolver) { }
     permissions(): Record<Permission, boolean> {
         return { ...this.flags };
     }
     private required(name: string, args: Record<string, unknown>): Permission[] {
+        if (HEADLESS_PROCESS_TOOLS.has(name)) return ['filesystem.project', 'process.godot'];
         const permissions: Permission[] = [];
         if (!LOCAL(name) && !CONTROLS.has(name))
             permissions.push('network.local', 'filesystem.project');
@@ -154,10 +159,17 @@ export class ToolPolicy {
         }
         if (Array.isArray(args.paths))
             targets.push(...(args.paths as string[]));
-        if (['project.settings.set', 'project.input.add_action', 'project.input.remove_action'].includes(name)) {
+        if (['project.settings.set', 'project.input.add_action', 'project.input.remove_action',
+            'headless.validate_project', 'headless.import', 'headless.run'].includes(name)) {
             targets.push('res://project.godot');
         }
         let extra: unknown = null;
+        let headlessExecutionId: string | null = null;
+        if (name === 'headless.stop') {
+            const status = await this.headlessStatus?.();
+            headlessExecutionId = status?.active?.executionId ?? null;
+            extra = { executionId: headlessExecutionId };
+        }
         if (['editor.close_scene', 'scene.reload', 'scene.save'].includes(name)) {
             const state = await this.recovery.editorState();
             extra = state;
@@ -191,7 +203,8 @@ export class ToolPolicy {
         }
         let risk: Risk = READS.has(name) || NORMAL_MUTATIONS.has(name) || CONTROLS.has(name) ? 'normal' : 'risky';
         if (['object.call', 'scene.reload', 'editor.close_scene', 'editor.undo', 'editor.redo', 'project.settings.set',
-            'transaction.commit', 'transaction.recover', 'checkpoint.restore'].includes(name)) {
+            'transaction.commit', 'transaction.recover', 'checkpoint.restore',
+            'headless.validate_project', 'headless.import', 'headless.run', 'headless.run_scene', 'headless.run_tests', 'headless.stop'].includes(name)) {
             risk = 'risky';
         }
         if (['script.create', 'resource.create', 'resource.save', 'scene.create', 'scene.save_as'].includes(name) &&
@@ -228,6 +241,8 @@ export class ToolPolicy {
             displayTargets.push(`transaction:${args.transaction_id}`);
         if (name === 'checkpoint.restore' && typeof args.checkpoint_id === 'string')
             displayTargets.push(`checkpoint:${args.checkpoint_id}`);
+        if (name === 'headless.stop' && headlessExecutionId)
+            displayTargets.push(`execution:${headlessExecutionId}`);
         if (!displayTargets.length && /^(node|object|scene|editor)\./.test(name))
             displayTargets.push('editor:active_scene');
         return {

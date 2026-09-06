@@ -44,3 +44,14 @@ it('removes the ephemeral bridge descriptor when MCP stdin closes', async () => 
     await rm(root, { recursive: true, force: true });
   }
 }, 8_000);
+
+it('closes the owned headless manager before finishing the session manifest', async () => {
+  const source = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8');
+  const close = source.indexOf('headless.close()');
+  const finish = source.indexOf('sessions.finish(');
+  expect(close).toBeGreaterThanOrEqual(0);
+  expect(finish).toBeGreaterThan(close);
+  expect(source).toContain('new HeadlessProcessManager(session,sessions,{godotBin})');
+  expect(source).toContain('Promise.all([policy.close(),headless.close()])');
+  expect(source).toContain('GODOT_BIN');
+});
