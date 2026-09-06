@@ -1,17 +1,17 @@
 # Tool contracts and generated artifacts
 
-Phase 7 introduces a code-generation boundary for **static public MCP tool contracts**. It deliberately does not generate execution logic.
+Phase 7 introduced a code-generation boundary for **static public MCP tool contracts**. Phase 7.1 strengthens the canonical pilot bindings so their real TypeScript schema and handler references are paired and registered from one typed binding definition. Execution logic is still not generated.
 
 ## Source of truth
 
-Edit only `scripts/tool-contracts.json` for static contract metadata. Every public tool has exactly one entry with:
+`scripts/tool-contracts.json` uses manifest `schemaVersion: 2`. Every one of the 165 public tools has exactly one entry with:
 
 - `name`, `domain`, `profiles`, `description`;
-- `risk.baseline`, `risk.tags`, `risk.dynamic`;
+- `risk.tags` and `risk.dynamic`;
 - `binding.status` and a concrete registration `source`;
-- `schemaRef` and `handlerRef` for bindings already migrated to canonical verification.
+- `schemaRef` and `handlerRef` for bindings migrated to canonical verification.
 
-The manifest contains exactly 165 tools, matching the Phase 6 full surface.
+`risk.baseline` is not authored in the manifest. It is derived by the generator: tools with at least one static risk tag are `normal`; tools with no static risk tags are `risky`. This reproduces the Phase 7 v2 classifications exactly while removing a duplicate truth.
 
 ## Generated artifacts
 
@@ -23,7 +23,7 @@ packages/server/src/security/tool-policy.generated.ts
 docs/generated/tool-inventory.md
 ```
 
-The catalog powers profiles and `godot.tools`. The policy artifact provides the static read/control/normal-mutation name sets consumed by `ToolPolicy`. The inventory is a deterministic human-readable view of profiles, risk metadata, binding migration status, source, and description.
+The catalog powers profiles, `godot.tools`, and the internal canonical/legacy registration gate. The policy artifact provides the static read/control/normal-mutation name sets consumed by `ToolPolicy`. The inventory is a deterministic human-readable view of profiles, derived risk metadata, binding migration status, source, and description.
 
 All three outputs are committed and must not be edited directly.
 
@@ -31,7 +31,7 @@ All three outputs are committed and must not be edited directly.
 
 The generator owns only static classification metadata. `ToolPolicy` still owns argument-dependent behavior such as overwrite elevation, permission enablement, approval fingerprints, reflective-method blocking, filesystem fingerprints, and transaction barriers.
 
-The generated static memberships intentionally reproduce the exact Phase 6 sets:
+The generated static memberships intentionally reproduce the exact Phase 6/7 sets:
 
 ```text
 READS             67
@@ -39,29 +39,46 @@ CONTROLS           9
 NORMAL_MUTATIONS  86
 ```
 
-Changing those memberships is therefore a reviewed contract change rather than an incidental edit in policy code.
+`risk.dynamic` remains explicit contract metadata (`none`, `conditional`, or `blockable`); it does not generate dynamic policy logic.
 
-## Binding migration
+## Typed canonical binding migration
 
-Every entry records the TypeScript source that declares the tool. Phase 7 verifies concrete schema/handler references for 21 representative tools:
+The existing 21 representative pilots remain canonical:
 
 - `godot.tools`;
 - 10 `navigation.*` tools;
 - 10 Node3D/Mesh3D/Camera3D/Collision3D/Light3D tools.
 
-These use `binding.status = canonical`. The generator requires the source file and declared `schemaRef`/`handlerRef` tokens to exist. Remaining entries are `legacy` and retain only the concrete registration source until migrated incrementally.
+Each pilot source defines the actual binding with real TypeScript references:
 
-Pilot registrars keep their actual Zod schemas and handlers hand-authored but omit duplicated descriptions; `ToolRegistry` injects the canonical description. A legacy registrar may still supply a description, but a mismatch fails server construction.
+```ts
+const navigationMeshBakeTool = defineCanonicalToolBinding('navigation.mesh.bake', {
+  inputSchema: NavigationMeshBakeSchema,
+  handler: bakeNavigationMesh
+});
+```
+
+The generator locates that exact definition and compares its identifier-valued `inputSchema` and `handler` fields with the manifest `schemaRef` and `handlerRef`. Merely mentioning the expected tokens elsewhere in the file is insufficient.
+
+Registration then consumes that same object:
+
+```ts
+bindCanonicalTool(registrar, navigationMeshBakeTool, rpc);
+```
+
+The tool name, schema object, and handler reference therefore travel together. `ToolRegistry` rejects a canonical tool that reaches `registerTool` without the private binder marker, and removes that marker before forwarding the public MCP config. Existing `assertFullyObserved()` still detects a canonical definition that was never registered.
+
+The remaining 144 entries are `legacy`; they retain their normal registration path and concrete source until migrated incrementally.
 
 ## Drift gate
 
-`npm run check:tool-contracts` validates the manifest/bindings, renders all expected artifacts in memory, and byte-compares them with the committed files. Check mode never writes.
+`npm run check:tool-contracts` validates manifest metadata, exact canonical bindings, source locations, and generated artifacts without writing. It byte-compares the rendered outputs with the committed files.
 
-Root `npm run build` begins with this check, so stale catalog, static-policy metadata, or inventory fails before TypeScript compilation.
+Root `npm run build` begins with this check, so stale catalog, static-policy metadata, inventory, malformed risk metadata, or a canonical schema/handler mismatch fails before normal TypeScript compilation.
 
 ## What codegen does not own
 
-Phase 7 does **not** generate:
+Phase 7.1 still does **not** generate:
 
 ```text
 GDScript handlers
@@ -77,11 +94,12 @@ Those remain explicit specialized code.
 
 ## Contributor workflow
 
-1. Update the canonical contract in `scripts/tool-contracts.json`.
-2. Keep schema/handler implementation in the normal registrar/tool files.
-3. For a migrated binding, record exact `source`, `schemaRef`, and `handlerRef`.
-4. Run `npm run generate:tool-contracts`.
-5. Review all generated diffs.
-6. Run `npm run check:tool-contracts` and normal build/tests.
+1. Update static metadata in `scripts/tool-contracts.json`.
+2. Keep schema and handler implementations as normal TypeScript references.
+3. For a canonical tool, define exactly one `defineCanonicalToolBinding(name, { inputSchema, handler })` in the declared source and register that object with `bindCanonicalTool`.
+4. Keep the manifest `schemaRef`/`handlerRef` aligned with those exact identifiers.
+5. Run `npm run generate:tool-contracts`.
+6. Review all generated diffs.
+7. Run `npm run check:tool-contracts` and normal build/tests.
 
-Runtime still fails fast on uncataloged declarations, missing declarations, or registrar description drift.
+Runtime fails fast on uncataloged declarations, missing declarations, registrar description drift, or a canonical tool that bypasses the typed binder.

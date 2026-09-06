@@ -49,7 +49,7 @@ No general TypeScript AST/codegen layer is introduced.
 
 ## Risk baseline derivation
 
-`risk.baseline` is removed from `scripts/tool-contracts.json`. The generator derives it deterministically:
+The manifest format is bumped to internal `schemaVersion: 2`. `risk.baseline` is removed from `scripts/tool-contracts.json`, and the generator derives it deterministically:
 
 - one or more static risk tags -> `normal`
 - no static risk tags -> `risky`
