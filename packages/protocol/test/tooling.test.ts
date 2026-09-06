@@ -31,7 +31,10 @@ describe('tooling contracts', () => {
     expect(entry.active).toBe(true);
     expect(ToolDiscoveryResultSchema.parse({
       activeProfile:'3d', selectedProfile:'3d',
-      profiles:[{id:'minimal',toolCount:5},{id:'3d',toolCount:107},{id:'full',toolCount:165}],
+      profiles:[
+        {id:'minimal',toolCount:5},{id:'core',toolCount:78},{id:'2d',toolCount:121},{id:'3d',toolCount:107},
+        {id:'navigation',toolCount:67},{id:'ui',toolCount:81},{id:'runtime',toolCount:30},{id:'full',toolCount:165}
+      ],
       total:1, offset:0, limit:25, nextOffset:null, tools:[entry]
     }).tools).toHaveLength(1);
   });

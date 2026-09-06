@@ -120,6 +120,14 @@ describe('profiled tool registrar', () => {
         expect(registry.observedNames()).toEqual(['node.create', 'session.status']);
     });
 
+
+    it('fails fast when the static catalog has declarations that were never observed', () => {
+        const registry = new ToolRegistry('minimal');
+        const registrar = registry.registeringRegistrar({ registerTool: vi.fn(() => ({}) as never) } as never);
+        registrar.registerTool('session.status', { description: 'Session state', inputSchema: {} } as never, vi.fn() as never);
+        expect(() => registry.assertFullyObserved()).toThrow('Undeclared MCP tool catalog entries:');
+    });
+
     it('rejects uncataloged declarations before they reach MCP', () => {
         const registerTool = vi.fn(() => ({}) as never);
         const registry = new ToolRegistry('full');
