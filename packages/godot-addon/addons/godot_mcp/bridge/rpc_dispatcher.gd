@@ -18,6 +18,7 @@ var _tilemap_handlers
 var _tileset_handlers
 var _power2d_handlers
 var _power3d_handlers
+var _material3d_handlers
 var _runtime
 var _recovery
 
@@ -41,6 +42,7 @@ func _init(editor_interface, runtime = null) -> void:
     _tileset_handlers = preload("res://addons/godot_mcp/bridge/handlers/tileset_handlers.gd").new(editor_interface)
     _power2d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power2d_handlers.gd").new(editor_interface)
     _power3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power3d_handlers.gd").new(editor_interface)
+    _material3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/material3d_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -171,6 +173,20 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _power3d_handlers.inspect_light3d(params)
         "light3d.configure":
             result = _power3d_handlers.configure_light3d(params)
+        "material3d.inspect":
+            result = _material3d_handlers.inspect_material3d(params)
+        "material3d.set_standard":
+            result = _material3d_handlers.set_standard_material3d(params)
+        "material3d.configure_standard":
+            result = _material3d_handlers.configure_standard_material3d(params)
+        "material3d.clear":
+            result = _material3d_handlers.clear_material3d(params)
+        "shader3d.inspect":
+            result = _material3d_handlers.inspect_shader3d(params)
+        "shader3d.set_code":
+            result = _material3d_handlers.set_shader3d_code(params)
+        "shader3d.set_parameter":
+            result = _material3d_handlers.set_shader3d_parameter(params)
         "ui.inspect_layout":
             result = _ui_handlers.inspect_layout(params)
         "ui.set_layout_preset":
