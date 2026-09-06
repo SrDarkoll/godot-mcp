@@ -38,6 +38,11 @@ const NORMAL_MUTATIONS = new Set([
 const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
     /^debug\.(output|errors|warnings)$/.test(name);
+const NON_FILESYSTEM_PATH_TOOLS = new Set(['animation.add_track']);
+const filesystemPathKeys = (name: string): string[] =>
+    NON_FILESYSTEM_PATH_TOOLS.has(name)
+        ? ['resource_path', 'script_path', 'source_path', 'target_path']
+        : ['path', 'resource_path', 'script_path', 'source_path', 'target_path'];
 function canonical(value: unknown): string {
     if (Array.isArray(value))
         return `[${value.map(canonical).join(',')}]`;
@@ -89,7 +94,7 @@ export class ToolPolicy {
             else
                 permissions.push('editor.modify', 'filesystem.project');
         }
-        if (['path', 'resource_path', 'script_path', 'source_path', 'target_path'].some(key => typeof args[key] === 'string') ||
+        if (filesystemPathKeys(name).some(key => typeof args[key] === 'string') ||
             Array.isArray(args.paths)) {
             permissions.push('filesystem.project');
         }
@@ -162,7 +167,7 @@ export class ToolPolicy {
         }
         const targets: string[] = [];
         const fingerprints: Record<string, string | null> = {};
-        for (const key of ['path', 'resource_path', 'script_path', 'source_path', 'target_path']) {
+        for (const key of filesystemPathKeys(name)) {
             if (typeof args[key] === 'string' && args[key])
                 targets.push(args[key] as string);
         }
@@ -236,6 +241,8 @@ export class ToolPolicy {
             displayTargets.push(`permission:${args.permission}`);
         if (name === 'project.settings.set' && typeof args.setting === 'string')
             displayTargets.push(`setting:${args.setting}`);
+        if (name === 'animation.add_track' && typeof args.path === 'string')
+            displayTargets.push(`track_path:${args.path}`);
         if ((name.startsWith('transaction.') && typeof args.transaction_id === 'string'))
             displayTargets.push(`transaction:${args.transaction_id}`);
         if (name === 'checkpoint.restore' && typeof args.checkpoint_id === 'string')

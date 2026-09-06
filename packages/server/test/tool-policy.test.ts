@@ -128,3 +128,19 @@ it('classifies workflow tools with only the permissions of their composed operat
     expect(diff.risk).toBe('normal');
     expect(diff.permissions).toEqual(expect.arrayContaining(['network.local','filesystem.project']));
 });
+
+it('does not treat Animation track paths as project filesystem paths', async () => {
+    const { policy } = await setup();
+    const args = {
+        player_path: '/Main/AnimationPlayer',
+        animation: 'fade',
+        type: 'value',
+        path: 'HUD:modulate:a'
+    };
+    const assessment = await policy.assess('animation.add_track', args);
+    expect(assessment.risk).toBe('normal');
+    expect(assessment.targets).toContain('track_path:HUD:modulate:a');
+    expect(assessment.targets).not.toContain('HUD:modulate:a');
+    expect(await policy.execute('animation.add_track', args, async () => ({ track_index: 0 })))
+        .toEqual({ track_index: 0 });
+});
