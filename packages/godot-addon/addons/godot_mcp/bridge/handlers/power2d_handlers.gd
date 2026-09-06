@@ -53,8 +53,10 @@ func _undo_redo() -> EditorUndoRedoManager:
 func _vector2(value, label: String):
 	if typeof(value) != TYPE_DICTIONARY:
 		return _error("INVALID_ARGUMENT", "%s must be an object with x/y" % label)
-	var x := float(value.get("x", NAN))
-	var y := float(value.get("y", NAN))
+	if not value.has("x") or not value.has("y"):
+		return _error("INVALID_ARGUMENT", "%s must contain x/y" % label)
+	var x := float(value.x)
+	var y := float(value.y)
 	if not is_finite(x) or not is_finite(y):
 		return _error("INVALID_ARGUMENT", "%s.x/y must be finite" % label)
 	return Vector2(x, y)
@@ -62,10 +64,13 @@ func _vector2(value, label: String):
 func _rect2(value, label: String):
 	if typeof(value) != TYPE_DICTIONARY:
 		return _error("INVALID_ARGUMENT", "%s must be an object" % label)
-	var x := float(value.get("x", NAN))
-	var y := float(value.get("y", NAN))
-	var width := float(value.get("width", NAN))
-	var height := float(value.get("height", NAN))
+	for key in ["x", "y", "width", "height"]:
+		if not value.has(key):
+			return _error("INVALID_ARGUMENT", "%s must contain x/y/width/height" % label)
+	var x := float(value.x)
+	var y := float(value.y)
+	var width := float(value.width)
+	var height := float(value.height)
 	if not is_finite(x) or not is_finite(y) or not is_finite(width) or not is_finite(height) or width < 0.0 or height < 0.0:
 		return _error("INVALID_ARGUMENT", "%s must contain finite x/y and nonnegative width/height" % label)
 	return Rect2(x, y, width, height)
@@ -515,15 +520,19 @@ func _create_shape(value):
 			rectangle.size = size
 			return rectangle
 		"circle":
-			var radius := float(value.get("radius", NAN))
+			if not value.has("radius"):
+				return _error("INVALID_ARGUMENT", "Circle radius is required")
+			var radius := float(value.radius)
 			if not is_finite(radius) or radius <= 0.0:
 				return _error("INVALID_ARGUMENT", "Circle radius must be positive")
 			var circle := CircleShape2D.new()
 			circle.radius = radius
 			return circle
 		"capsule":
-			var radius := float(value.get("radius", NAN))
-			var height := float(value.get("height", NAN))
+			if not value.has("radius") or not value.has("height"):
+				return _error("INVALID_ARGUMENT", "Capsule radius and height are required")
+			var radius := float(value.radius)
+			var height := float(value.height)
 			if not is_finite(radius) or not is_finite(height) or radius <= 0.0 or height <= 0.0:
 				return _error("INVALID_ARGUMENT", "Capsule radius and height must be positive")
 			if height < radius * 2.0:
@@ -548,7 +557,9 @@ func set_collision2d_shape(params: Dictionary) -> Dictionary:
 	var created = _create_shape(params.shape)
 	if typeof(created) == TYPE_DICTIONARY:
 		return created
-	var next_shape: Shape2D = created as Shape2D if created != null else null
+	var next_shape: Shape2D = null
+	if created != null:
+		next_shape = created as Shape2D
 	var previous := collider.shape
 	var undo_redo := _undo_redo()
 	if undo_redo:
