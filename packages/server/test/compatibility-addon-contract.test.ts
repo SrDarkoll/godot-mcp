@@ -14,6 +14,9 @@ describe('compatibility addon contract', () => {
     expect(source).toContain('ClassDB.class_exists');
     expect(source).toContain('ClassDB.class_has_method');
     expect(source).toContain('ClassDB.class_get_property_list');
+    expect(source).toContain('ClassDB.can_instantiate');
+    expect(source).toContain('ClassDB.instantiate');
+    expect(source).toContain('PROPERTY_USAGE_STORAGE');
     expect(source).toContain('_editor_interface.has_method');
     expect(source).toContain('DisplayServer.get_name() == "headless"');
     expect(source).not.toContain('func probe(params');
@@ -31,7 +34,8 @@ describe('compatibility addon contract', () => {
       'visual.viewport2d.capture', 'visual.viewport3d.capture'
     ]) expect(core).toContain(id);
     expect(quirks).toContain('navigation.agent3d.keep_y_velocity.hidden_with_3d_avoidance');
-    expect(quirks).toContain('minor >= 6');
+    expect(quirks).toContain('_probe.property_has_storage_with_overrides');
+    expect(quirks).not.toContain('minor >= 6');
   });
 
   it('routes visual admission and legacy viewport flags through the same capability manifest', () => {

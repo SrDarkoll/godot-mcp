@@ -25,7 +25,7 @@ Unknown or absent features fail conservatively. The server does not infer suppor
 
 ## Known quirks
 
-Quirks are centralized in `bridge/compatibility/quirk_registry.gd`. The initial known quirk records Godot 4.6+ `NavigationAgent3D.keep_y_velocity` property-usage behavior while `use_3d_avoidance` is enabled.
+Quirks are centralized in `bridge/compatibility/quirk_registry.gd`. The initial known quirk records the observed `NavigationAgent3D.keep_y_velocity` property-usage behavior while `use_3d_avoidance` is enabled. The quirk is detected from the live class behavior instead of inferred for future minor versions.
 
 The quirk registry is intentionally narrow. It is not a replacement for `ClassDB`, and handlers should prefer direct feature capability checks whenever possible.
 

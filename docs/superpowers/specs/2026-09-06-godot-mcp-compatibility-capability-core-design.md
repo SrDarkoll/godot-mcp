@@ -108,7 +108,7 @@ The manifest is bounded to known capability IDs and has schema version `1`:
   "quirks": {
     "navigation.agent3d.keep_y_velocity.hidden_with_3d_avoidance": {
       "active": true,
-      "reason": "Known Godot 4.6+ persistence/property-usage behavior"
+      "reason": "Observed persistence/property-usage behavior in this Godot build"
     }
   }
 }
@@ -126,9 +126,9 @@ Capability entries contain only `status` and optional `reason`. Quirk entries co
 - bake 3D requires `NavigationMesh`, `NavigationServer3D.parse_source_geometry_data`, and `NavigationServer3D.bake_from_source_geometry_data`;
 - agents require their respective classes;
 - `navigation.agent3d.keep_y_velocity` is unsupported if the property does not exist;
-- if it exists, it is `restricted` because it is authorable only in 2D avoidance mode.
+- if it exists and the live property-usage probe detects the hidden-storage quirk, it is `restricted`; otherwise it is `supported`.
 
-For Godot 4.6+ the known property-usage/persistence quirk is marked active. For earlier or future unknown minors the restriction remains conservative because the property has no useful semantics under 3D avoidance; the quirk flag only records the specifically known persistence behavior.
+The property-usage/persistence quirk is marked active only when a live `NavigationAgent3D` probe shows that `keep_y_velocity` loses `PROPERTY_USAGE_STORAGE` after enabling `use_3d_avoidance`. If a future Godot minor changes that behavior, the quirk becomes inactive without a version-specific code change.
 
 ### Visual
 

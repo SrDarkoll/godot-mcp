@@ -15,7 +15,7 @@ var _manifest: Dictionary
 func _init(editor_interface) -> void:
     _probe = preload("res://addons/godot_mcp/bridge/compatibility/feature_probe.gd").new(editor_interface)
     var engine := _engine_version()
-    _quirks = preload("res://addons/godot_mcp/bridge/compatibility/quirk_registry.gd").new(engine)
+    _quirks = preload("res://addons/godot_mcp/bridge/compatibility/quirk_registry.gd").new(engine, _probe)
     _manifest = {
         "schemaVersion": 1,
         "engine": engine,
@@ -59,7 +59,9 @@ func _bake_capability(dimension: String) -> Dictionary:
 func _keep_y_velocity_capability() -> Dictionary:
     if not _probe.class_exists("NavigationAgent3D") or not _probe.class_has_property("NavigationAgent3D", "keep_y_velocity"):
         return _entry(STATUS_UNSUPPORTED, "NavigationAgent3D.keep_y_velocity is unavailable in this Godot build")
-    return _entry(STATUS_RESTRICTED, "Only authorable while use_3d_avoidance is false")
+    if _quirks.active(KEEP_Y_QUIRK):
+        return _entry(STATUS_RESTRICTED, "Only authorable while use_3d_avoidance is false in this Godot build")
+    return _entry(STATUS_SUPPORTED)
 
 func _viewport_capability(is_3d: bool) -> Dictionary:
     if _probe.is_headless():

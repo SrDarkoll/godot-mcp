@@ -469,7 +469,7 @@ func _commit_agent_change(action_name: String, target_node: Node, before: Dictio
 
 func _agent_result(root: Node, agent) -> Dictionary:
 	var result := _agent_snapshot(agent)
-	if agent is NavigationAgent3D and (agent.use_3d_avoidance or _compatibility.status(KEEP_Y_CAPABILITY) == "unsupported"):
+	if agent is NavigationAgent3D and (_compatibility.status(KEEP_Y_CAPABILITY) == "unsupported" or (agent.use_3d_avoidance and _compatibility.quirk_active(KEEP_Y_QUIRK))):
 		result.erase("keep_y_velocity")
 	result.node_path = _logical_path(root, agent)
 	result.type = agent.get_class()
@@ -508,8 +508,8 @@ func configure_agent(params: Dictionary) -> Dictionary:
 		effective_use_3d_avoidance = bool(params.get("use_3d_avoidance", agent.use_3d_avoidance))
 		if params.has("keep_y_velocity") and _compatibility.status(KEEP_Y_CAPABILITY) == "unsupported":
 			return _error("CAPABILITY_UNAVAILABLE", _compatibility.reason(KEEP_Y_CAPABILITY))
-		if effective_use_3d_avoidance and params.has("keep_y_velocity"):
-			return _error("INVALID_ARGUMENT", "keep_y_velocity is unavailable when use_3d_avoidance is true because Godot does not persist it in that mode")
+		if effective_use_3d_avoidance and params.has("keep_y_velocity") and _compatibility.quirk_active(KEEP_Y_QUIRK):
+			return _error("INVALID_ARGUMENT", "keep_y_velocity is unavailable when use_3d_avoidance is true because this Godot build does not persist it in that mode")
 	var before := _agent_snapshot(agent)
 	var after := before.duplicate(true)
 	for key in before.keys():

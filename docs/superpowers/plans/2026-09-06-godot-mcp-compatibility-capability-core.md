@@ -56,7 +56,7 @@
 - `supports(capability_id: String) -> bool`
 - `quirk_active(quirk_id: String) -> bool`
 
-- [ ] Write source-contract tests requiring `ClassDB.class_exists`, `ClassDB.class_has_method`, `ClassDB.class_get_property_list`, editor method probing, headless probing, and one shared core instance in dispatcher.
+- [ ] Write source-contract tests requiring `ClassDB.class_exists`, `ClassDB.class_has_method`, `ClassDB.class_get_property_list`, safe class instantiation/property-storage probing, editor method probing, headless probing, and one shared core instance in dispatcher.
 - [ ] Run the contract test and confirm it fails.
 - [ ] Implement `FeatureProbe`, `QuirkRegistry`, and `CompatibilityCore` with the fixed capability IDs from the spec.
 - [ ] Wire one core instance into the dispatcher.
