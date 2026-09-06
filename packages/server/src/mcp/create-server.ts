@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { SERVER_VERSION } from '@godot-mcp/protocol';
+import { SERVER_VERSION, type ToolProfile } from '@godot-mcp/protocol';
 import { createRequestStateCodec, McpServer } from '@modelcontextprotocol/server';
 import type { BridgeServer } from '../bridge/bridge-server.js';
 import { RecoveryService } from '../recovery/recovery-service.js';
@@ -7,6 +7,7 @@ import { RuntimeService } from '../runtime/runtime-service.js';
 import { approvalStateBinding } from '../security/approval-state.js';
 import { ToolPolicy } from '../security/tool-policy.js';
 import { guardedRegistrar } from '../security/tool-registrar.js';
+import { ToolRegistry } from '../tooling/tool-registry.js';
 import type { SessionStore } from '../session/session-store.js';
 import type { Session } from '../session/session.js';
 import { registerDebugTools } from '../tools/debug-tools.js';
@@ -42,6 +43,7 @@ export interface McpServerContext {
     runtime?: RuntimeService;
     recovery?: RecoveryService;
     policy?: ToolPolicy;
+    toolProfile?: ToolProfile;
 }
 export function createMcpServer(ctx: McpServerContext): McpServer {
     const approvalState = createRequestStateCodec<{
@@ -60,7 +62,8 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     const runtime = ctx.runtime ?? new RuntimeService(ctx.session, ctx.sessions, ctx.bridge);
     const visual = ctx.visual ?? new VisualTools(ctx.session, ctx.sessions, ctx.bridge, runtime);
     const workflow = new WorkflowService(ctx.session, ctx.sessions, ctx.bridge, runtime, visual);
-    const registrar = guardedRegistrar(server, policy, approvalState);
+    const registry = new ToolRegistry(ctx.toolProfile ?? 'full');
+    const registrar = registry.registeringRegistrar(guardedRegistrar(server, policy, approvalState));
     const rpc = ctx.bridge.rpc;
     registerRuntimeTools(registrar, runtime);
     registerDebugTools(registrar, runtime);
