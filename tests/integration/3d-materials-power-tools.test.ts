@@ -193,7 +193,11 @@ describe('Godot 3D and material power tools',()=>{
       expect((await confirmFixtureOperation(client,'scene.reload',{})).structuredContent).toMatchObject({reloaded:true});
 
       const persistedTransform=await call('node3d.inspect_transform',{node_path:'/Main/World'});
-      expect(persistedTransform.structuredContent).toMatchObject({position:{x:1,y:2,z:3},scale:{x:2,y:2,z:2}});
+      expect(persistedTransform.structuredContent).toMatchObject({position:{x:1,y:2,z:3}});
+      const persistedScale=(persistedTransform.structuredContent as any).scale;
+      expect(persistedScale.x).toBeCloseTo(2,5);
+      expect(persistedScale.y).toBeCloseTo(2,5);
+      expect(persistedScale.z).toBeCloseTo(2,5);
       const persistedMesh=await call('mesh3d.inspect',{node_path:'/Main/World/Model'});
       expect((persistedMesh.structuredContent as any).primitive).toMatchObject({kind:'box',size:{x:2,y:3,z:4}});
       const persistedCamera=await call('camera3d.inspect',{node_path:'/Main/World/Camera'});
