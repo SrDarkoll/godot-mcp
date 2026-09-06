@@ -1,5 +1,6 @@
 import type { ToolCatalogEntry, ToolDiscoveryParams, ToolDiscoveryResult, ToolProfile } from '@godot-mcp/protocol';
 import type { ToolRegistrar } from '../security/tool-registrar.js';
+import { CANONICAL_TOOL_BINDING_MARKER } from './canonical-tool-binding.js';
 import { TOOL_CATALOG, TOOL_PROFILES, toolCatalogEntry, toolNamesForProfile } from './tool-catalog.js';
 
 export class ToolRegistry {
@@ -13,8 +14,13 @@ export class ToolRegistry {
       if(!entry) throw new Error(`Uncataloged MCP tool: ${name}`);
       const declaredDescription=typeof config?.description==='string'?config.description.trim():'';
       if(declaredDescription&&declaredDescription!==entry.description) throw new Error(`MCP tool description drift: ${name}`);
+      const canonicalMarker=config?.[CANONICAL_TOOL_BINDING_MARKER];
+      if(entry.bindingStatus==='canonical'&&canonicalMarker!==name) throw new Error(`Canonical MCP tool must use bindCanonicalTool: ${name}`);
+      if(entry.bindingStatus==='legacy'&&canonicalMarker!==undefined) throw new Error(`Legacy MCP tool cannot use bindCanonicalTool: ${name}`);
+      const forwardedConfig={...config,description:entry.description};
+      delete forwardedConfig[CANONICAL_TOOL_BINDING_MARKER];
       this.observed.add(name);
-      if(entry.profiles.includes(this.activeProfile)) return base.registerTool(name,{...config,description:entry.description},handler);
+      if(entry.profiles.includes(this.activeProfile)) return base.registerTool(name,forwardedConfig,handler);
       return undefined as never;
     };
     return {registerTool:register as ToolRegistrar['registerTool']};

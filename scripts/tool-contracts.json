@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "tools": [
     {
       "name": "animation.add_track",
@@ -12,7 +12,6 @@
       ],
       "description": "Add and configure a non-audio Animation track with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -34,7 +33,6 @@
       ],
       "description": "Set Animation length, loop mode or step with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -56,7 +54,6 @@
       ],
       "description": "Create an Animation in an AnimationMixer library with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -78,7 +75,6 @@
       ],
       "description": "Insert a new Animation key at an unused timestamp with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -100,7 +96,6 @@
       ],
       "description": "Inspect an Animation resource, including tracks and bounded key values.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -122,7 +117,6 @@
       ],
       "description": "List AnimationMixer libraries and animation names.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -144,7 +138,6 @@
       ],
       "description": "Remove an Animation from an AnimationMixer library with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -166,7 +159,6 @@
       ],
       "description": "Remove an Animation key by track/key index with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -186,7 +178,6 @@
       ],
       "description": "Atomically configure persistent Camera2D zoom, limits, smoothing and drag settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -206,7 +197,6 @@
       ],
       "description": "Inspect persistent Camera2D zoom, limits, smoothing and drag settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -226,7 +216,6 @@
       ],
       "description": "Atomically configure Camera3D projection, clipping, offsets and cull mask.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -248,7 +237,6 @@
       ],
       "description": "Inspect persistent Camera3D projection and clipping settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -274,7 +262,6 @@
       ],
       "description": "checkpoint.create: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -298,7 +285,6 @@
       ],
       "description": "checkpoint.inspect: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -322,7 +308,6 @@
       ],
       "description": "checkpoint.list: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -346,7 +331,6 @@
       ],
       "description": "checkpoint.restore: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -364,7 +348,6 @@
       ],
       "description": "Inspect CollisionShape2D and supported shape dimensions.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -384,7 +367,6 @@
       ],
       "description": "Create, replace or clear RectangleShape2D, CircleShape2D or CapsuleShape2D with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -404,7 +386,6 @@
       ],
       "description": "Inspect CollisionShape3D and supported primitive dimensions.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -426,7 +407,6 @@
       ],
       "description": "Assign or clear an embedded primitive Shape3D with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -448,7 +428,6 @@
       ],
       "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -469,7 +448,6 @@
       ],
       "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -490,7 +468,6 @@
       ],
       "description": "Sample runtime FPS and object/node counts.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -510,7 +487,6 @@
       ],
       "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -535,7 +511,6 @@
       ],
       "description": "Switch active scene tab to a given scene path.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -559,7 +534,6 @@
       ],
       "description": "editor.close_scene: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -581,7 +555,6 @@
       ],
       "description": "Get information about the currently active edited scene tab.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -605,7 +578,6 @@
       ],
       "description": "Get filesystem directory and file structure under res://.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -629,7 +601,6 @@
       ],
       "description": "Get list of open scene paths in the editor.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -653,7 +624,6 @@
       ],
       "description": "Get currently selected nodes in the editor scene tree.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -677,7 +647,6 @@
       ],
       "description": "Trigger Redo in the Godot editor.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -699,7 +668,6 @@
       ],
       "description": "Request a rescan of the project filesystem in the editor.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -723,7 +691,6 @@
       ],
       "description": "Select a node in the editor scene tree.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -747,7 +714,6 @@
       ],
       "description": "Trigger Undo in the Godot editor.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -771,7 +737,6 @@
       ],
       "description": "Return the bounded compatibility and capability manifest reported by the authenticated Godot addon.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -797,7 +762,6 @@
       ],
       "description": "Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -807,7 +771,7 @@
         "status": "canonical",
         "source": "packages/server/src/mcp/register-tooling-tools.ts",
         "schemaRef": "ToolDiscoveryParamsSchema",
-        "handlerRef": "registry.discover"
+        "handlerRef": "discoverGodotTools"
       }
     },
     {
@@ -819,7 +783,6 @@
       ],
       "description": "Atomically configure common and subtype-specific Light3D settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -841,7 +804,6 @@
       ],
       "description": "Inspect DirectionalLight3D, OmniLight3D or SpotLight3D settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -863,7 +825,6 @@
       ],
       "description": "Clear the selected MeshInstance3D material override with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -883,7 +844,6 @@
       ],
       "description": "Copy-on-write configure the selected StandardMaterial3D.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -903,7 +863,6 @@
       ],
       "description": "Inspect a MeshInstance3D material override or surface override.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -923,7 +882,6 @@
       ],
       "description": "Create and assign a fresh embedded StandardMaterial3D.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -943,7 +901,6 @@
       ],
       "description": "Inspect MeshInstance3D mesh type, primitive dimensions and surfaces.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -965,7 +922,6 @@
       ],
       "description": "Assign or clear an embedded primitive Mesh on MeshInstance3D with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -989,7 +945,6 @@
       ],
       "description": "Atomically configure persistent NavigationAgent2D/3D pathfinding and avoidance settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1013,7 +968,6 @@
       ],
       "description": "Inspect persistent NavigationAgent2D/3D pathfinding and avoidance settings without advancing a path.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1037,7 +991,6 @@
       ],
       "description": "Copy-on-write parse and synchronously bake navigation geometry from an explicit scene source root.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1061,7 +1014,6 @@
       ],
       "description": "Copy-on-write clear baked navigation geometry while preserving resource configuration and 2D outlines.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1085,7 +1037,6 @@
       ],
       "description": "Copy-on-write configure NavigationPolygon/NavigationMesh bake settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1109,7 +1060,6 @@
       ],
       "description": "Inspect the NavigationPolygon or NavigationMesh assigned to a navigation region.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1133,7 +1083,6 @@
       ],
       "description": "Create and assign a fresh embedded NavigationPolygon or NavigationMesh matching the region dimension.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1157,7 +1106,6 @@
       ],
       "description": "Atomically replace bounded NavigationPolygon outlines for a 2D navigation region.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1181,7 +1129,6 @@
       ],
       "description": "Atomically configure common NavigationRegion2D/3D properties with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1205,7 +1152,6 @@
       ],
       "description": "Inspect a NavigationRegion2D or NavigationRegion3D and its navigation resource.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1231,7 +1177,6 @@
       ],
       "description": "Create a new node as a child of a parent node in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1255,7 +1200,6 @@
       ],
       "description": "Delete a node from the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1279,7 +1223,6 @@
       ],
       "description": "Duplicate a node in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1303,7 +1246,6 @@
       ],
       "description": "Get multiple or all exported property values of a node.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1327,7 +1269,6 @@
       ],
       "description": "Get a single property value of a node.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1351,7 +1292,6 @@
       ],
       "description": "Inspect full details of a node (class, script, groups, children count, exported properties).",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1375,7 +1315,6 @@
       ],
       "description": "List immediate children of a node.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1399,7 +1338,6 @@
       ],
       "description": "Move a node to a specific child index with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1423,7 +1361,6 @@
       ],
       "description": "Rename a node in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1447,7 +1384,6 @@
       ],
       "description": "Reparent a node to a new parent in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1471,7 +1407,6 @@
       ],
       "description": "Set a property value on a node with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1491,7 +1426,6 @@
       ],
       "description": "Inspect local and global Node2D transform values.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1511,7 +1445,6 @@
       ],
       "description": "Atomically set local Node2D position, rotation, scale or skew with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1531,7 +1464,6 @@
       ],
       "description": "Inspect local and global Node3D transforms.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1553,7 +1485,6 @@
       ],
       "description": "Atomically set local Node3D position, rotation or stable scale with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1575,7 +1506,6 @@
       ],
       "description": "Call an allowed method on an object.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "blockable"
       },
@@ -1593,7 +1523,6 @@
       ],
       "description": "Get a property value on an object.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1613,7 +1542,6 @@
       ],
       "description": "Get the Godot class name of an object (node, resource, or instance id).",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1633,7 +1561,6 @@
       ],
       "description": "Get the list of methods for an object.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1653,7 +1580,6 @@
       ],
       "description": "Get the list of properties for an object.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1673,7 +1599,6 @@
       ],
       "description": "Get the list of signals for an object.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1693,7 +1618,6 @@
       ],
       "description": "Set a property value on an object.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1713,7 +1637,6 @@
       ],
       "description": "Atomically configure Parallax2D repeat, scrolling, viewport following and limits.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1733,7 +1656,6 @@
       ],
       "description": "Inspect Parallax2D repeat, scrolling, viewport following and limits.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1758,7 +1680,6 @@
       ],
       "description": "Change a session-only permission.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1783,7 +1704,6 @@
       ],
       "description": "Change a session-only permission.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1808,7 +1728,6 @@
       ],
       "description": "Change a permission for this MCP session only.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1833,7 +1752,6 @@
       ],
       "description": "Session-only tool permissions. These do not sandbox project code or add missing capabilities.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -1860,7 +1778,6 @@
       ],
       "description": "Inspect the active Godot project through the connected editor addon.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1882,7 +1799,6 @@
       ],
       "description": "Add an action to the InputMap and persist in project settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1904,7 +1820,6 @@
       ],
       "description": "List all input actions and their assigned events from InputMap.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -1926,7 +1841,6 @@
       ],
       "description": "Remove an action from the InputMap and project settings.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1946,7 +1860,6 @@
       ],
       "description": "Structured Godot project.run operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1966,7 +1879,6 @@
       ],
       "description": "Structured Godot project.run_scene operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -1988,7 +1900,6 @@
       ],
       "description": "Get a project setting value from project.godot.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2010,7 +1921,6 @@
       ],
       "description": "Set a project setting value and optionally save to project.godot.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -2028,7 +1938,6 @@
       ],
       "description": "Structured Godot project.stop operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "control"
         ],
@@ -2052,7 +1961,6 @@
       ],
       "description": "Create and save a new resource of a specified type.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2076,7 +1984,6 @@
       ],
       "description": "Duplicate a resource to a new path.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2100,7 +2007,6 @@
       ],
       "description": "Inspect properties of a resource file.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2124,7 +2030,6 @@
       ],
       "description": "Load a resource file and inspect its exported properties.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2148,7 +2053,6 @@
       ],
       "description": "Save a loaded resource.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2172,7 +2076,6 @@
       ],
       "description": "Set a property on a resource file and save it.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2197,7 +2100,6 @@
       ],
       "description": "Read the risk, targets and required permissions of an operation without executing it.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2217,7 +2119,6 @@
       ],
       "description": "Structured Godot runtime.get_property operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2237,7 +2138,6 @@
       ],
       "description": "Structured Godot runtime.inspect_node operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2257,7 +2157,6 @@
       ],
       "description": "Structured Godot runtime.pause operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2277,7 +2176,6 @@
       ],
       "description": "Structured Godot runtime.restart operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2297,7 +2195,6 @@
       ],
       "description": "Structured Godot runtime.resume operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2317,7 +2214,6 @@
       ],
       "description": "Structured Godot runtime.scene_tree operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2337,7 +2233,6 @@
       ],
       "description": "Structured Godot runtime.status operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -2358,7 +2253,6 @@
       ],
       "description": "Structured Godot runtime.stop operation on the current runtime session.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "control"
         ],
@@ -2382,7 +2276,6 @@
       ],
       "description": "Create a new scene with specified root node type and optional path.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2406,7 +2299,6 @@
       ],
       "description": "Get the root node info of the currently edited scene.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2432,7 +2324,6 @@
       ],
       "description": "Return the active edited scene tree with node names, classes, paths, and scripts.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2456,7 +2347,6 @@
       ],
       "description": "Instantiate a scene as a child of a node in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2480,7 +2370,6 @@
       ],
       "description": "Open a scene file in the Godot editor.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2504,7 +2393,6 @@
       ],
       "description": "Reload a scene from disk in the editor.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -2526,7 +2414,6 @@
       ],
       "description": "Save the currently edited scene.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2550,7 +2437,6 @@
       ],
       "description": "Save the currently edited scene to a new path.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "conditional"
       },
@@ -2571,7 +2457,6 @@
       ],
       "description": "Attach a script to a node in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2594,7 +2479,6 @@
       ],
       "description": "Create a new script file with an optional template.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2617,7 +2501,6 @@
       ],
       "description": "Detach a script from a node in the edited scene with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2640,7 +2523,6 @@
       ],
       "description": "Inspect structure of a script (methods, properties, signals, base type).",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2663,7 +2545,6 @@
       ],
       "description": "Validate GDScript syntax and compile checks without saving.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2688,7 +2569,6 @@
       ],
       "description": "Read the persistent manifest of the current session, including screenshots and visual checkpoints.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2714,7 +2594,6 @@
       ],
       "description": "Return the active Godot MCP session and editor/runtime connection state.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -2735,7 +2614,6 @@
       ],
       "description": "Inspect spatial ShaderMaterial code, uniforms and current parameters.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2755,7 +2633,6 @@
       ],
       "description": "Create or copy-on-write update an embedded spatial ShaderMaterial.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2775,7 +2652,6 @@
       ],
       "description": "Copy-on-write set a declared spatial shader uniform using canonical Variant encoding.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2798,7 +2674,6 @@
       ],
       "description": "Connect a signal from a source node to a target node method with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2821,7 +2696,6 @@
       ],
       "description": "List active signal connections on a node.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2844,7 +2718,6 @@
       ],
       "description": "Disconnect a signal between two nodes with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2867,7 +2740,6 @@
       ],
       "description": "List all signals declared on a node and its script.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2887,7 +2759,6 @@
       ],
       "description": "Atomically configure Sprite2D frame grid, region, flip, centering and offset.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2907,7 +2778,6 @@
       ],
       "description": "Inspect Sprite2D texture, frame, region, flip and offset state.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -2927,7 +2797,6 @@
       ],
       "description": "Assign or clear a project Texture2D on Sprite2D with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2947,7 +2816,6 @@
       ],
       "description": "Clear a TileMapLayer with bounded exact Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2967,7 +2835,6 @@
       ],
       "description": "Atomically erase up to 4096 TileMapLayer cells with exact Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -2987,7 +2854,6 @@
       ],
       "description": "Inspect selected TileMapLayer cells or enumerate all used cells up to 4096.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3007,7 +2873,6 @@
       ],
       "description": "Inspect a modern Godot TileMapLayer without enumerating every cell.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3027,7 +2892,6 @@
       ],
       "description": "Convert a TileMapLayer local pixel position to map coordinate.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3047,7 +2911,6 @@
       ],
       "description": "Convert a TileMapLayer map coordinate to local pixel position.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3067,7 +2930,6 @@
       ],
       "description": "Set one TileMapLayer cell with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3087,7 +2949,6 @@
       ],
       "description": "Atomically set up to 4096 TileMapLayer cells in one Undo/Redo action.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3107,7 +2968,6 @@
       ],
       "description": "Add a project texture as a TileSetAtlasSource with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3127,7 +2987,6 @@
       ],
       "description": "Create up to 4096 base atlas tiles atomically with Undo/Redo.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3147,7 +3006,6 @@
       ],
       "description": "Ensure a TileMapLayer has an embedded TileSet without replacing an existing one.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3167,7 +3025,6 @@
       ],
       "description": "Inspect the TileSet assigned to a TileMapLayer and summarize its sources.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3187,7 +3044,6 @@
       ],
       "description": "Inspect one TileSetAtlasSource and its base atlas tiles.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3207,7 +3063,6 @@
       ],
       "description": "Remove an unused TileSet source conservatively with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3231,7 +3086,6 @@
       ],
       "description": "transaction.begin: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3255,7 +3109,6 @@
       ],
       "description": "Publish and validate staged files; failed validation triggers exact-byte compensation.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -3277,7 +3130,6 @@
       ],
       "description": "transaction.delete_file: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3301,7 +3153,6 @@
       ],
       "description": "transaction.preview: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3325,7 +3176,6 @@
       ],
       "description": "transaction.recover: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "risky",
         "tags": [],
         "dynamic": "none"
       },
@@ -3347,7 +3197,6 @@
       ],
       "description": "transaction.rollback: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3371,7 +3220,6 @@
       ],
       "description": "transaction.status: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read",
           "control"
@@ -3396,7 +3244,6 @@
       ],
       "description": "transaction.write_file: declared on-disk file recovery with retained snapshots.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3417,7 +3264,6 @@
       ],
       "description": "Inspect Control anchors, offsets, rectangles, size flags, focus neighbors and parent Container ownership.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3438,7 +3284,6 @@
       ],
       "description": "Set all four Control anchors atomically with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3459,7 +3304,6 @@
       ],
       "description": "Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3480,7 +3324,6 @@
       ],
       "description": "Apply a Godot Control layout preset with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3501,7 +3344,6 @@
       ],
       "description": "Set one or more Control offsets and report whether a parent Container manages layout.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3522,7 +3364,6 @@
       ],
       "description": "Set Control horizontal/vertical size flags and optional stretch ratio with Undo/Redo support.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3542,7 +3383,6 @@
       ],
       "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3563,7 +3403,6 @@
       ],
       "description": "Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3583,7 +3422,6 @@
       ],
       "description": "Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3603,7 +3441,6 @@
       ],
       "description": "Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "read"
         ],
@@ -3623,7 +3460,6 @@
       ],
       "description": "Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],
@@ -3643,7 +3479,6 @@
       ],
       "description": "Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture.",
       "risk": {
-        "baseline": "normal",
         "tags": [
           "normal_mutation"
         ],

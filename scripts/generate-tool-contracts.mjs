@@ -8,7 +8,6 @@ const TOOL_DOMAINS = [
   'core','session','security','recovery','scene','node','object','resource','script','signal','project','editor',
   'runtime','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
 ];
-const RISK_BASELINES = ['normal','risky'];
 const RISK_TAGS = ['read','control','normal_mutation'];
 const RISK_DYNAMIC = ['none','conditional','blockable'];
 const BINDING_STATUSES = ['legacy','canonical'];
@@ -25,8 +24,8 @@ function nonempty(value) { return typeof value === 'string' ? value.trim() : '';
 
 export function validateContracts(raw, options = {}) {
   const expectedCount = options.expectedCount ?? DEFAULT_EXPECTED_COUNT;
-  if (!raw || typeof raw !== 'object' || raw.schemaVersion !== 1 || !Array.isArray(raw.tools)) {
-    fail('Invalid tool contract manifest: expected schemaVersion 1 with tools array');
+  if (!raw || typeof raw !== 'object' || raw.schemaVersion !== 2 || !Array.isArray(raw.tools)) {
+    fail('Invalid tool contract manifest: expected schemaVersion 2 with tools array');
   }
   if (raw.tools.length !== expectedCount) {
     fail(`Invalid tool contract count: expected ${expectedCount}, received ${raw.tools.length}`);
@@ -52,14 +51,14 @@ export function validateContracts(raw, options = {}) {
 
     const risk = item.risk;
     if (!risk || typeof risk !== 'object') fail(`Invalid tool risk: ${name}`);
-    const baseline = nonempty(risk.baseline);
+    if (Object.prototype.hasOwnProperty.call(risk, 'baseline')) fail(`Tool risk baseline is derived from tags and must not be declared: ${name}`);
     const dynamic = nonempty(risk.dynamic);
-    if (!RISK_BASELINES.includes(baseline)) fail(`Unknown tool risk baseline for ${name}: ${baseline}`);
     if (!RISK_DYNAMIC.includes(dynamic)) fail(`Unknown tool dynamic risk for ${name}: ${dynamic}`);
     const tags = asStringArray(risk.tags, 'risk tags', name);
     if (new Set(tags).size !== tags.length) fail(`Duplicate tool risk tag for ${name}`);
     for (const tag of tags) if (!RISK_TAGS.includes(tag)) fail(`Unknown tool risk tag for ${name}: ${tag}`);
     const orderedTags = RISK_TAGS.filter(tag => tags.includes(tag));
+    const baseline = orderedTags.length ? 'normal' : 'risky';
 
     const binding = item.binding;
     if (!binding || typeof binding !== 'object') fail(`Invalid tool binding: ${name}`);
@@ -88,9 +87,9 @@ function tsString(value) {
 export function renderToolCatalog(contracts) {
   const rows = contracts.map(contract => {
     const profiles = contract.profiles.map(tsString).join(',');
-    return `  Object.freeze({name:${tsString(contract.name)},domain:${tsString(contract.domain)},profiles:Object.freeze([${profiles}]) as readonly ToolProfile[],description:${tsString(contract.description)}}),`;
+    return `  Object.freeze({name:${tsString(contract.name)},domain:${tsString(contract.domain)},profiles:Object.freeze([${profiles}]) as readonly ToolProfile[],description:${tsString(contract.description)},bindingStatus:${tsString(contract.binding.status)}}),`;
   }).join('\n');
-  return `// GENERATED FILE. DO NOT EDIT.\n// Source: scripts/tool-contracts.json\n\nimport type { ToolDomain, ToolProfile } from '@godot-mcp/protocol';\n\nexport const TOOL_PROFILES = Object.freeze([${TOOL_PROFILES.map(tsString).join(',')}]) as readonly ToolProfile[];\n\nexport interface StaticToolCatalogEntry {\n  readonly name:string;\n  readonly domain:ToolDomain;\n  readonly profiles:readonly ToolProfile[];\n  readonly description:string;\n}\n\nexport const TOOL_CATALOG = Object.freeze([\n${rows}\n]) satisfies readonly StaticToolCatalogEntry[];\n\nconst byName = new Map<string,StaticToolCatalogEntry>(TOOL_CATALOG.map(entry=>[entry.name,entry]));\n\nexport function toolCatalogEntry(name:string):StaticToolCatalogEntry|undefined{return byName.get(name);}\nexport function toolNamesForProfile(profile:ToolProfile):string[]{return TOOL_CATALOG.filter(entry=>entry.profiles.includes(profile)).map(entry=>entry.name);}\n`;
+  return `// GENERATED FILE. DO NOT EDIT.\n// Source: scripts/tool-contracts.json\n\nimport type { ToolDomain, ToolProfile } from '@godot-mcp/protocol';\n\nexport const TOOL_PROFILES = Object.freeze([${TOOL_PROFILES.map(tsString).join(',')}]) as readonly ToolProfile[];\n\nexport interface StaticToolCatalogEntry {\n  readonly name:string;\n  readonly domain:ToolDomain;\n  readonly profiles:readonly ToolProfile[];\n  readonly description:string;\n  readonly bindingStatus:'canonical'|'legacy';\n}\n\nexport const TOOL_CATALOG = Object.freeze([\n${rows}\n]) satisfies readonly StaticToolCatalogEntry[];\n\nconst byName = new Map<string,StaticToolCatalogEntry>(TOOL_CATALOG.map(entry=>[entry.name,entry]));\n\nexport function toolCatalogEntry(name:string):StaticToolCatalogEntry|undefined{return byName.get(name);}\nexport function toolNamesForProfile(profile:ToolProfile):string[]{return TOOL_CATALOG.filter(entry=>entry.profiles.includes(profile)).map(entry=>entry.name);}\n`;
 }
 
 export function renderToolPolicy(contracts) {
@@ -126,6 +125,20 @@ function toFilesystemPath(value, fallback) {
   return path.resolve(String(value));
 }
 
+function escapedRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function exactCanonicalBinding(source, contract) {
+  const pattern = new RegExp(`defineCanonicalToolBinding\\(\\s*['\"]${escapedRegExp(contract.name)}['\"]\\s*,\\s*\\{([^}]*)\\}\\s*\\)`, 'g');
+  const matches = [...source.matchAll(pattern)];
+  if (matches.length !== 1) fail(`Canonical tool binding definition count for ${contract.name}: expected 1, received ${matches.length}`);
+  const body = matches[0][1] ?? '';
+  const schema = body.match(/\binputSchema\s*:\s*([A-Za-z_$][A-Za-z0-9_$]*)\b/)?.[1] ?? '';
+  const handler = body.match(/\bhandler\s*:\s*([A-Za-z_$][A-Za-z0-9_$]*)\b/)?.[1] ?? '';
+  if (schema !== contract.binding.schemaRef || handler !== contract.binding.handlerRef) {
+    fail(`Canonical tool binding mismatch for ${contract.name}: expected ${contract.binding.schemaRef}/${contract.binding.handlerRef}, received ${schema || '<missing>'}/${handler || '<missing>'}`);
+  }
+}
+
 async function validateBindingSources(contracts, sourceRoot) {
   const cache = new Map();
   for (const contract of contracts) {
@@ -137,11 +150,8 @@ async function validateBindingSources(contracts, sourceRoot) {
       catch { fail(`Tool binding source missing for ${contract.name}: ${contract.binding.source}`); }
       cache.set(filePath, source);
     }
-    if (!source.includes(contract.name)) fail(`Tool binding source does not declare ${contract.name}: ${contract.binding.source}`);
-    if (contract.binding.status === 'canonical') {
-      if (!source.includes(contract.binding.schemaRef)) fail(`Tool binding schemaRef not found for ${contract.name}: ${contract.binding.schemaRef}`);
-      if (!source.includes(contract.binding.handlerRef)) fail(`Tool binding handlerRef not found for ${contract.name}: ${contract.binding.handlerRef}`);
-    }
+    if (contract.binding.status === 'canonical') exactCanonicalBinding(source, contract);
+    else if (!source.includes(contract.name)) fail(`Tool binding source does not declare ${contract.name}: ${contract.binding.source}`);
   }
 }
 

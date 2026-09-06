@@ -2,12 +2,14 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type { CallToolResult, McpServer, ServerContext } from '@modelcontextprotocol/server';
+import { ToolDiscoveryParamsSchema } from '@godot-mcp/protocol';
 import { describe, expect, it, vi } from 'vitest';
 import { RecoveryService } from '../src/recovery/recovery-service.js';
 import { guardedRegistrar, type RiskApprovalState } from '../src/security/tool-registrar.js';
 import { ToolPolicy } from '../src/security/tool-policy.js';
 import { createSession } from '../src/session/session.js';
 import { SessionStore } from '../src/session/session-store.js';
+import { bindCanonicalTool, defineCanonicalToolBinding } from '../src/tooling/canonical-tool-binding.js';
 import { ToolRegistry } from '../src/tooling/tool-registry.js';
 
 type Handler = (args: Record<string, unknown>, context: ServerContext) => unknown | Promise<unknown>;
@@ -144,6 +146,40 @@ describe('profiled tool registrar', () => {
         });
     });
 
+
+
+    it('rejects a canonical tool that bypasses the canonical binder', () => {
+        const registerTool = vi.fn(() => ({}) as never);
+        const registry = new ToolRegistry('full');
+        const registrar = registry.registeringRegistrar({ registerTool } as never);
+        expect(() => registrar.registerTool('godot.tools', { inputSchema: ToolDiscoveryParamsSchema } as never, vi.fn() as never))
+            .toThrow('Canonical MCP tool must use bindCanonicalTool: godot.tools');
+        expect(registerTool).not.toHaveBeenCalled();
+    });
+
+    it('registers a canonical tool from one typed name/schema/handler binding', async () => {
+        const registerTool = vi.fn(() => ({}) as never);
+        const registry = new ToolRegistry('full');
+        const registrar = registry.registeringRegistrar({ registerTool } as never);
+        const handler = vi.fn((_context: { prefix: string }, args: { limit: number }) => ({ prefix: _context.prefix, limit: args.limit }));
+        const binding = defineCanonicalToolBinding('godot.tools', {
+            inputSchema: ToolDiscoveryParamsSchema,
+            handler
+        });
+        bindCanonicalTool(registrar, binding, { prefix: 'ok' });
+        expect(registerTool).toHaveBeenCalledTimes(1);
+        const [name, config, forwarded] = registerTool.mock.calls[0] as unknown as [string, Record<string | symbol, unknown>, Handler];
+        expect(name).toBe('godot.tools');
+        expect(config).toMatchObject({
+            inputSchema: ToolDiscoveryParamsSchema,
+            description: 'Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers.'
+        });
+        expect(Object.getOwnPropertySymbols(config)).toHaveLength(0);
+        const result = await forwarded({ limit: 7 }, {} as ServerContext) as CallToolResult;
+        expect(result.isError).not.toBe(true);
+        expect(result.structuredContent).toEqual({ prefix: 'ok', limit: 7 });
+        expect(handler).toHaveBeenCalledTimes(1);
+    });
     it('rejects uncataloged declarations before they reach MCP', () => {
         const registerTool = vi.fn(() => ({}) as never);
         const registry = new ToolRegistry('full');
