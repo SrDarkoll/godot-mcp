@@ -9,7 +9,7 @@ describe('tool catalog', () => {
     expect(TOOL_CATALOG.every(entry => entry.profiles.includes('full'))).toBe(true);
     expect(TOOL_CATALOG.every(entry => entry.description.trim().length > 0)).toBe(true);
     expect(Object.fromEntries(TOOL_PROFILES.map(profile => [profile, toolNamesForProfile(profile).length]))).toEqual({
-      minimal:5, core:78, '2d':121, '3d':107, navigation:67, ui:81, runtime:30, full:165
+      minimal:5, core:78, '2d':121, '3d':107, navigation:67, ui:81, runtime:38, full:173
     });
   });
 
@@ -32,6 +32,14 @@ describe('tool catalog', () => {
     expect(runtime.has('debug.errors')).toBe(true);
     expect(runtime.has('workflow.run_check')).toBe(true);
     expect(runtime.has('scene.save')).toBe(false);
+    expect(runtime.has('headless.validate_project')).toBe(true);
+    expect(runtime.has('headless.get_output')).toBe(true);
+    expect(runtime.has('headless.stop')).toBe(true);
+    expect(runtime.has('headless.run_scene')).toBe(true);
+
+    for (const profile of ['minimal','core','2d','3d','navigation','ui'] as const) {
+      expect(toolNamesForProfile(profile).some(name => name.startsWith('headless.'))).toBe(false);
+    }
 
     expect(TOOL_CATALOG.find(entry => entry.name === 'godot.tools')?.description).toBe('Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers.');
 

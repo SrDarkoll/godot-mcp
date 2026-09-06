@@ -112,7 +112,8 @@ describe('canonical pilot bindings', () => {
     for (const relative of [
       '../src/mcp/register-tooling-tools.ts',
       '../src/mcp/register-navigation-tools.ts',
-      '../src/mcp/register-power3d-tools.ts'
+      '../src/mcp/register-power3d-tools.ts',
+      '../src/mcp/register-headless-tools.ts'
     ]) {
       const source = await fs.readFile(new URL(relative, import.meta.url), 'utf8');
       expect(source).not.toContain('description:');
@@ -121,6 +122,6 @@ describe('canonical pilot bindings', () => {
       expect(source).toContain('bindCanonicalTool(');
       definitions += source.match(/defineCanonicalToolBinding\(/g)?.length ?? 0;
     }
-    expect(definitions).toBe(21);
+    expect(definitions).toBe(29);
   });
 });

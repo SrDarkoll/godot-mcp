@@ -2,9 +2,9 @@
 
 > **Generated file. Do not edit directly.** Source: `scripts/tool-contracts.json`. Regenerate with `npm run generate:tool-contracts`.
 
-Total public tools: **165**
+Total public tools: **173**
 
-Canonical schema/handler bindings: **21**
+Canonical schema/handler bindings: **29**
 
 ## Profile counts
 
@@ -14,8 +14,8 @@ Canonical schema/handler bindings: **21**
 - `3d`: 107
 - `navigation`: 67
 - `ui`: 81
-- `runtime`: 30
-- `full`: 165
+- `runtime`: 38
+- `full`: 173
 
 ## Tools
 
@@ -57,6 +57,14 @@ Canonical schema/handler bindings: **21**
 | `editor.undo` | editor | core, 2d, 3d, navigation, ui, full | risky; no static tags; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Trigger Undo in the Godot editor. |
 | `godot.capabilities` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-core-tools.ts | Return the bounded compatibility and capability manifest reported by the authenticated Godot addon. |
 | `godot.tools` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | normal; read; dynamic=none | canonical: packages/server/src/mcp/register-tooling-tools.ts :: ToolDiscoveryParamsSchema / discoverGodotTools | Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers. |
+| `headless.get_output` | headless | runtime, full | normal; read; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessGetOutputSchema / getHeadlessOutput | Read bounded persisted stdout/stderr output for a headless Godot execution. |
+| `headless.import` | headless | runtime, full | risky; no static tags; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessImportSchema / importHeadlessProject | Run Godot project import in headless mode and wait for completion. |
+| `headless.run` | headless | runtime, full | risky; no static tags; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessRunSchema / runHeadlessProject | Launch the project's main scene in a persistent owned headless Godot process. |
+| `headless.run_scene` | headless | runtime, full | risky; no static tags; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessRunSceneSchema / runHeadlessScene | Launch a project-local scene in a persistent owned headless Godot process. |
+| `headless.run_tests` | headless | runtime, full | risky; no static tags; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessRunTestsSchema / runHeadlessTests | Run a project-local GDScript test entry point in headless Godot with a bounded timeout. |
+| `headless.status` | headless | runtime, full | normal; read; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessStatusSchema / getHeadlessStatus | Inspect configured Godot availability and session-owned headless execution state. |
+| `headless.stop` | headless | runtime, full | normal; control; dynamic=conditional | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessStopSchema / stopHeadlessProcess | Stop the single session-owned headless Godot process if one is active. |
+| `headless.validate_project` | headless | runtime, full | risky; no static tags; dynamic=none | canonical: packages/server/src/mcp/register-headless-tools.ts :: HeadlessValidateProjectSchema / validateHeadlessProject | Initialize the project in headless editor mode and report whether Godot exits successfully. |
 | `light3d.configure` | 3d | 3d, full | normal; normal_mutation; dynamic=none | canonical: packages/server/src/mcp/register-power3d-tools.ts :: Light3dConfigureSchema / configureLight3d | Atomically configure common and subtype-specific Light3D settings. |
 | `light3d.inspect` | 3d | 3d, full | normal; read; dynamic=none | canonical: packages/server/src/mcp/register-power3d-tools.ts :: node / inspectLight3d | Inspect DirectionalLight3D, OmniLight3D or SpotLight3D settings. |
 | `material3d.clear` | materials | 3d, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-material3d-tools.ts | Clear the selected MeshInstance3D material override with Undo/Redo. |

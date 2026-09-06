@@ -775,6 +775,164 @@
       }
     },
     {
+      "name": "headless.get_output",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Read bounded persisted stdout/stderr output for a headless Godot execution.",
+      "risk": {
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessGetOutputSchema",
+        "handlerRef": "getHeadlessOutput"
+      }
+    },
+    {
+      "name": "headless.import",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Run Godot project import in headless mode and wait for completion.",
+      "risk": {
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessImportSchema",
+        "handlerRef": "importHeadlessProject"
+      }
+    },
+    {
+      "name": "headless.run",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Launch the project's main scene in a persistent owned headless Godot process.",
+      "risk": {
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessRunSchema",
+        "handlerRef": "runHeadlessProject"
+      }
+    },
+    {
+      "name": "headless.run_scene",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Launch a project-local scene in a persistent owned headless Godot process.",
+      "risk": {
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessRunSceneSchema",
+        "handlerRef": "runHeadlessScene"
+      }
+    },
+    {
+      "name": "headless.run_tests",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Run a project-local GDScript test entry point in headless Godot with a bounded timeout.",
+      "risk": {
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessRunTestsSchema",
+        "handlerRef": "runHeadlessTests"
+      }
+    },
+    {
+      "name": "headless.status",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Inspect configured Godot availability and session-owned headless execution state.",
+      "risk": {
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessStatusSchema",
+        "handlerRef": "getHeadlessStatus"
+      }
+    },
+    {
+      "name": "headless.stop",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Stop the single session-owned headless Godot process if one is active.",
+      "risk": {
+        "tags": [
+          "control"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessStopSchema",
+        "handlerRef": "stopHeadlessProcess"
+      }
+    },
+    {
+      "name": "headless.validate_project",
+      "domain": "headless",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Initialize the project in headless editor mode and report whether Godot exits successfully.",
+      "risk": {
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-headless-tools.ts",
+        "schemaRef": "HeadlessValidateProjectSchema",
+        "handlerRef": "validateHeadlessProject"
+      }
+    },
+    {
       "name": "light3d.configure",
       "domain": "3d",
       "profiles": [

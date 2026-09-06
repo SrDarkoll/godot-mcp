@@ -56,7 +56,7 @@ describe('MCP server', () => {
         await server.close();
     }, 15000);
     it('filters the registered MCP surface deterministically by profile', async () => {
-        const list = async (toolProfile: 'minimal' | '3d') => {
+        const list = async (toolProfile: 'minimal' | '3d' | 'runtime') => {
             const session = disconnectedSession();
             const bridge = new BridgeServer({ session, token: 'b'.repeat(64), port: 0 });
             const server = createMcpServer({ session, bridge, sessions: new SessionStore(session.projectRoot), toolProfile });
@@ -75,6 +75,19 @@ describe('MCP server', () => {
         expect(tools3d).toContain('navigation.mesh.bake');
         expect(tools3d).not.toContain('tilemap.set_cell');
         expect(tools3d).not.toContain('object.call');
+
+        const runtimeTools = await list('runtime');
+        expect(runtimeTools).toEqual(toolNamesForProfile('runtime'));
+        expect(runtimeTools.filter(name => name.startsWith('headless.'))).toEqual([
+            'headless.get_output',
+            'headless.import',
+            'headless.run',
+            'headless.run_scene',
+            'headless.run_tests',
+            'headless.status',
+            'headless.stop',
+            'headless.validate_project'
+        ]);
     });
 
     it('elicits host approval for risky tools without exposing a bearer confirmation token', async () => {

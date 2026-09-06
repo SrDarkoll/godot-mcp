@@ -3,6 +3,7 @@ import { SERVER_VERSION, type ToolProfile } from '@godot-mcp/protocol';
 import { createRequestStateCodec, McpServer } from '@modelcontextprotocol/server';
 import type { BridgeServer } from '../bridge/bridge-server.js';
 import { RecoveryService } from '../recovery/recovery-service.js';
+import { HeadlessProcessManager } from '../headless/headless-process-manager.js';
 import { RuntimeService } from '../runtime/runtime-service.js';
 import { approvalStateBinding } from '../security/approval-state.js';
 import { ToolPolicy } from '../security/tool-policy.js';
@@ -19,6 +20,7 @@ import { WorkflowService } from '../workflow/workflow-service.js';
 import { registerAnimationTools } from './register-animation-tools.js';
 import { registerCoreTools } from './register-core-tools.js';
 import { registerEditorTools } from './register-editor-tools.js';
+import { registerHeadlessTools } from './register-headless-tools.js';
 import { registerNodeTools } from './register-node-tools.js';
 import { registerObjectTools } from './register-object-tools.js';
 import { registerProjectTools } from './register-project-tools.js';
@@ -43,6 +45,7 @@ export interface McpServerContext {
     visual?: VisualTools;
     runtime?: RuntimeService;
     recovery?: RecoveryService;
+    headless?: HeadlessProcessManager;
     policy?: ToolPolicy;
     toolProfile?: ToolProfile;
 }
@@ -59,6 +62,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     });
     const server = new McpServer({ name: 'godot-mcp', version: SERVER_VERSION }, { requestState: { verify: approvalState.verify } });
     const recovery = ctx.recovery ?? new RecoveryService(ctx.session, ctx.sessions, ctx.bridge);
+    const headless = ctx.headless ?? new HeadlessProcessManager(ctx.session, ctx.sessions, { godotBin: null });
     const policy = ctx.policy ?? new ToolPolicy(ctx.session, ctx.sessions, recovery);
     const runtime = ctx.runtime ?? new RuntimeService(ctx.session, ctx.sessions, ctx.bridge);
     const visual = ctx.visual ?? new VisualTools(ctx.session, ctx.sessions, ctx.bridge, runtime);
@@ -67,6 +71,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     const registrar = registry.registeringRegistrar(guardedRegistrar(server, policy, approvalState));
     const rpc = ctx.bridge.rpc;
     registerRuntimeTools(registrar, runtime);
+    registerHeadlessTools(registrar, headless);
     registerDebugTools(registrar, runtime);
     registerRecoveryTools(registrar, recovery, rpc);
     registerSecurityTools(registrar, policy);
