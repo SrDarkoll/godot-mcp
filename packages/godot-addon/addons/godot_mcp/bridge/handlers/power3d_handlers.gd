@@ -31,12 +31,12 @@ func _resolve_node(root: Node, path_str: String) -> Node:
 		return root.get_node_or_null(path_str.substr(1))
 	return null
 
-func _resolve_typed(root: Node, path_str: String, class_name: String):
+func _resolve_typed(root: Node, path_str: String, expected_class_name: String):
 	var node := _resolve_node(root, path_str)
 	if not node:
 		return _error("NODE_NOT_FOUND", "Node not found: %s" % path_str)
-	if not node.is_class(class_name):
-		return _error("INVALID_NODE_TYPE", "Node is not a %s: %s" % [class_name, path_str])
+	if not node.is_class(expected_class_name):
+		return _error("INVALID_NODE_TYPE", "Node is not a %s: %s" % [expected_class_name, path_str])
 	return node
 
 func _undo_redo() -> EditorUndoRedoManager:

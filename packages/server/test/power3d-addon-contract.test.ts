@@ -25,4 +25,10 @@ describe('3D addon contract',()=>{
     expect(source).toContain('camera.set_orthogonal');
     expect(source).toContain('camera.set_frustum');
   });
+
+  it('does not use reserved GDScript keywords as parameter names',()=>{
+    const source=fs.readFileSync(file,'utf8');
+    expect(source).not.toContain('path_str: String, class_name: String');
+    expect(source).toContain('expected_class_name: String');
+  });
 });
