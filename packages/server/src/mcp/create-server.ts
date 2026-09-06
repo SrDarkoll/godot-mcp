@@ -25,6 +25,8 @@ import { registerResourceTools } from './register-resource-tools.js';
 import { registerSceneTools } from './register-scene-tools.js';
 import { registerScriptTools } from './register-script-tools.js';
 import { registerSignalTools } from './register-signal-tools.js';
+import { registerTilemapTools } from './register-tilemap-tools.js';
+import { registerTilesetTools } from './register-tileset-tools.js';
 import { registerUiTools } from './register-ui-tools.js';
 import { registerVisualTools } from './register-visual-tools.js';
 import { registerWorkflowTools } from './register-workflow-tools.js';
@@ -65,6 +67,8 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerCoreTools(registrar, rpc, ctx.session);
     registerUiTools(registrar, rpc);
     registerAnimationTools(registrar, rpc);
+    registerTilemapTools(registrar, rpc);
+    registerTilesetTools(registrar, rpc);
     registerObjectTools(registrar, rpc);
     registerSceneTools(registrar, rpc);
     registerNodeTools(registrar, rpc);

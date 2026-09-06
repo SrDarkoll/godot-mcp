@@ -17,7 +17,8 @@ const READS = new Set([
     'editor.get_selected_nodes', 'editor.get_filesystem', 'runtime.status', 'runtime.scene_tree',
     'runtime.inspect_node', 'runtime.get_property', 'debug.output', 'debug.errors', 'debug.warnings',
     'debug.performance', 'permissions.status', 'risk.preview', 'transaction.status', 'transaction.preview',
-    'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since', 'ui.inspect_layout', 'animation.list', 'animation.inspect'
+    'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since', 'ui.inspect_layout', 'animation.list', 'animation.inspect',
+    'tilemap.inspect', 'tilemap.get_cells', 'tilemap.map_to_local', 'tilemap.local_to_map', 'tileset.inspect', 'tileset.inspect_atlas_source'
 ]);
 const CONTROLS = new Set([
     'runtime.status', 'runtime.stop', 'project.stop', 'session.status', 'permissions.status',
@@ -33,16 +34,20 @@ const NORMAL_MUTATIONS = new Set([
     'visual.capture_viewport_3d', 'workflow.snapshot', 'workflow.run_check', 'transaction.begin', 'transaction.write_file', 'transaction.delete_file',
     'transaction.rollback', 'checkpoint.create', 'permissions.set', 'permissions.enable', 'permissions.disable',
     'ui.set_layout_preset', 'ui.set_anchors', 'ui.set_offsets', 'ui.set_size_flags', 'ui.set_focus_neighbor',
-    'animation.create', 'animation.remove', 'animation.configure', 'animation.add_track', 'animation.insert_key', 'animation.remove_key'
+    'animation.create', 'animation.remove', 'animation.configure', 'animation.add_track', 'animation.insert_key', 'animation.remove_key',
+    'tilemap.set_cell', 'tilemap.set_cells', 'tilemap.erase_cells', 'tilemap.clear', 'tileset.ensure_for_layer',
+    'tileset.add_atlas_source', 'tileset.create_atlas_tiles', 'tileset.remove_source'
 ]);
 const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
     /^debug\.(output|errors|warnings)$/.test(name);
 const NON_FILESYSTEM_PATH_TOOLS = new Set(['animation.add_track']);
-const filesystemPathKeys = (name: string): string[] =>
-    NON_FILESYSTEM_PATH_TOOLS.has(name)
+const filesystemPathKeys = (name: string): string[] => {
+    const keys = NON_FILESYSTEM_PATH_TOOLS.has(name)
         ? ['resource_path', 'script_path', 'source_path', 'target_path']
         : ['path', 'resource_path', 'script_path', 'source_path', 'target_path'];
+    return name === 'tileset.add_atlas_source' ? [...keys, 'texture_path'] : keys;
+};
 function canonical(value: unknown): string {
     if (Array.isArray(value))
         return `[${value.map(canonical).join(',')}]`;
