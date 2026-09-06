@@ -6,12 +6,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const TOOL_PROFILES = ['minimal','core','2d','3d','navigation','ui','runtime','full'];
 const TOOL_DOMAINS = [
   'core','session','security','recovery','scene','node','object','resource','script','signal','project','editor',
-  'runtime','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
+  'runtime','headless','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
 ];
 const RISK_TAGS = ['read','control','normal_mutation'];
 const RISK_DYNAMIC = ['none','conditional','blockable'];
 const BINDING_STATUSES = ['legacy','canonical'];
-const DEFAULT_EXPECTED_COUNT = 165;
+const DEFAULT_EXPECTED_COUNT = 173;
 
 function fail(message) { throw new Error(message); }
 function asStringArray(value, field, name) {

@@ -17,5 +17,6 @@ it('requires checkpoint references to an existing screenshot', () => {
     transactions:[],errors:[],permissionChanges:[]};
   expect(SessionManifestSchema.safeParse(manifest).success).toBe(true);
   expect(SessionManifestSchema.parse(manifest).runtimeRuns).toEqual([]);
+  expect(SessionManifestSchema.parse(manifest).headlessRuns).toEqual([]);
   expect(SessionManifestSchema.safeParse({...manifest,screenshots:[]}).success).toBe(false);
 });

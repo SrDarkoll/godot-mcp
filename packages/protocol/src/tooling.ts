@@ -3,7 +3,7 @@ import * as z from 'zod/v4';
 export const ToolProfileSchema = z.enum(['minimal','core','2d','3d','navigation','ui','runtime','full']);
 export const ToolDomainSchema = z.enum([
   'core','session','security','recovery','scene','node','object','resource','script','signal','project','editor',
-  'runtime','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
+  'runtime','headless','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
 ]);
 
 export const ToolDiscoveryParamsSchema = z.strictObject({

@@ -17,12 +17,12 @@ export class SessionStore {
   async create(session: Session): Promise<void> {
     await this.enqueue(session.id, async () => {
       const dir = await this.ensureDirectory(session.id);
-      for (const relative of ['screenshots/editor','screenshots/game','screenshots/runtime','transactions','checkpoints','logs','events','artifacts']) {
+      for (const relative of ['screenshots/editor','screenshots/game','screenshots/runtime','transactions','checkpoints','logs','logs/headless','events','artifacts']) {
         await this.ensureDirectory(session.id, relative);
       }
       const manifest: SessionManifest = {manifestVersion:1,sessionId:session.id,projectRoot:session.projectRoot,
         startedAt:session.startedAt,endedAt:null,godotVersion:null,addonVersion:null,protocolVersion:1,
-        nextScreenshotSequence:1,screenshots:[],transactions:[],checkpoints:[],errors:[],permissionChanges:[],runtimeRuns:[]};
+        nextScreenshotSequence:1,screenshots:[],transactions:[],checkpoints:[],errors:[],permissionChanges:[],runtimeRuns:[],headlessRuns:[]};
       try {
         const handle = await fs.open(path.join(dir,'manifest.json'),'wx');
         try { await handle.writeFile(`${JSON.stringify(manifest,null,2)}\n`); await handle.sync(); }

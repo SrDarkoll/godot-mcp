@@ -9,7 +9,7 @@ describe('tooling contracts', () => {
     expect(ToolProfileSchema.options).toEqual(['minimal','core','2d','3d','navigation','ui','runtime','full']);
     expect(ToolDomainSchema.options).toEqual([
       'core','session','security','recovery','scene','node','object','resource','script','signal','project','editor',
-      'runtime','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
+      'runtime','headless','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
     ]);
     expect(() => ToolProfileSchema.parse('physics')).toThrow();
   });
@@ -33,7 +33,7 @@ describe('tooling contracts', () => {
       activeProfile:'3d', selectedProfile:'3d',
       profiles:[
         {id:'minimal',toolCount:5},{id:'core',toolCount:78},{id:'2d',toolCount:121},{id:'3d',toolCount:107},
-        {id:'navigation',toolCount:67},{id:'ui',toolCount:81},{id:'runtime',toolCount:30},{id:'full',toolCount:165}
+        {id:'navigation',toolCount:67},{id:'ui',toolCount:81},{id:'runtime',toolCount:38},{id:'full',toolCount:173}
       ],
       total:1, offset:0, limit:25, nextOffset:null, tools:[entry]
     }).tools).toHaveLength(1);

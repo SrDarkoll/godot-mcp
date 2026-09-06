@@ -55,6 +55,7 @@ describe('tool contract generator', () => {
     expect(policy).toContain("CONTROL_TOOL_NAMES=Object.freeze(['alpha.read'])");
     expect(() => validateContracts({ ...sample, schemaVersion: 1 }, { expectedCount: 2 })).toThrow(/schemaVersion 2/);
     expect(() => validateContracts({ ...sample, tools: [...sample.tools, sample.tools[0]] }, { expectedCount: 3 })).toThrow(/Duplicate tool contract: zeta\.read/);
+    expect(validateContracts({ schemaVersion: 2, tools: [{ ...sample.tools[0], domain: 'headless' }] }, { expectedCount: 1 })[0].domain).toBe('headless');
     expect(() => validateContracts({ schemaVersion: 2, tools: [{ ...sample.tools[0], domain: 'physics' }] }, { expectedCount: 1 })).toThrow(/Unknown tool domain/);
     expect(() => validateContracts({ schemaVersion: 2, tools: [{ ...sample.tools[0], profiles: ['core'] }] }, { expectedCount: 1 })).toThrow(/must include full/);
     expect(() => validateContracts({ schemaVersion: 2, tools: [{ ...sample.tools[0], risk: undefined }] }, { expectedCount: 1 })).toThrow(/Invalid tool risk/);

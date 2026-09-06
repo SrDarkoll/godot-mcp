@@ -58,8 +58,10 @@ describe('session store', () => {
     const dir = path.join(root, '.godot-mcp', 'sessions', session.id);
     await expect(stat(path.join(dir, 'screenshots', 'editor'))).resolves.toBeDefined();
     await expect(stat(path.join(dir, 'screenshots', 'game'))).resolves.toBeDefined();
+    await expect(stat(path.join(dir, 'logs', 'headless'))).resolves.toBeDefined();
     const manifest = JSON.parse(await readFile(path.join(dir, 'manifest.json'), 'utf8'));
     expect(manifest.sessionId).toBe(session.id);
+    expect(manifest.headlessRuns).toEqual([]);
   });
 
   it('writes and removes only the ephemeral bridge descriptor', async () => {

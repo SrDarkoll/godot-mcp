@@ -2,6 +2,7 @@ import * as z from 'zod/v4';
 import { MAX_CAPTURE_BYTES, VisualReasonSchema } from './visual.js';
 import {RuntimeRunSchema} from './runtime.js';
 import {FileCheckpointSchema} from './recovery.js';
+import {HeadlessExecutionRecordSchema} from './headless.js';
 
 export const ScreenshotRecordSchema = z.strictObject({
   id: z.uuid(), sequence: z.number().int().positive(), type: z.enum(['editor_2d','editor_3d','game']),
@@ -22,6 +23,7 @@ export const SessionManifestSchema = z.strictObject({
   godotVersion: z.string().nullable(), addonVersion: z.string().nullable(), protocolVersion: z.literal(1),
   nextScreenshotSequence: z.number().int().positive(), screenshots: z.array(ScreenshotRecordSchema),
   runtimeRuns:z.array(RuntimeRunSchema).default([]),
+  headlessRuns:z.array(HeadlessExecutionRecordSchema).max(20).default([]),
   checkpoints: z.array(z.discriminatedUnion('kind',[VisualCheckpointRecordSchema,FileCheckpointSchema])), transactions: z.array(z.record(z.string(),z.json())),
   permissionChanges: z.array(z.record(z.string(),z.json())),
   errors: z.array(z.strictObject({timestamp:z.iso.datetime(),tool:z.string(),code:z.string(),message:z.string()}))
