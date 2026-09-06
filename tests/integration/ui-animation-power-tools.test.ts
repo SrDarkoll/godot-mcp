@@ -142,8 +142,9 @@ describe('Godot UI and animation power tools',()=>{
       const inspected=await call('animation.inspect',{player_path:'/Main/AnimationPlayer',animation:'fade'});
       expect(inspected.isError,JSON.stringify(inspected.structuredContent)).not.toBe(true);
       expect(inspected.structuredContent).toMatchObject({
-        player_path:'/Main/AnimationPlayer',animation:'fade',length:0.5,loop_mode:'none',step:0.05,track_count:1
+        player_path:'/Main/AnimationPlayer',animation:'fade',length:0.5,loop_mode:'none',track_count:1
       });
+      expect((inspected.structuredContent as any).step).toBeCloseTo(0.05,6);
       const inspectedTrack=(inspected.structuredContent as any).tracks[0];
       expect(inspectedTrack).toMatchObject({type:'value',path:'HUD:modulate:a',interpolation:'linear'});
       expect(inspectedTrack.keys).toHaveLength(2);
@@ -158,6 +159,7 @@ describe('Godot UI and animation power tools',()=>{
       expect((persistedUi.structuredContent as any)).toMatchObject({anchors:{left:0,top:0,right:1,bottom:1},offsets:{left:12}});
       const persistedAnimation=await call('animation.inspect',{player_path:'/Main/AnimationPlayer',animation:'fade'});
       expect(persistedAnimation.isError,JSON.stringify(persistedAnimation.structuredContent)).not.toBe(true);
+      expect((persistedAnimation.structuredContent as any).step).toBeCloseTo(0.05,6);
       expect((persistedAnimation.structuredContent as any).tracks[0].keys).toHaveLength(2);
 
       const badUi=await call('ui.inspect_layout',{node_path:'/Main/Player'});
