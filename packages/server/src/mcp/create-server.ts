@@ -22,6 +22,8 @@ import { registerNodeTools } from './register-node-tools.js';
 import { registerObjectTools } from './register-object-tools.js';
 import { registerProjectTools } from './register-project-tools.js';
 import { registerPower2dTools } from './register-power2d-tools.js';
+import { registerPower3dTools } from './register-power3d-tools.js';
+import { registerMaterial3dTools } from './register-material3d-tools.js';
 import { registerResourceTools } from './register-resource-tools.js';
 import { registerSceneTools } from './register-scene-tools.js';
 import { registerScriptTools } from './register-script-tools.js';
@@ -71,6 +73,8 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerTilemapTools(registrar, rpc);
     registerTilesetTools(registrar, rpc);
     registerPower2dTools(registrar, rpc);
+    registerPower3dTools(registrar, rpc);
+    registerMaterial3dTools(registrar, rpc);
     registerObjectTools(registrar, rpc);
     registerSceneTools(registrar, rpc);
     registerNodeTools(registrar, rpc);

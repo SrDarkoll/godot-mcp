@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createSession } from '../src/session/session.js';
 import { SessionStore } from '../src/session/session-store.js';
 import { RecoveryService } from '../src/recovery/recovery-service.js';
@@ -169,4 +169,24 @@ it('fingerprints Sprite2D texture paths without treating semantic node paths as 
     expect(assessment.targets).toContain('res://sprite.png');
     expect(assessment.targets).toContain('node_path:/Main/Actor/Sprite');
     expect(assessment.targets).not.toContain('/Main/Actor/Sprite');
+});
+
+describe('Phase 3 material path classification',()=>{
+  it('fingerprints material texture paths but treats node_path as semantic context',async()=>{
+    const files={
+      fingerprint:vi.fn(async(value:string)=>value.includes('missing')?null:`fp:${value}`),
+      resolve:vi.fn()
+    };
+    const recovery={files,activeId:null,editorConnected:false,requireNoBarrier:vi.fn()} as never;
+    const sessions={ensureDirectory:vi.fn(async()=>await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-policy-'))),update:vi.fn()} as never;
+    const session={id:'phase3',projectRoot:'C:/Project'} as never;
+    const policy=new ToolPolicy(session,sessions,recovery);
+    const assessment=await policy.assess('material3d.configure_standard',{
+      node_path:'/Main/Model',albedo_texture_path:'res://albedo.png',normal_texture_path:'res://normal.png'
+    });
+    expect(files.fingerprint).toHaveBeenCalledWith('res://albedo.png');
+    expect(files.fingerprint).toHaveBeenCalledWith('res://normal.png');
+    expect(files.fingerprint).not.toHaveBeenCalledWith('/Main/Model');
+    expect(assessment.targets).toContain('node_path:/Main/Model');
+  });
 });

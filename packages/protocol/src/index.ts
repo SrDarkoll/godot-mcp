@@ -20,3 +20,5 @@ export * from './animation.js';
 export * from './tilemap.js';
 
 export * from './power2d.js';
+
+export * from './power3d.js';
