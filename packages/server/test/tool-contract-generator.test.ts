@@ -47,6 +47,7 @@ describe('tool contract generator', () => {
     const catalogB = renderToolCatalog(validateContracts(sample, { expectedCount: 2 }));
     expect(catalogA).toBe(catalogB);
     expect(catalogA.indexOf("name:'alpha.read'")).toBeLessThan(catalogA.indexOf("name:'zeta.read'"));
+    expect(catalogA).toContain("profiles:Object.freeze(['minimal','core','full']) as readonly ToolProfile[]");
     const inventory = renderToolInventory(contracts);
     expect(inventory).toContain('| `alpha.read` | core | minimal, core, full | normal; read, control; dynamic=none | canonical: packages/server/src/mcp/register-core-tools.ts :: z.object / toolSuccess | Read alpha state. |');
     const policy = renderToolPolicy(contracts);

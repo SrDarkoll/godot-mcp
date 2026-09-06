@@ -88,7 +88,7 @@ function tsString(value) {
 export function renderToolCatalog(contracts) {
   const rows = contracts.map(contract => {
     const profiles = contract.profiles.map(tsString).join(',');
-    return `  Object.freeze({name:${tsString(contract.name)},domain:${tsString(contract.domain)},profiles:Object.freeze([${profiles}]),description:${tsString(contract.description)}}),`;
+    return `  Object.freeze({name:${tsString(contract.name)},domain:${tsString(contract.domain)},profiles:Object.freeze([${profiles}]) as readonly ToolProfile[],description:${tsString(contract.description)}}),`;
   }).join('\n');
   return `// GENERATED FILE. DO NOT EDIT.\n// Source: scripts/tool-contracts.json\n\nimport type { ToolDomain, ToolProfile } from '@godot-mcp/protocol';\n\nexport const TOOL_PROFILES = Object.freeze([${TOOL_PROFILES.map(tsString).join(',')}]) as readonly ToolProfile[];\n\nexport interface StaticToolCatalogEntry {\n  readonly name:string;\n  readonly domain:ToolDomain;\n  readonly profiles:readonly ToolProfile[];\n  readonly description:string;\n}\n\nexport const TOOL_CATALOG = Object.freeze([\n${rows}\n]) satisfies readonly StaticToolCatalogEntry[];\n\nconst byName = new Map<string,StaticToolCatalogEntry>(TOOL_CATALOG.map(entry=>[entry.name,entry]));\n\nexport function toolCatalogEntry(name:string):StaticToolCatalogEntry|undefined{return byName.get(name);}\nexport function toolNamesForProfile(profile:ToolProfile):string[]{return TOOL_CATALOG.filter(entry=>entry.profiles.includes(profile)).map(entry=>entry.name);}\n`;
 }
