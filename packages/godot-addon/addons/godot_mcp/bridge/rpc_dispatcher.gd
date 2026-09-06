@@ -19,6 +19,7 @@ var _tileset_handlers
 var _power2d_handlers
 var _power3d_handlers
 var _material3d_handlers
+var _navigation_handlers
 var _runtime
 var _recovery
 
@@ -43,6 +44,7 @@ func _init(editor_interface, runtime = null) -> void:
     _power2d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power2d_handlers.gd").new(editor_interface)
     _power3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power3d_handlers.gd").new(editor_interface)
     _material3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/material3d_handlers.gd").new(editor_interface)
+    _navigation_handlers = preload("res://addons/godot_mcp/bridge/handlers/navigation_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -173,6 +175,26 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _power3d_handlers.inspect_light3d(params)
         "light3d.configure":
             result = _power3d_handlers.configure_light3d(params)
+        "navigation.region.inspect":
+            result = _navigation_handlers.inspect_region(params)
+        "navigation.region.configure":
+            result = _navigation_handlers.configure_region(params)
+        "navigation.mesh.inspect":
+            result = _navigation_handlers.inspect_mesh(params)
+        "navigation.mesh.set":
+            result = _navigation_handlers.set_mesh(params)
+        "navigation.mesh.configure":
+            result = _navigation_handlers.configure_mesh(params)
+        "navigation.mesh.set_outlines":
+            result = _navigation_handlers.set_outlines(params)
+        "navigation.mesh.bake":
+            result = _navigation_handlers.bake_mesh(params)
+        "navigation.mesh.clear":
+            result = _navigation_handlers.clear_mesh(params)
+        "navigation.agent.inspect":
+            result = _navigation_handlers.inspect_agent(params)
+        "navigation.agent.configure":
+            result = _navigation_handlers.configure_agent(params)
         "material3d.inspect":
             result = _material3d_handlers.inspect_material3d(params)
         "material3d.set_standard":
