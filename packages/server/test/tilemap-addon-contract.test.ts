@@ -17,5 +17,6 @@ describe('TileMapLayer addon contract',()=>{
     expect(handler).toContain('create_action');
     expect(handler).toContain(', 0, layer)');
     expect(handler).toContain('SOURCE_NOT_FOUND');
+    expect(handler).toContain('var stored_alternative: int = int(alternative_tile)');
   });
 });

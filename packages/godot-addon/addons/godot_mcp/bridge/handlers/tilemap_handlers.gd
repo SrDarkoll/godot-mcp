@@ -141,7 +141,7 @@ func _validate_write_cell(layer: TileMapLayer, cell: Dictionary):
 	var source := tile_set.get_source(source_id)
 	if not source.has_tile(atlas_coords):
 		return _error("TILE_NOT_FOUND", "Tile source has no tile at atlas coordinates %s" % str(atlas_coords))
-	var stored_alternative := alternative_tile
+	var stored_alternative: int = int(alternative_tile)
 	if source is TileSetAtlasSource:
 		stored_alternative &= ~TileSetAtlasSource.TRANSFORM_FLIP_H
 		stored_alternative &= ~TileSetAtlasSource.TRANSFORM_FLIP_V
