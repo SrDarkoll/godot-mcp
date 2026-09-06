@@ -8,6 +8,14 @@ import { HeadlessProcessManager } from '../src/headless/headless-process-manager
 import { createSession } from '../src/session/session.js';
 import { SessionStore } from '../src/session/session-store.js';
 
+async function waitUntil(predicate:()=>boolean|Promise<boolean>,timeoutMs=1000):Promise<void>{
+  const deadline=Date.now()+timeoutMs;
+  while(!(await predicate())){
+    if(Date.now()>=deadline)throw new Error('Timed out waiting for test condition');
+    await new Promise(resolve=>setTimeout(resolve,5));
+  }
+}
+
 class FakeChild extends EventEmitter {
   readonly stdout=new PassThrough();readonly stderr=new PassThrough();pid=4321;kills:string[]=[];
   kill(signal?:NodeJS.Signals|number){this.kills.push(String(signal ?? 'SIGTERM'));return true;}
@@ -35,15 +43,17 @@ describe('HeadlessProcessManager',()=>{
     expect(calls[0]!.args).toEqual(['--headless','--path',f.root]);
     expect(calls[0]!.options).toMatchObject({shell:false,cwd:f.root});
     expect(calls[0]!.options.env.GODOT_MCP_HEADLESS_CHILD).toBe('1');
-    calls[0]!.child.close(0);await new Promise(resolve=>setImmediate(resolve));
+    calls[0]!.child.close(0);
+    await waitUntil(async()=> (await manager.status()).active===null);
 
     const scene=await manager.runScene({scene_path:'res://levels/test.tscn'});
     expect(scene.scenePath).toBe('res://levels/test.tscn');
     expect(calls[1]!.args).toEqual(['--headless','--path',f.root,'res://levels/test.tscn']);
-    calls[1]!.child.close(0);await new Promise(resolve=>setImmediate(resolve));
+    calls[1]!.child.close(0);
+    await waitUntil(async()=> (await manager.status()).active===null);
 
     const testPromise=manager.runTests({script_path:'res://tests/test.gd',timeout_ms:1000});
-    await new Promise(resolve=>setImmediate(resolve));
+    await waitUntil(()=>calls.length===3);
     expect(calls[2]!.args).toEqual(['--headless','--path',f.root,'--script','res://tests/test.gd']);
     calls[2]!.child.close(7);
     expect((await testPromise).exitCode).toBe(7);
@@ -56,13 +66,13 @@ describe('HeadlessProcessManager',()=>{
     const manager=new HeadlessProcessManager(f.session,f.sessions,{godotBin:f.bin,spawnImpl});
 
     const validating=manager.validateProject({timeout_ms:1000});
-    await new Promise(resolve=>setImmediate(resolve));
+    await waitUntil(()=>calls.length===1);
     expect(calls[0]!.args).toEqual(['--headless','--path',f.root,'--editor','--quit']);
     calls[0]!.child.close(0);
     expect((await validating).exitCode).toBe(0);
 
     const importing=manager.importProject({timeout_ms:1000});
-    await new Promise(resolve=>setImmediate(resolve));
+    await waitUntil(()=>calls.length===2);
     expect(calls[1]!.args).toEqual(['--headless','--path',f.root,'--import']);
     calls[1]!.child.close(0);
     expect((await importing).exitCode).toBe(0);
@@ -110,7 +120,9 @@ describe('HeadlessProcessManager',()=>{
     const hanging=((_bin:string,_args:string[],_options:any)=>{child=new FakeChild();queueMicrotask(()=>child!.spawn());return child as any;}) as any;
     const timed=new HeadlessProcessManager(f.session,f.sessions,{godotBin:f.bin,spawnImpl:hanging});
     const promise=timed.validateProject({timeout_ms:5});
-    setTimeout(()=>child?.close(null,'SIGTERM'),7);
+    await waitUntil(()=>child!==undefined);
+    await waitUntil(()=>child!.kills.length>0);
+    child!.close(null,'SIGTERM');
     const record=await promise;
     expect(record).toMatchObject({state:'failed',timedOut:true,errorCode:'HEADLESS_TIMEOUT'});
     expect(child!.kills.length).toBeGreaterThan(0);
