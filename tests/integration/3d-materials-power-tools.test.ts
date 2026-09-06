@@ -131,6 +131,16 @@ describe('Godot 3D and material power tools',()=>{
       expect(sun.structuredContent).toMatchObject({type:'DirectionalLight3D',shadow_max_distance:250,shadow_enabled:true});
       expect((await call('light3d.inspect',{node_path:'/Main/World/Lamp'})).structuredContent).toMatchObject({energy:3,range:12});
 
+      const missingSurface=await call('material3d.inspect',{node_path:'/Main/World/Model',surface_index:99});
+      expect(missingSurface.isError).toBe(true);
+      expect(missingSurface.structuredContent).toMatchObject({error:{code:'SURFACE_NOT_FOUND'}});
+      const mismatchedMaterial=await call('material3d.configure_standard',{node_path:'/Main/World/Model',roughness:0.4});
+      expect(mismatchedMaterial.isError).toBe(true);
+      expect(mismatchedMaterial.structuredContent).toMatchObject({error:{code:'MATERIAL_TYPE_MISMATCH'}});
+      const missingTexture=await call('material3d.set_standard',{node_path:'/Main/World/Model',albedo_texture_path:'res://missing.png'});
+      expect(missingTexture.isError).toBe(true);
+      expect(missingTexture.structuredContent).toMatchObject({error:{code:'RESOURCE_NOT_FOUND'}});
+
       const surfaceStandard=await call('material3d.set_standard',{
         node_path:'/Main/World/Model',surface_index:0,albedo_color:{r:0.25,g:0.5,b:0.75,a:1},albedo_texture_path:'res://surface.png',
         metallic:0.2,roughness:0.8,cull_mode:'back',transparency:'disabled'

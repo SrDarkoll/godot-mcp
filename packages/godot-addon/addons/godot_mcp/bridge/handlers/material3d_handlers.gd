@@ -90,11 +90,11 @@ func _resolve_target(root: Node, params: Dictionary) -> Dictionary:
 		return _error("INVALID_NODE_TYPE", "surface_index requires a MeshInstance3D")
 	var mesh_instance := geometry as MeshInstance3D
 	if not mesh_instance.mesh:
-		return _error("INVALID_ARGUMENT", "MeshInstance3D has no mesh surfaces")
+		return _error("SURFACE_NOT_FOUND", "MeshInstance3D has no mesh surfaces")
 	var surface_index := int(params.get("surface_index", -1))
 	var surface_count := mesh_instance.mesh.get_surface_count()
 	if surface_index < 0 or surface_index >= surface_count:
-		return _error("INVALID_ARGUMENT", "surface_index %d is outside mesh surface count %d" % [surface_index, surface_count])
+		return _error("SURFACE_NOT_FOUND", "surface_index %d is outside mesh surface count %d" % [surface_index, surface_count])
 	return {
 		"node": mesh_instance,
 		"surface_index": surface_index,
@@ -269,7 +269,7 @@ func configure_standard_material3d(params: Dictionary) -> Dictionary:
 	if target.has("__error"): return target
 	var current := target.get("material") as Material
 	if not current is StandardMaterial3D:
-		return _error("INVALID_MATERIAL_TYPE", "Selected material is not a StandardMaterial3D")
+		return _error("MATERIAL_TYPE_MISMATCH", "Selected material is not a StandardMaterial3D")
 	var material := current.duplicate(true) as StandardMaterial3D
 	var applied = _apply_standard_fields(material, params)
 	if typeof(applied) == TYPE_DICTIONARY: return applied
@@ -315,10 +315,10 @@ func _shader_uniforms(material: ShaderMaterial):
 func _shader_result(root: Node, target: Dictionary):
 	var current := target.get("material") as Material
 	if not current is ShaderMaterial:
-		return _error("INVALID_MATERIAL_TYPE", "Selected material is not a ShaderMaterial")
+		return _error("MATERIAL_TYPE_MISMATCH", "Selected material is not a ShaderMaterial")
 	var material := current as ShaderMaterial
 	if not material.shader:
-		return _error("INVALID_MATERIAL_TYPE", "ShaderMaterial has no Shader")
+		return _error("MATERIAL_TYPE_MISMATCH", "ShaderMaterial has no Shader")
 	var uniforms = _shader_uniforms(material)
 	if typeof(uniforms) == TYPE_DICTIONARY:
 		return uniforms
@@ -387,7 +387,7 @@ func set_shader3d_parameter(params: Dictionary) -> Dictionary:
 	if target.has("__error"): return target
 	var current := target.get("material") as Material
 	if not current is ShaderMaterial or not (current as ShaderMaterial).shader:
-		return _error("INVALID_MATERIAL_TYPE", "Selected material is not a ShaderMaterial with a Shader")
+		return _error("MATERIAL_TYPE_MISMATCH", "Selected material is not a ShaderMaterial with a Shader")
 	var requested := str(params.get("name", ""))
 	var shader := (current as ShaderMaterial).shader
 	if not _uniform_exists(shader, requested):
