@@ -15,8 +15,8 @@ describe('tooling contracts', () => {
   });
 
   it('bounds discovery filters and pagination', () => {
-    expect(ToolDiscoveryParamsSchema.parse({})).toEqual({ activeOnly: true, offset: 0, limit: 25 });
-    expect(ToolDiscoveryParamsSchema.parse({ profile:'3d' })).toEqual({ profile:'3d', activeOnly:false, offset:0, limit:25 });
+    expect(ToolDiscoveryParamsSchema.parse({})).toEqual({ offset: 0, limit: 25 });
+    expect(ToolDiscoveryParamsSchema.parse({ profile:'3d' })).toEqual({ profile:'3d', offset:0, limit:25 });
     expect(ToolDiscoveryParamsSchema.parse({ profile:'3d', activeOnly:false, domain:'navigation', query:'mesh', offset:10, limit:50 }))
       .toMatchObject({ profile:'3d', activeOnly:false, domain:'navigation', query:'mesh', offset:10, limit:50 });
     expect(() => ToolDiscoveryParamsSchema.parse({ query:'x'.repeat(81) })).toThrow();

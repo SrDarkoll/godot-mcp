@@ -9,7 +9,7 @@ import type { Session } from '../session/session.js';
 import { OperationGate } from './operation-gate.js';
 import { isBlockedReflectiveMethod } from './reflection-safety.js';
 const READS = new Set([
-    'session.status', 'session.manifest', 'project.info', 'godot.capabilities', 'scene.get_tree', 'scene.get_root',
+    'session.status', 'session.manifest', 'project.info', 'godot.capabilities', 'godot.tools', 'scene.get_tree', 'scene.get_root',
     'node.inspect', 'node.list_children', 'node.get_property', 'node.get_properties',
     'object.get_class', 'object.get_property_list', 'object.get_method_list', 'object.get_signal_list', 'object.get',
     'resource.load', 'resource.inspect', 'script.inspect', 'script.validate', 'signal.list', 'signal.connections',
@@ -45,7 +45,7 @@ const NORMAL_MUTATIONS = new Set([
     'material3d.set_standard', 'material3d.configure_standard', 'material3d.clear', 'shader3d.set_code', 'shader3d.set_parameter',
     'navigation.region.configure', 'navigation.mesh.set', 'navigation.mesh.configure', 'navigation.mesh.set_outlines', 'navigation.mesh.bake', 'navigation.mesh.clear', 'navigation.agent.configure'
 ]);
-const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
+const LOCAL = (name: string): boolean => name === 'godot.tools' || /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
     /^debug\.(output|errors|warnings)$/.test(name);
 const NON_FILESYSTEM_PATH_TOOLS = new Set(['animation.add_track']);

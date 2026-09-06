@@ -43,7 +43,7 @@ describe('MCP server', () => {
         await client.connect(clientTransport);
         const tools = await client.listTools();
         const toolNames = tools.tools.map(tool => tool.name).sort();
-        expect(toolNames).toEqual(toolNamesForProfile('full').filter(name => name !== 'godot.tools'));
+        expect(toolNames).toEqual(toolNamesForProfile('full'));
         const status = await client.callTool({ name: 'session.status', arguments: {} });
         expect(status.structuredContent).toMatchObject({ sessionId: 's1', editorConnected: false });
         const project = await client.callTool({ name: 'project.info', arguments: {} });
@@ -68,9 +68,9 @@ describe('MCP server', () => {
             finally { await client.close(); await server.close(); }
         };
 
-        expect(await list('minimal')).toEqual(toolNamesForProfile('minimal').filter(name => name !== 'godot.tools'));
+        expect(await list('minimal')).toEqual(toolNamesForProfile('minimal'));
         const tools3d = await list('3d');
-        expect(tools3d).toEqual(toolNamesForProfile('3d').filter(name => name !== 'godot.tools'));
+        expect(tools3d).toEqual(toolNamesForProfile('3d'));
         expect(tools3d).toContain('mesh3d.set_primitive');
         expect(tools3d).toContain('navigation.mesh.bake');
         expect(tools3d).not.toContain('tilemap.set_cell');

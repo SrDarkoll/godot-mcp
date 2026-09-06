@@ -35,6 +35,7 @@ import { registerTilesetTools } from './register-tileset-tools.js';
 import { registerUiTools } from './register-ui-tools.js';
 import { registerVisualTools } from './register-visual-tools.js';
 import { registerWorkflowTools } from './register-workflow-tools.js';
+import { registerToolingTools } from './register-tooling-tools.js';
 export interface McpServerContext {
     session: Session;
     bridge: BridgeServer;
@@ -88,5 +89,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerSignalTools(registrar, rpc);
     registerProjectTools(registrar, rpc);
     registerEditorTools(registrar, rpc);
+    registerToolingTools(registrar, registry);
+    registry.assertFullyObserved();
     return server;
 }

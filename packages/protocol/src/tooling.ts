@@ -6,7 +6,7 @@ export const ToolDomainSchema = z.enum([
   'runtime','debug','visual','workflow','ui','animation','tilemap','tileset','2d','3d','materials','navigation'
 ]);
 
-const ToolDiscoveryParamsBaseSchema = z.strictObject({
+export const ToolDiscoveryParamsSchema = z.strictObject({
   profile: ToolProfileSchema.optional(),
   domain: ToolDomainSchema.optional(),
   query: z.string().trim().min(1).max(80).optional(),
@@ -14,11 +14,6 @@ const ToolDiscoveryParamsBaseSchema = z.strictObject({
   offset: z.number().int().min(0).max(10000).default(0),
   limit: z.number().int().min(1).max(50).default(25)
 });
-
-export const ToolDiscoveryParamsSchema = ToolDiscoveryParamsBaseSchema.transform(value => ({
-  ...value,
-  activeOnly: value.activeOnly ?? value.profile === undefined
-}));
 
 export const ToolCatalogEntrySchema = z.strictObject({
   name: z.string().trim().min(1).max(160),
