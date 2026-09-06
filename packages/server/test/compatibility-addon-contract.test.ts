@@ -34,6 +34,19 @@ describe('compatibility addon contract', () => {
     expect(quirks).toContain('minor >= 6');
   });
 
+  it('routes visual admission and legacy viewport flags through the same capability manifest', () => {
+    const visual = fs.readFileSync(path.join(addonRoot, 'handlers/visual_handlers.gd'), 'utf8');
+    const bridge = fs.readFileSync(path.join(addonRoot, 'bridge_client.gd'), 'utf8');
+    expect(visual).toContain('_compatibility.supports(capability_id)');
+    expect(visual).toContain('visual.viewport2d.capture');
+    expect(visual).toContain('visual.viewport3d.capture');
+    expect(visual).not.toContain('DisplayServer.get_name() == "headless"');
+    expect(visual).not.toContain('_editor_interface.has_method(method)');
+    expect(bridge).toContain('var compatibility := _dispatcher.compatibility_manifest()');
+    expect(bridge).not.toContain('DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_2d")');
+    expect(bridge).not.toContain('DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_3d")');
+  });
+
   it('creates exactly one compatibility core in the dispatcher', () => {
     const source = fs.readFileSync(dispatcherFile, 'utf8');
     expect(source.match(/compatibility_core\.gd"\)\.new\(editor_interface\)/g) ?? []).toHaveLength(1);

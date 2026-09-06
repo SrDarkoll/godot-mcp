@@ -107,6 +107,10 @@ func _send_hello() -> void:
     var descriptor := _connection_descriptor
     if descriptor.is_empty() or _socket == null:
         return
+    var compatibility := _dispatcher.compatibility_manifest()
+    var effective_capabilities: Dictionary = compatibility.get("capabilities", {})
+    var viewport2d: Dictionary = effective_capabilities.get("visual.viewport2d.capture", {})
+    var viewport3d: Dictionary = effective_capabilities.get("visual.viewport3d.capture", {})
     var hello := {
         "type": "hello",
         "token": str(descriptor.get("token", "")),
@@ -114,13 +118,13 @@ func _send_hello() -> void:
         "addonVersion": ADDON_VERSION,
         "godotVersion": Engine.get_version_info().string,
         "projectRoot": ProjectSettings.globalize_path("res://").replace("\\", "/").trim_suffix("/"),
-        "compatibility": _dispatcher.compatibility_manifest(),
+        "compatibility": compatibility,
         "capabilities": {
             "editor": true,
             "runtime": _runtime != null,
             "debugger": _runtime != null,
-            "viewport2d": DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_2d"),
-            "viewport3d": DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_3d"),
+            "viewport2d": str(viewport2d.get("status", "unsupported")) != "unsupported",
+            "viewport3d": str(viewport3d.get("status", "unsupported")) != "unsupported",
             "undoRedo": true
         }
     }

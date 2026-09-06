@@ -2,7 +2,11 @@
 extends RefCounted
 
 const MAX_PNG_BYTES := 16 * 1024 * 1024
+const VIEWPORT2D_CAPABILITY := "visual.viewport2d.capture"
+const VIEWPORT3D_CAPABILITY := "visual.viewport3d.capture"
+
 var _editor_interface
+var _compatibility
 
 class FrameWait:
     extends RefCounted
@@ -45,8 +49,9 @@ class FrameWait:
             timer.timeout.disconnect(_timeout)
         completed.emit(drawn)
 
-func _init(editor_interface) -> void:
+func _init(editor_interface, compatibility) -> void:
     _editor_interface = editor_interface
+    _compatibility = compatibility
 
 func _error(code: String, message: String) -> Dictionary:
     return {"__error": {"code": code, "message": message}}
@@ -66,9 +71,10 @@ func handle_capture_viewport_3d(params: Dictionary) -> Dictionary:
     return await _capture(true, int(index))
 
 func _capture(is_3d: bool, index: int) -> Dictionary:
+    var capability_id := VIEWPORT3D_CAPABILITY if is_3d else VIEWPORT2D_CAPABILITY
+    if not _compatibility.supports(capability_id):
+        return _error("CAPTURE_UNSUPPORTED", _compatibility.reason(capability_id))
     var method := "get_editor_viewport_3d" if is_3d else "get_editor_viewport_2d"
-    if DisplayServer.get_name() == "headless" or not _editor_interface.has_method(method):
-        return _error("CAPTURE_UNSUPPORTED", "Editor viewport capture requires a supported graphical editor")
     var root = _editor_interface.get_edited_scene_root()
     if root == null:
         return _error("NO_OPEN_SCENE", "No edited scene is open")
