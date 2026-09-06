@@ -131,7 +131,14 @@ describe('Godot TileMapLayer and TileSet power tools',()=>{
         {coords:{x:4,y:3},source_id:0,atlas_coords:{x:0,y:1},alternative_tile:0}
       ]);
 
-      await expect(call('tilemap.map_to_local',{node_path:'/Main/Ground',coords:{x:32768,y:0}})).rejects.toThrow();
+      const invalidCoords=await call('tilemap.map_to_local',{node_path:'/Main/Ground',coords:{x:32768,y:0}});
+      expect(invalidCoords.isError).toBe(true);
+      const invalidCoordsText=(invalidCoords.content as Array<{type?:string;text?:string}>)
+        .filter(item=>item.type==='text')
+        .map(item=>item.text??'')
+        .join('\n');
+      expect(invalidCoordsText).toContain('tilemap.map_to_local');
+      expect(invalidCoordsText).toContain('coords.x');
 
       const mapped=await call('tilemap.map_to_local',{node_path:'/Main/Ground',coords:{x:2,y:3}});
       expect(mapped.isError,JSON.stringify(mapped.structuredContent)).not.toBe(true);
