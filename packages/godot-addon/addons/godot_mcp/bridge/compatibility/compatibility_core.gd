@@ -41,10 +41,10 @@ func _entry(status_value: String, reason: String = "") -> Dictionary:
         entry.reason = reason
     return entry
 
-func _class_capability(class_name: String) -> Dictionary:
-    if _probe.class_exists(class_name):
+func _class_capability(godot_class: String) -> Dictionary:
+    if _probe.class_exists(godot_class):
         return _entry(STATUS_SUPPORTED)
-    return _entry(STATUS_UNSUPPORTED, "%s is unavailable in this Godot build" % class_name)
+    return _entry(STATUS_UNSUPPORTED, "%s is unavailable in this Godot build" % godot_class)
 
 func _bake_capability(dimension: String) -> Dictionary:
     var resource_class := "NavigationPolygon" if dimension == "2d" else "NavigationMesh"

@@ -51,6 +51,13 @@ describe('compatibility addon contract', () => {
     expect(bridge).not.toContain('DisplayServer.get_name() != "headless" and _editor_interface.has_method("get_editor_viewport_3d")');
   });
 
+  it('does not use reserved GDScript keywords as compatibility parameter names', () => {
+    for (const file of [probeFile, quirksFile, coreFile]) {
+      const source = fs.readFileSync(file, 'utf8');
+      expect(source).not.toMatch(/func\s+\w+\s*\([^)]*\bclass_name\b/);
+    }
+  });
+
   it('creates exactly one compatibility core in the dispatcher', () => {
     const source = fs.readFileSync(dispatcherFile, 'utf8');
     expect(source.match(/compatibility_core\.gd"\)\.new\(editor_interface\)/g) ?? []).toHaveLength(1);
