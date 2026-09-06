@@ -43,6 +43,18 @@ The first addon message is:
   "addonVersion": "0.1.0",
   "godotVersion": "4.7.2.stable.official",
   "projectRoot": "C:/Projects/GodotMcpFixture",
+  "compatibility": {
+    "schemaVersion": 1,
+    "engine": { "major": 4, "minor": 6, "patch": 3, "status": "stable", "build": "official", "hash": "...", "string": "4.6.3.stable.official" },
+    "capabilities": {
+      "navigation.region.2d": { "status": "supported" },
+      "navigation.agent3d.keep_y_velocity": { "status": "restricted", "reason": "Only authorable while use_3d_avoidance is false" },
+      "visual.viewport2d.capture": { "status": "supported" }
+    },
+    "quirks": {
+      "navigation.agent3d.keep_y_velocity.hidden_with_3d_avoidance": { "active": true, "reason": "Known Godot 4.6+ NavigationAgent3D property-usage behavior" }
+    }
+  },
   "capabilities": {
     "editor": true,
     "runtime": false,
@@ -55,6 +67,8 @@ The first addon message is:
 ```
 
 The server rejects an invalid token, a protocol mismatch, a different project root, or a second active editor connection.
+
+The optional `compatibility` object is a bounded, feature-first manifest. Current addons send it on every hello; keeping it optional preserves protocol compatibility with older addon fixtures. The read-only `godot.capabilities` MCP tool returns this authenticated manifest without arbitrary reflection.
 
 ## Hello acknowledgement
 

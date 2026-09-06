@@ -147,7 +147,25 @@ describe('Godot editor handshake', () => {
       const projectInfo = await client.callTool({ name: 'project.info', arguments: {} });
       expect(projectInfo.structuredContent).toMatchObject({ name: 'Godot MCP Fixture' });
 
-      // 5. scene.get_tree returns expected nodes
+      // 5. godot.capabilities returns the authenticated feature-first manifest
+      const compatibility = await client.callTool({ name: 'godot.capabilities', arguments: {} });
+      expect(compatibility.isError).not.toBe(true);
+      expect(compatibility.structuredContent).toMatchObject({
+        schemaVersion: 1,
+        engine: { major: 4, minor: 6, patch: 3 },
+        capabilities: {
+          'navigation.region.2d': { status: 'supported' },
+          'navigation.region.3d': { status: 'supported' },
+          'navigation.agent3d.keep_y_velocity': { status: 'restricted' },
+          'visual.viewport2d.capture': { status: 'unsupported' },
+          'visual.viewport3d.capture': { status: 'unsupported' }
+        },
+        quirks: {
+          'navigation.agent3d.keep_y_velocity.hidden_with_3d_avoidance': { active: true }
+        }
+      });
+
+      // 6. scene.get_tree returns expected nodes
       let tree = await client.callTool({ name: 'scene.get_tree', arguments: {} });
       const deadline = Date.now() + 10_000;
       while (!(tree.structuredContent as Record<string, unknown>)['root'] && Date.now() < deadline) {
@@ -170,7 +188,7 @@ describe('Godot editor handshake', () => {
       await client.close();
     }
 
-    // 6. Verify bridge descriptor is cleaned up and not left behind
+    // 7. Verify bridge descriptor is cleaned up and not left behind
     const descriptorCleaned = await waitFor(async () => {
       try {
         await stat(descriptorPath);
