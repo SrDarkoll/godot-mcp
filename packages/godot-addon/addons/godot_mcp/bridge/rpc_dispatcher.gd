@@ -14,6 +14,7 @@ var _editor_handlers
 var _visual_handlers
 var _ui_handlers
 var _animation_handlers
+var _tilemap_handlers
 var _runtime
 var _recovery
 
@@ -33,6 +34,7 @@ func _init(editor_interface, runtime = null) -> void:
     _visual_handlers = preload("res://addons/godot_mcp/bridge/handlers/visual_handlers.gd").new(editor_interface)
     _ui_handlers = preload("res://addons/godot_mcp/bridge/handlers/ui_handlers.gd").new(editor_interface)
     _animation_handlers = preload("res://addons/godot_mcp/bridge/handlers/animation_handlers.gd").new(editor_interface)
+    _tilemap_handlers = preload("res://addons/godot_mcp/bridge/handlers/tilemap_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -93,6 +95,22 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _animation_handlers.insert_key(params)
         "animation.remove_key":
             result = _animation_handlers.remove_key(params)
+        "tilemap.inspect":
+            result = _tilemap_handlers.inspect(params)
+        "tilemap.get_cells":
+            result = _tilemap_handlers.get_cells(params)
+        "tilemap.set_cell":
+            result = _tilemap_handlers.set_cell(params)
+        "tilemap.set_cells":
+            result = _tilemap_handlers.set_cells(params)
+        "tilemap.erase_cells":
+            result = _tilemap_handlers.erase_cells(params)
+        "tilemap.clear":
+            result = _tilemap_handlers.clear(params)
+        "tilemap.map_to_local":
+            result = _tilemap_handlers.map_to_local(params)
+        "tilemap.local_to_map":
+            result = _tilemap_handlers.local_to_map(params)
         "ui.inspect_layout":
             result = _ui_handlers.inspect_layout(params)
         "ui.set_layout_preset":
