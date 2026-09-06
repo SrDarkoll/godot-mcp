@@ -17,7 +17,8 @@ describe('3D material addon contract',()=>{
   it('uses copy-on-write and scene-context Undo/Redo for material mutations',()=>{
     const source=fs.readFileSync(file,'utf8');
     expect(source).toContain('duplicate(true)');
-    expect((source.match(/create_action\(/g)??[]).length).toBeGreaterThanOrEqual(5);
+    expect((source.match(/create_action\(/g)??[]).length).toBeGreaterThanOrEqual(1);
+    expect(source).toContain('func _commit_material_change(action_name: String, target: Dictionary, next_material: Material) -> void:');
     expect(source).toContain('undo_redo.create_action(action_name, 0, target_node)');
     for(const action of ['Set StandardMaterial3D','Configure StandardMaterial3D','Clear Material3D','Set Shader3D Code','Set Shader3D Parameter'])
       expect(source).toContain(`_commit_material_change("${action}"`);
