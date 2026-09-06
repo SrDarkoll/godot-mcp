@@ -13,9 +13,9 @@
     "build": "npm run build --workspace @godot-mcp/protocol && npm run build --workspace @godot-mcp/server && npm run build --workspace @godot-mcp/cli",
     "test": "npm run build && npm run test --workspace @godot-mcp/protocol && npm run test --workspace @godot-mcp/server && npm run test --workspace @godot-mcp/cli",
     "typecheck": "npm run build && npm run typecheck --workspace @godot-mcp/protocol && npm run typecheck --workspace @godot-mcp/server && npm run typecheck --workspace @godot-mcp/cli",
-    "test:integration": "node scripts/run-integration.mjs",
-    "test:integration:visual": "node scripts/run-integration.mjs --visual",
-    "test:integration:runtime": "node scripts/run-integration.mjs --runtime",
+    "test:integration": "npm run build && node scripts/run-integration.mjs",
+    "test:integration:visual": "npm run build && node scripts/run-integration.mjs --visual",
+    "test:integration:runtime": "npm run build && node scripts/run-integration.mjs --runtime",
     "check:godot": "node scripts/check-addon.mjs",
     "release:pack": "npm run build && node scripts/pack-release.mjs",
     "test:distribution": "npm run build && node scripts/smoke-release.mjs"
