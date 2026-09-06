@@ -12,7 +12,7 @@ Declared-file transactions, recoverable file checkpoints and session risk/permis
 
 Risky operations use MCP host/user elicitation rather than model-replayable confirmation tokens; see the [security model](docs/tools/security.md).
 
-Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md). Modern `TileMapLayer` and embedded TileSet atlas helpers are also available; see the [TileMapLayer and TileSet power-tools guide](docs/tools/tilemap-tileset.md). Common 2D authoring helpers for Node2D, Sprite2D, Camera2D, CollisionShape2D and Parallax2D are documented in the [2D power-tools guide](docs/tools/2d.md).
+Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md). Modern `TileMapLayer` and embedded TileSet atlas helpers are also available; see the [TileMapLayer and TileSet power-tools guide](docs/tools/tilemap-tileset.md). Common 2D authoring helpers for Node2D, Sprite2D, Camera2D, CollisionShape2D and Parallax2D are documented in the [2D power-tools guide](docs/tools/2d.md). Common 3D scene authoring plus StandardMaterial3D and spatial ShaderMaterial workflows are documented in the [3D and materials power-tools guide](docs/tools/3d-materials.md).
 
 > Unsaved editor-state recovery, debugger stepping and release automation remain future milestones. Visual checkpoints index images; file checkpoints restore selected on-disk files.
 
@@ -41,6 +41,7 @@ Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/Anima
   - `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers
   - `tilemap.*` TileMapLayer editing helpers and `tileset.*` embedded TileSet/atlas helpers
   - `node2d.*`, `sprite2d.*`, `camera2d.*`, `collision2d.*` and `parallax2d.*` common 2D authoring helpers
+  - `node3d.*`, `mesh3d.*`, `camera3d.*`, `collision3d.*`, `light3d.*`, `material3d.*` and `shader3d.*` common 3D/material authoring helpers
 - CLI commands:
   - `godot-mcp init`
   - `godot-mcp doctor`

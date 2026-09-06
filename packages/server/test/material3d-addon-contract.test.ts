@@ -10,7 +10,7 @@ describe('3D material addon contract',()=>{
       'inspect_material3d','set_standard_material3d','configure_standard_material3d','clear_material3d',
       'inspect_shader3d','set_shader3d_code','set_shader3d_parameter',
       'StandardMaterial3D','ShaderMaterial','Shader.new()','VariantSerializer.serialize','VariantSerializer.deserialize',
-      'get_shader_uniform_list','set_shader_parameter'
+      'get_shader_uniform_list','set_shader_parameter','set_surface_override_material','material_override'
     ]) expect(source).toContain(marker);
   });
   it('uses copy-on-write and scene-context Undo/Redo for material mutations',()=>{
