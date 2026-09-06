@@ -168,7 +168,8 @@ describe('Godot navigation power tools',()=>{
         use_3d_avoidance:true,keep_y_velocity:false,path_height_offset:0.2
       });
       expect(agent3d.isError,JSON.stringify(agent3d.structuredContent)).not.toBe(true);
-      expect(agent3d.structuredContent).toMatchObject({dimension:'3d',navigation_layers:7,height:1.8,use_3d_avoidance:true,keep_y_velocity:false});
+      expect(agent3d.structuredContent).toMatchObject({dimension:'3d',navigation_layers:7,use_3d_avoidance:true,keep_y_velocity:false});
+      expect((agent3d.structuredContent as any).height).toBeCloseTo(1.8,5);
       expect((agent3d.structuredContent as any).path_height_offset).toBeCloseTo(0.2,5);
 
       expect((await call('scene.save')).structuredContent).toMatchObject({saved:true});
@@ -188,7 +189,8 @@ describe('Godot navigation power tools',()=>{
       expect((persisted3dMesh.structuredContent as any).polygon_count).toBeGreaterThan(0);
       expect(persisted3dMesh.structuredContent).toMatchObject({agent_height:1.5,agent_radius:0.25,sample_partition_type:'watershed',vertices_per_polygon:6});
       const persisted3dAgent=await call('navigation.agent.inspect',{node_path:'/Main/Nav3D/Agent'});
-      expect(persisted3dAgent.structuredContent).toMatchObject({navigation_layers:7,height:1.8,use_3d_avoidance:true,keep_y_velocity:false});
+      expect(persisted3dAgent.structuredContent).toMatchObject({navigation_layers:7,use_3d_avoidance:true,keep_y_velocity:false});
+      expect((persisted3dAgent.structuredContent as any).height).toBeCloseTo(1.8,5);
     }finally{
       await client.close().catch(()=>undefined);
       await stopProcess(godot);
