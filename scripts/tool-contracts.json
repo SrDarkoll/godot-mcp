@@ -10,7 +10,18 @@
         "ui",
         "full"
       ],
-      "description": "Add and configure a non-audio Animation track with Undo/Redo support."
+      "description": "Add and configure a non-audio Animation track with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.configure",
@@ -21,7 +32,18 @@
         "ui",
         "full"
       ],
-      "description": "Set Animation length, loop mode or step with Undo/Redo support."
+      "description": "Set Animation length, loop mode or step with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.create",
@@ -32,7 +54,18 @@
         "ui",
         "full"
       ],
-      "description": "Create an Animation in an AnimationMixer library with Undo/Redo support."
+      "description": "Create an Animation in an AnimationMixer library with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.insert_key",
@@ -43,7 +76,18 @@
         "ui",
         "full"
       ],
-      "description": "Insert a new Animation key at an unused timestamp with Undo/Redo support."
+      "description": "Insert a new Animation key at an unused timestamp with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.inspect",
@@ -54,7 +98,18 @@
         "ui",
         "full"
       ],
-      "description": "Inspect an Animation resource, including tracks and bounded key values."
+      "description": "Inspect an Animation resource, including tracks and bounded key values.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.list",
@@ -65,7 +120,18 @@
         "ui",
         "full"
       ],
-      "description": "List AnimationMixer libraries and animation names."
+      "description": "List AnimationMixer libraries and animation names.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.remove",
@@ -76,7 +142,18 @@
         "ui",
         "full"
       ],
-      "description": "Remove an Animation from an AnimationMixer library with Undo/Redo support."
+      "description": "Remove an Animation from an AnimationMixer library with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "animation.remove_key",
@@ -87,7 +164,18 @@
         "ui",
         "full"
       ],
-      "description": "Remove an Animation key by track/key index with Undo/Redo support."
+      "description": "Remove an Animation key by track/key index with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-animation-tools.ts"
+      }
     },
     {
       "name": "camera2d.configure",
@@ -96,7 +184,18 @@
         "2d",
         "full"
       ],
-      "description": "Atomically configure persistent Camera2D zoom, limits, smoothing and drag settings."
+      "description": "Atomically configure persistent Camera2D zoom, limits, smoothing and drag settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "camera2d.inspect",
@@ -105,7 +204,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect persistent Camera2D zoom, limits, smoothing and drag settings."
+      "description": "Inspect persistent Camera2D zoom, limits, smoothing and drag settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "camera3d.configure",
@@ -114,7 +224,20 @@
         "3d",
         "full"
       ],
-      "description": "Atomically configure Camera3D projection, clipping, offsets and cull mask."
+      "description": "Atomically configure Camera3D projection, clipping, offsets and cull mask.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "Camera3dConfigureSchema",
+        "handlerRef": "configureCamera3d"
+      }
     },
     {
       "name": "camera3d.inspect",
@@ -123,7 +246,20 @@
         "3d",
         "full"
       ],
-      "description": "Inspect persistent Camera3D projection and clipping settings."
+      "description": "Inspect persistent Camera3D projection and clipping settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "node",
+        "handlerRef": "inspectCamera3d"
+      }
     },
     {
       "name": "checkpoint.create",
@@ -136,7 +272,18 @@
         "ui",
         "full"
       ],
-      "description": "checkpoint.create: declared on-disk file recovery with retained snapshots."
+      "description": "checkpoint.create: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "checkpoint.inspect",
@@ -149,7 +296,18 @@
         "ui",
         "full"
       ],
-      "description": "checkpoint.inspect: declared on-disk file recovery with retained snapshots."
+      "description": "checkpoint.inspect: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "checkpoint.list",
@@ -162,7 +320,18 @@
         "ui",
         "full"
       ],
-      "description": "checkpoint.list: declared on-disk file recovery with retained snapshots."
+      "description": "checkpoint.list: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "checkpoint.restore",
@@ -175,7 +344,16 @@
         "ui",
         "full"
       ],
-      "description": "checkpoint.restore: declared on-disk file recovery with retained snapshots."
+      "description": "checkpoint.restore: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "collision2d.inspect",
@@ -184,7 +362,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect CollisionShape2D and supported shape dimensions."
+      "description": "Inspect CollisionShape2D and supported shape dimensions.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "collision2d.set_shape",
@@ -193,7 +382,18 @@
         "2d",
         "full"
       ],
-      "description": "Create, replace or clear RectangleShape2D, CircleShape2D or CapsuleShape2D with Undo/Redo."
+      "description": "Create, replace or clear RectangleShape2D, CircleShape2D or CapsuleShape2D with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "collision3d.inspect",
@@ -202,7 +402,20 @@
         "3d",
         "full"
       ],
-      "description": "Inspect CollisionShape3D and supported primitive dimensions."
+      "description": "Inspect CollisionShape3D and supported primitive dimensions.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "node",
+        "handlerRef": "inspectCollision3d"
+      }
     },
     {
       "name": "collision3d.set_shape",
@@ -211,7 +424,20 @@
         "3d",
         "full"
       ],
-      "description": "Assign or clear an embedded primitive Shape3D with Undo/Redo."
+      "description": "Assign or clear an embedded primitive Shape3D with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "Collision3dSetShapeSchema",
+        "handlerRef": "setCollision3dShape"
+      }
     },
     {
       "name": "debug.errors",
@@ -220,7 +446,19 @@
         "runtime",
         "full"
       ],
-      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content."
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/debug-tools.ts"
+      }
     },
     {
       "name": "debug.output",
@@ -229,7 +467,19 @@
         "runtime",
         "full"
       ],
-      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content."
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/debug-tools.ts"
+      }
     },
     {
       "name": "debug.performance",
@@ -238,7 +488,18 @@
         "runtime",
         "full"
       ],
-      "description": "Sample runtime FPS and object/node counts."
+      "description": "Sample runtime FPS and object/node counts.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/debug-tools.ts"
+      }
     },
     {
       "name": "debug.warnings",
@@ -247,7 +508,19 @@
         "runtime",
         "full"
       ],
-      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content."
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/debug-tools.ts"
+      }
     },
     {
       "name": "editor.change_scene",
@@ -260,7 +533,18 @@
         "ui",
         "full"
       ],
-      "description": "Switch active scene tab to a given scene path."
+      "description": "Switch active scene tab to a given scene path.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.close_scene",
@@ -273,7 +557,16 @@
         "ui",
         "full"
       ],
-      "description": "editor.close_scene: declared on-disk file recovery with retained snapshots."
+      "description": "editor.close_scene: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "editor.get_active_scene",
@@ -286,7 +579,18 @@
         "ui",
         "full"
       ],
-      "description": "Get information about the currently active edited scene tab."
+      "description": "Get information about the currently active edited scene tab.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.get_filesystem",
@@ -299,7 +603,18 @@
         "ui",
         "full"
       ],
-      "description": "Get filesystem directory and file structure under res://."
+      "description": "Get filesystem directory and file structure under res://.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.get_open_scenes",
@@ -312,7 +627,18 @@
         "ui",
         "full"
       ],
-      "description": "Get list of open scene paths in the editor."
+      "description": "Get list of open scene paths in the editor.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.get_selected_nodes",
@@ -325,7 +651,18 @@
         "ui",
         "full"
       ],
-      "description": "Get currently selected nodes in the editor scene tree."
+      "description": "Get currently selected nodes in the editor scene tree.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.redo",
@@ -338,7 +675,16 @@
         "ui",
         "full"
       ],
-      "description": "Trigger Redo in the Godot editor."
+      "description": "Trigger Redo in the Godot editor.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.scan_filesystem",
@@ -351,7 +697,18 @@
         "ui",
         "full"
       ],
-      "description": "Request a rescan of the project filesystem in the editor."
+      "description": "Request a rescan of the project filesystem in the editor.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.select_node",
@@ -364,7 +721,18 @@
         "ui",
         "full"
       ],
-      "description": "Select a node in the editor scene tree."
+      "description": "Select a node in the editor scene tree.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "editor.undo",
@@ -377,7 +745,16 @@
         "ui",
         "full"
       ],
-      "description": "Trigger Undo in the Godot editor."
+      "description": "Trigger Undo in the Godot editor.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-editor-tools.ts"
+      }
     },
     {
       "name": "godot.capabilities",
@@ -392,7 +769,18 @@
         "runtime",
         "full"
       ],
-      "description": "Return the bounded compatibility and capability manifest reported by the authenticated Godot addon."
+      "description": "Return the bounded compatibility and capability manifest reported by the authenticated Godot addon.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-core-tools.ts"
+      }
     },
     {
       "name": "godot.tools",
@@ -407,7 +795,20 @@
         "runtime",
         "full"
       ],
-      "description": "Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers."
+      "description": "Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-tooling-tools.ts",
+        "schemaRef": "ToolDiscoveryParamsSchema",
+        "handlerRef": "registry.discover"
+      }
     },
     {
       "name": "light3d.configure",
@@ -416,7 +817,20 @@
         "3d",
         "full"
       ],
-      "description": "Atomically configure common and subtype-specific Light3D settings."
+      "description": "Atomically configure common and subtype-specific Light3D settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "Light3dConfigureSchema",
+        "handlerRef": "configureLight3d"
+      }
     },
     {
       "name": "light3d.inspect",
@@ -425,7 +839,20 @@
         "3d",
         "full"
       ],
-      "description": "Inspect DirectionalLight3D, OmniLight3D or SpotLight3D settings."
+      "description": "Inspect DirectionalLight3D, OmniLight3D or SpotLight3D settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "node",
+        "handlerRef": "inspectLight3d"
+      }
     },
     {
       "name": "material3d.clear",
@@ -434,7 +861,18 @@
         "3d",
         "full"
       ],
-      "description": "Clear the selected MeshInstance3D material override with Undo/Redo."
+      "description": "Clear the selected MeshInstance3D material override with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "material3d.configure_standard",
@@ -443,7 +881,18 @@
         "3d",
         "full"
       ],
-      "description": "Copy-on-write configure the selected StandardMaterial3D."
+      "description": "Copy-on-write configure the selected StandardMaterial3D.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "material3d.inspect",
@@ -452,7 +901,18 @@
         "3d",
         "full"
       ],
-      "description": "Inspect a MeshInstance3D material override or surface override."
+      "description": "Inspect a MeshInstance3D material override or surface override.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "material3d.set_standard",
@@ -461,7 +921,18 @@
         "3d",
         "full"
       ],
-      "description": "Create and assign a fresh embedded StandardMaterial3D."
+      "description": "Create and assign a fresh embedded StandardMaterial3D.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "mesh3d.inspect",
@@ -470,7 +941,20 @@
         "3d",
         "full"
       ],
-      "description": "Inspect MeshInstance3D mesh type, primitive dimensions and surfaces."
+      "description": "Inspect MeshInstance3D mesh type, primitive dimensions and surfaces.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "node",
+        "handlerRef": "inspectMesh3d"
+      }
     },
     {
       "name": "mesh3d.set_primitive",
@@ -479,7 +963,20 @@
         "3d",
         "full"
       ],
-      "description": "Assign or clear an embedded primitive Mesh on MeshInstance3D with Undo/Redo."
+      "description": "Assign or clear an embedded primitive Mesh on MeshInstance3D with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "Mesh3dSetPrimitiveSchema",
+        "handlerRef": "setMesh3dPrimitive"
+      }
     },
     {
       "name": "navigation.agent.configure",
@@ -490,7 +987,20 @@
         "navigation",
         "full"
       ],
-      "description": "Atomically configure persistent NavigationAgent2D/3D pathfinding and avoidance settings."
+      "description": "Atomically configure persistent NavigationAgent2D/3D pathfinding and avoidance settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationAgentConfigureSchema",
+        "handlerRef": "configureNavigationAgent"
+      }
     },
     {
       "name": "navigation.agent.inspect",
@@ -501,7 +1011,20 @@
         "navigation",
         "full"
       ],
-      "description": "Inspect persistent NavigationAgent2D/3D pathfinding and avoidance settings without advancing a path."
+      "description": "Inspect persistent NavigationAgent2D/3D pathfinding and avoidance settings without advancing a path.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationNodeTargetSchema",
+        "handlerRef": "inspectNavigationAgent"
+      }
     },
     {
       "name": "navigation.mesh.bake",
@@ -512,7 +1035,20 @@
         "navigation",
         "full"
       ],
-      "description": "Copy-on-write parse and synchronously bake navigation geometry from an explicit scene source root."
+      "description": "Copy-on-write parse and synchronously bake navigation geometry from an explicit scene source root.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationMeshBakeSchema",
+        "handlerRef": "bakeNavigationMesh"
+      }
     },
     {
       "name": "navigation.mesh.clear",
@@ -523,7 +1059,20 @@
         "navigation",
         "full"
       ],
-      "description": "Copy-on-write clear baked navigation geometry while preserving resource configuration and 2D outlines."
+      "description": "Copy-on-write clear baked navigation geometry while preserving resource configuration and 2D outlines.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationNodeTargetSchema",
+        "handlerRef": "clearNavigationMesh"
+      }
     },
     {
       "name": "navigation.mesh.configure",
@@ -534,7 +1083,20 @@
         "navigation",
         "full"
       ],
-      "description": "Copy-on-write configure NavigationPolygon/NavigationMesh bake settings."
+      "description": "Copy-on-write configure NavigationPolygon/NavigationMesh bake settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationMeshConfigureSchema",
+        "handlerRef": "configureNavigationMesh"
+      }
     },
     {
       "name": "navigation.mesh.inspect",
@@ -545,7 +1107,20 @@
         "navigation",
         "full"
       ],
-      "description": "Inspect the NavigationPolygon or NavigationMesh assigned to a navigation region."
+      "description": "Inspect the NavigationPolygon or NavigationMesh assigned to a navigation region.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationNodeTargetSchema",
+        "handlerRef": "inspectNavigationMesh"
+      }
     },
     {
       "name": "navigation.mesh.set",
@@ -556,7 +1131,20 @@
         "navigation",
         "full"
       ],
-      "description": "Create and assign a fresh embedded NavigationPolygon or NavigationMesh matching the region dimension."
+      "description": "Create and assign a fresh embedded NavigationPolygon or NavigationMesh matching the region dimension.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationNodeTargetSchema",
+        "handlerRef": "setNavigationMesh"
+      }
     },
     {
       "name": "navigation.mesh.set_outlines",
@@ -567,7 +1155,20 @@
         "navigation",
         "full"
       ],
-      "description": "Atomically replace bounded NavigationPolygon outlines for a 2D navigation region."
+      "description": "Atomically replace bounded NavigationPolygon outlines for a 2D navigation region.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationMeshSetOutlinesSchema",
+        "handlerRef": "setNavigationOutlines"
+      }
     },
     {
       "name": "navigation.region.configure",
@@ -578,7 +1179,20 @@
         "navigation",
         "full"
       ],
-      "description": "Atomically configure common NavigationRegion2D/3D properties with Undo/Redo."
+      "description": "Atomically configure common NavigationRegion2D/3D properties with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationRegionConfigureSchema",
+        "handlerRef": "configureNavigationRegion"
+      }
     },
     {
       "name": "navigation.region.inspect",
@@ -589,7 +1203,20 @@
         "navigation",
         "full"
       ],
-      "description": "Inspect a NavigationRegion2D or NavigationRegion3D and its navigation resource."
+      "description": "Inspect a NavigationRegion2D or NavigationRegion3D and its navigation resource.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-navigation-tools.ts",
+        "schemaRef": "NavigationNodeTargetSchema",
+        "handlerRef": "inspectNavigationRegion"
+      }
     },
     {
       "name": "node.create",
@@ -602,7 +1229,18 @@
         "ui",
         "full"
       ],
-      "description": "Create a new node as a child of a parent node in the edited scene with Undo/Redo support."
+      "description": "Create a new node as a child of a parent node in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.delete",
@@ -615,7 +1253,18 @@
         "ui",
         "full"
       ],
-      "description": "Delete a node from the edited scene with Undo/Redo support."
+      "description": "Delete a node from the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.duplicate",
@@ -628,7 +1277,18 @@
         "ui",
         "full"
       ],
-      "description": "Duplicate a node in the edited scene with Undo/Redo support."
+      "description": "Duplicate a node in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.get_properties",
@@ -641,7 +1301,18 @@
         "ui",
         "full"
       ],
-      "description": "Get multiple or all exported property values of a node."
+      "description": "Get multiple or all exported property values of a node.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.get_property",
@@ -654,7 +1325,18 @@
         "ui",
         "full"
       ],
-      "description": "Get a single property value of a node."
+      "description": "Get a single property value of a node.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.inspect",
@@ -667,7 +1349,18 @@
         "ui",
         "full"
       ],
-      "description": "Inspect full details of a node (class, script, groups, children count, exported properties)."
+      "description": "Inspect full details of a node (class, script, groups, children count, exported properties).",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.list_children",
@@ -680,7 +1373,18 @@
         "ui",
         "full"
       ],
-      "description": "List immediate children of a node."
+      "description": "List immediate children of a node.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.move",
@@ -693,7 +1397,18 @@
         "ui",
         "full"
       ],
-      "description": "Move a node to a specific child index with Undo/Redo support."
+      "description": "Move a node to a specific child index with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.rename",
@@ -706,7 +1421,18 @@
         "ui",
         "full"
       ],
-      "description": "Rename a node in the edited scene with Undo/Redo support."
+      "description": "Rename a node in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.reparent",
@@ -719,7 +1445,18 @@
         "ui",
         "full"
       ],
-      "description": "Reparent a node to a new parent in the edited scene with Undo/Redo support."
+      "description": "Reparent a node to a new parent in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node.set_property",
@@ -732,7 +1469,18 @@
         "ui",
         "full"
       ],
-      "description": "Set a property value on a node with Undo/Redo support."
+      "description": "Set a property value on a node with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-node-tools.ts"
+      }
     },
     {
       "name": "node2d.inspect_transform",
@@ -741,7 +1489,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect local and global Node2D transform values."
+      "description": "Inspect local and global Node2D transform values.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "node2d.set_transform",
@@ -750,7 +1509,18 @@
         "2d",
         "full"
       ],
-      "description": "Atomically set local Node2D position, rotation, scale or skew with Undo/Redo."
+      "description": "Atomically set local Node2D position, rotation, scale or skew with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "node3d.inspect_transform",
@@ -759,7 +1529,20 @@
         "3d",
         "full"
       ],
-      "description": "Inspect local and global Node3D transforms."
+      "description": "Inspect local and global Node3D transforms.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "node",
+        "handlerRef": "inspectNode3dTransform"
+      }
     },
     {
       "name": "node3d.set_transform",
@@ -768,7 +1551,20 @@
         "3d",
         "full"
       ],
-      "description": "Atomically set local Node3D position, rotation or stable scale with Undo/Redo."
+      "description": "Atomically set local Node3D position, rotation or stable scale with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-power3d-tools.ts",
+        "schemaRef": "Node3dSetTransformSchema",
+        "handlerRef": "setNode3dTransform"
+      }
     },
     {
       "name": "object.call",
@@ -777,7 +1573,16 @@
         "core",
         "full"
       ],
-      "description": "Call an allowed method on an object."
+      "description": "Call an allowed method on an object.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "blockable"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "object.get",
@@ -786,7 +1591,18 @@
         "core",
         "full"
       ],
-      "description": "Get a property value on an object."
+      "description": "Get a property value on an object.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "object.get_class",
@@ -795,7 +1611,18 @@
         "core",
         "full"
       ],
-      "description": "Get the Godot class name of an object (node, resource, or instance id)."
+      "description": "Get the Godot class name of an object (node, resource, or instance id).",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "object.get_method_list",
@@ -804,7 +1631,18 @@
         "core",
         "full"
       ],
-      "description": "Get the list of methods for an object."
+      "description": "Get the list of methods for an object.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "object.get_property_list",
@@ -813,7 +1651,18 @@
         "core",
         "full"
       ],
-      "description": "Get the list of properties for an object."
+      "description": "Get the list of properties for an object.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "object.get_signal_list",
@@ -822,7 +1671,18 @@
         "core",
         "full"
       ],
-      "description": "Get the list of signals for an object."
+      "description": "Get the list of signals for an object.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "object.set",
@@ -831,7 +1691,18 @@
         "core",
         "full"
       ],
-      "description": "Set a property value on an object."
+      "description": "Set a property value on an object.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-object-tools.ts"
+      }
     },
     {
       "name": "parallax2d.configure",
@@ -840,7 +1711,18 @@
         "2d",
         "full"
       ],
-      "description": "Atomically configure Parallax2D repeat, scrolling, viewport following and limits."
+      "description": "Atomically configure Parallax2D repeat, scrolling, viewport following and limits.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "parallax2d.inspect",
@@ -849,7 +1731,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect Parallax2D repeat, scrolling, viewport following and limits."
+      "description": "Inspect Parallax2D repeat, scrolling, viewport following and limits.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "permissions.disable",
@@ -863,7 +1756,18 @@
         "runtime",
         "full"
       ],
-      "description": "Change a session-only permission."
+      "description": "Change a session-only permission.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/security-tools.ts"
+      }
     },
     {
       "name": "permissions.enable",
@@ -877,7 +1781,18 @@
         "runtime",
         "full"
       ],
-      "description": "Change a session-only permission."
+      "description": "Change a session-only permission.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/security-tools.ts"
+      }
     },
     {
       "name": "permissions.set",
@@ -891,7 +1806,18 @@
         "runtime",
         "full"
       ],
-      "description": "Change a permission for this MCP session only."
+      "description": "Change a permission for this MCP session only.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/security-tools.ts"
+      }
     },
     {
       "name": "permissions.status",
@@ -905,7 +1831,19 @@
         "runtime",
         "full"
       ],
-      "description": "Session-only tool permissions. These do not sandbox project code or add missing capabilities."
+      "description": "Session-only tool permissions. These do not sandbox project code or add missing capabilities.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/security-tools.ts"
+      }
     },
     {
       "name": "project.info",
@@ -920,7 +1858,18 @@
         "runtime",
         "full"
       ],
-      "description": "Inspect the active Godot project through the connected editor addon."
+      "description": "Inspect the active Godot project through the connected editor addon.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-core-tools.ts"
+      }
     },
     {
       "name": "project.input.add_action",
@@ -931,7 +1880,18 @@
         "3d",
         "full"
       ],
-      "description": "Add an action to the InputMap and persist in project settings."
+      "description": "Add an action to the InputMap and persist in project settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-project-tools.ts"
+      }
     },
     {
       "name": "project.input.list",
@@ -942,7 +1902,18 @@
         "3d",
         "full"
       ],
-      "description": "List all input actions and their assigned events from InputMap."
+      "description": "List all input actions and their assigned events from InputMap.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-project-tools.ts"
+      }
     },
     {
       "name": "project.input.remove_action",
@@ -953,7 +1924,18 @@
         "3d",
         "full"
       ],
-      "description": "Remove an action from the InputMap and project settings."
+      "description": "Remove an action from the InputMap and project settings.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-project-tools.ts"
+      }
     },
     {
       "name": "project.run",
@@ -962,7 +1944,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot project.run operation on the current runtime session."
+      "description": "Structured Godot project.run operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "project.run_scene",
@@ -971,7 +1964,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot project.run_scene operation on the current runtime session."
+      "description": "Structured Godot project.run_scene operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "project.settings.get",
@@ -982,7 +1986,18 @@
         "3d",
         "full"
       ],
-      "description": "Get a project setting value from project.godot."
+      "description": "Get a project setting value from project.godot.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-project-tools.ts"
+      }
     },
     {
       "name": "project.settings.set",
@@ -993,7 +2008,16 @@
         "3d",
         "full"
       ],
-      "description": "Set a project setting value and optionally save to project.godot."
+      "description": "Set a project setting value and optionally save to project.godot.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-project-tools.ts"
+      }
     },
     {
       "name": "project.stop",
@@ -1002,7 +2026,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot project.stop operation on the current runtime session."
+      "description": "Structured Godot project.stop operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "resource.create",
@@ -1015,7 +2050,18 @@
         "ui",
         "full"
       ],
-      "description": "Create and save a new resource of a specified type."
+      "description": "Create and save a new resource of a specified type.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-resource-tools.ts"
+      }
     },
     {
       "name": "resource.duplicate",
@@ -1028,7 +2074,18 @@
         "ui",
         "full"
       ],
-      "description": "Duplicate a resource to a new path."
+      "description": "Duplicate a resource to a new path.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-resource-tools.ts"
+      }
     },
     {
       "name": "resource.inspect",
@@ -1041,7 +2098,18 @@
         "ui",
         "full"
       ],
-      "description": "Inspect properties of a resource file."
+      "description": "Inspect properties of a resource file.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-resource-tools.ts"
+      }
     },
     {
       "name": "resource.load",
@@ -1054,7 +2122,18 @@
         "ui",
         "full"
       ],
-      "description": "Load a resource file and inspect its exported properties."
+      "description": "Load a resource file and inspect its exported properties.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-resource-tools.ts"
+      }
     },
     {
       "name": "resource.save",
@@ -1067,7 +2146,18 @@
         "ui",
         "full"
       ],
-      "description": "Save a loaded resource."
+      "description": "Save a loaded resource.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-resource-tools.ts"
+      }
     },
     {
       "name": "resource.set_property",
@@ -1080,7 +2170,18 @@
         "ui",
         "full"
       ],
-      "description": "Set a property on a resource file and save it."
+      "description": "Set a property on a resource file and save it.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-resource-tools.ts"
+      }
     },
     {
       "name": "risk.preview",
@@ -1094,7 +2195,18 @@
         "runtime",
         "full"
       ],
-      "description": "Read the risk, targets and required permissions of an operation without executing it."
+      "description": "Read the risk, targets and required permissions of an operation without executing it.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/security-tools.ts"
+      }
     },
     {
       "name": "runtime.get_property",
@@ -1103,7 +2215,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.get_property operation on the current runtime session."
+      "description": "Structured Godot runtime.get_property operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.inspect_node",
@@ -1112,7 +2235,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.inspect_node operation on the current runtime session."
+      "description": "Structured Godot runtime.inspect_node operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.pause",
@@ -1121,7 +2255,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.pause operation on the current runtime session."
+      "description": "Structured Godot runtime.pause operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.restart",
@@ -1130,7 +2275,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.restart operation on the current runtime session."
+      "description": "Structured Godot runtime.restart operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.resume",
@@ -1139,7 +2295,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.resume operation on the current runtime session."
+      "description": "Structured Godot runtime.resume operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.scene_tree",
@@ -1148,7 +2315,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.scene_tree operation on the current runtime session."
+      "description": "Structured Godot runtime.scene_tree operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.status",
@@ -1157,7 +2335,19 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.status operation on the current runtime session."
+      "description": "Structured Godot runtime.status operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "runtime.stop",
@@ -1166,7 +2356,18 @@
         "runtime",
         "full"
       ],
-      "description": "Structured Godot runtime.stop operation on the current runtime session."
+      "description": "Structured Godot runtime.stop operation on the current runtime session.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/runtime-tools.ts"
+      }
     },
     {
       "name": "scene.create",
@@ -1179,7 +2380,18 @@
         "ui",
         "full"
       ],
-      "description": "Create a new scene with specified root node type and optional path."
+      "description": "Create a new scene with specified root node type and optional path.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "scene.get_root",
@@ -1192,7 +2404,18 @@
         "ui",
         "full"
       ],
-      "description": "Get the root node info of the currently edited scene."
+      "description": "Get the root node info of the currently edited scene.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "scene.get_tree",
@@ -1207,7 +2430,18 @@
         "runtime",
         "full"
       ],
-      "description": "Return the active edited scene tree with node names, classes, paths, and scripts."
+      "description": "Return the active edited scene tree with node names, classes, paths, and scripts.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-core-tools.ts"
+      }
     },
     {
       "name": "scene.instantiate",
@@ -1220,7 +2454,18 @@
         "ui",
         "full"
       ],
-      "description": "Instantiate a scene as a child of a node in the edited scene with Undo/Redo support."
+      "description": "Instantiate a scene as a child of a node in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "scene.open",
@@ -1233,7 +2478,18 @@
         "ui",
         "full"
       ],
-      "description": "Open a scene file in the Godot editor."
+      "description": "Open a scene file in the Godot editor.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "scene.reload",
@@ -1246,7 +2502,16 @@
         "ui",
         "full"
       ],
-      "description": "Reload a scene from disk in the editor."
+      "description": "Reload a scene from disk in the editor.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "scene.save",
@@ -1259,7 +2524,18 @@
         "ui",
         "full"
       ],
-      "description": "Save the currently edited scene."
+      "description": "Save the currently edited scene.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "scene.save_as",
@@ -1272,7 +2548,16 @@
         "ui",
         "full"
       ],
-      "description": "Save the currently edited scene to a new path."
+      "description": "Save the currently edited scene to a new path.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-scene-tools.ts"
+      }
     },
     {
       "name": "script.attach",
@@ -1284,7 +2569,18 @@
         "ui",
         "full"
       ],
-      "description": "Attach a script to a node in the edited scene with Undo/Redo support."
+      "description": "Attach a script to a node in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-script-tools.ts"
+      }
     },
     {
       "name": "script.create",
@@ -1296,7 +2592,18 @@
         "ui",
         "full"
       ],
-      "description": "Create a new script file with an optional template."
+      "description": "Create a new script file with an optional template.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-script-tools.ts"
+      }
     },
     {
       "name": "script.detach",
@@ -1308,7 +2615,18 @@
         "ui",
         "full"
       ],
-      "description": "Detach a script from a node in the edited scene with Undo/Redo support."
+      "description": "Detach a script from a node in the edited scene with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-script-tools.ts"
+      }
     },
     {
       "name": "script.inspect",
@@ -1320,7 +2638,18 @@
         "ui",
         "full"
       ],
-      "description": "Inspect structure of a script (methods, properties, signals, base type)."
+      "description": "Inspect structure of a script (methods, properties, signals, base type).",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-script-tools.ts"
+      }
     },
     {
       "name": "script.validate",
@@ -1332,7 +2661,18 @@
         "ui",
         "full"
       ],
-      "description": "Validate GDScript syntax and compile checks without saving."
+      "description": "Validate GDScript syntax and compile checks without saving.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-script-tools.ts"
+      }
     },
     {
       "name": "session.manifest",
@@ -1346,7 +2686,18 @@
         "runtime",
         "full"
       ],
-      "description": "Read the persistent manifest of the current session, including screenshots and visual checkpoints."
+      "description": "Read the persistent manifest of the current session, including screenshots and visual checkpoints.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-visual-tools.ts"
+      }
     },
     {
       "name": "session.status",
@@ -1361,7 +2712,19 @@
         "runtime",
         "full"
       ],
-      "description": "Return the active Godot MCP session and editor/runtime connection state."
+      "description": "Return the active Godot MCP session and editor/runtime connection state.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-core-tools.ts"
+      }
     },
     {
       "name": "shader3d.inspect",
@@ -1370,7 +2733,18 @@
         "3d",
         "full"
       ],
-      "description": "Inspect spatial ShaderMaterial code, uniforms and current parameters."
+      "description": "Inspect spatial ShaderMaterial code, uniforms and current parameters.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "shader3d.set_code",
@@ -1379,7 +2753,18 @@
         "3d",
         "full"
       ],
-      "description": "Create or copy-on-write update an embedded spatial ShaderMaterial."
+      "description": "Create or copy-on-write update an embedded spatial ShaderMaterial.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "shader3d.set_parameter",
@@ -1388,7 +2773,18 @@
         "3d",
         "full"
       ],
-      "description": "Copy-on-write set a declared spatial shader uniform using canonical Variant encoding."
+      "description": "Copy-on-write set a declared spatial shader uniform using canonical Variant encoding.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-material3d-tools.ts"
+      }
     },
     {
       "name": "signal.connect",
@@ -1400,7 +2796,18 @@
         "ui",
         "full"
       ],
-      "description": "Connect a signal from a source node to a target node method with Undo/Redo support."
+      "description": "Connect a signal from a source node to a target node method with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-signal-tools.ts"
+      }
     },
     {
       "name": "signal.connections",
@@ -1412,7 +2819,18 @@
         "ui",
         "full"
       ],
-      "description": "List active signal connections on a node."
+      "description": "List active signal connections on a node.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-signal-tools.ts"
+      }
     },
     {
       "name": "signal.disconnect",
@@ -1424,7 +2842,18 @@
         "ui",
         "full"
       ],
-      "description": "Disconnect a signal between two nodes with Undo/Redo support."
+      "description": "Disconnect a signal between two nodes with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-signal-tools.ts"
+      }
     },
     {
       "name": "signal.list",
@@ -1436,7 +2865,18 @@
         "ui",
         "full"
       ],
-      "description": "List all signals declared on a node and its script."
+      "description": "List all signals declared on a node and its script.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-signal-tools.ts"
+      }
     },
     {
       "name": "sprite2d.configure",
@@ -1445,7 +2885,18 @@
         "2d",
         "full"
       ],
-      "description": "Atomically configure Sprite2D frame grid, region, flip, centering and offset."
+      "description": "Atomically configure Sprite2D frame grid, region, flip, centering and offset.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "sprite2d.inspect",
@@ -1454,7 +2905,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect Sprite2D texture, frame, region, flip and offset state."
+      "description": "Inspect Sprite2D texture, frame, region, flip and offset state.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "sprite2d.set_texture",
@@ -1463,7 +2925,18 @@
         "2d",
         "full"
       ],
-      "description": "Assign or clear a project Texture2D on Sprite2D with Undo/Redo."
+      "description": "Assign or clear a project Texture2D on Sprite2D with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-power2d-tools.ts"
+      }
     },
     {
       "name": "tilemap.clear",
@@ -1472,7 +2945,18 @@
         "2d",
         "full"
       ],
-      "description": "Clear a TileMapLayer with bounded exact Undo/Redo."
+      "description": "Clear a TileMapLayer with bounded exact Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.erase_cells",
@@ -1481,7 +2965,18 @@
         "2d",
         "full"
       ],
-      "description": "Atomically erase up to 4096 TileMapLayer cells with exact Undo/Redo."
+      "description": "Atomically erase up to 4096 TileMapLayer cells with exact Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.get_cells",
@@ -1490,7 +2985,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect selected TileMapLayer cells or enumerate all used cells up to 4096."
+      "description": "Inspect selected TileMapLayer cells or enumerate all used cells up to 4096.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.inspect",
@@ -1499,7 +3005,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect a modern Godot TileMapLayer without enumerating every cell."
+      "description": "Inspect a modern Godot TileMapLayer without enumerating every cell.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.local_to_map",
@@ -1508,7 +3025,18 @@
         "2d",
         "full"
       ],
-      "description": "Convert a TileMapLayer local pixel position to map coordinate."
+      "description": "Convert a TileMapLayer local pixel position to map coordinate.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.map_to_local",
@@ -1517,7 +3045,18 @@
         "2d",
         "full"
       ],
-      "description": "Convert a TileMapLayer map coordinate to local pixel position."
+      "description": "Convert a TileMapLayer map coordinate to local pixel position.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.set_cell",
@@ -1526,7 +3065,18 @@
         "2d",
         "full"
       ],
-      "description": "Set one TileMapLayer cell with Undo/Redo support."
+      "description": "Set one TileMapLayer cell with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tilemap.set_cells",
@@ -1535,7 +3085,18 @@
         "2d",
         "full"
       ],
-      "description": "Atomically set up to 4096 TileMapLayer cells in one Undo/Redo action."
+      "description": "Atomically set up to 4096 TileMapLayer cells in one Undo/Redo action.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tilemap-tools.ts"
+      }
     },
     {
       "name": "tileset.add_atlas_source",
@@ -1544,7 +3105,18 @@
         "2d",
         "full"
       ],
-      "description": "Add a project texture as a TileSetAtlasSource with Undo/Redo support."
+      "description": "Add a project texture as a TileSetAtlasSource with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tileset-tools.ts"
+      }
     },
     {
       "name": "tileset.create_atlas_tiles",
@@ -1553,7 +3125,18 @@
         "2d",
         "full"
       ],
-      "description": "Create up to 4096 base atlas tiles atomically with Undo/Redo."
+      "description": "Create up to 4096 base atlas tiles atomically with Undo/Redo.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tileset-tools.ts"
+      }
     },
     {
       "name": "tileset.ensure_for_layer",
@@ -1562,7 +3145,18 @@
         "2d",
         "full"
       ],
-      "description": "Ensure a TileMapLayer has an embedded TileSet without replacing an existing one."
+      "description": "Ensure a TileMapLayer has an embedded TileSet without replacing an existing one.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tileset-tools.ts"
+      }
     },
     {
       "name": "tileset.inspect",
@@ -1571,7 +3165,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect the TileSet assigned to a TileMapLayer and summarize its sources."
+      "description": "Inspect the TileSet assigned to a TileMapLayer and summarize its sources.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tileset-tools.ts"
+      }
     },
     {
       "name": "tileset.inspect_atlas_source",
@@ -1580,7 +3185,18 @@
         "2d",
         "full"
       ],
-      "description": "Inspect one TileSetAtlasSource and its base atlas tiles."
+      "description": "Inspect one TileSetAtlasSource and its base atlas tiles.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tileset-tools.ts"
+      }
     },
     {
       "name": "tileset.remove_source",
@@ -1589,7 +3205,18 @@
         "2d",
         "full"
       ],
-      "description": "Remove an unused TileSet source conservatively with Undo/Redo support."
+      "description": "Remove an unused TileSet source conservatively with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-tileset-tools.ts"
+      }
     },
     {
       "name": "transaction.begin",
@@ -1602,7 +3229,18 @@
         "ui",
         "full"
       ],
-      "description": "transaction.begin: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.begin: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.commit",
@@ -1615,7 +3253,16 @@
         "ui",
         "full"
       ],
-      "description": "Publish and validate staged files; failed validation triggers exact-byte compensation."
+      "description": "Publish and validate staged files; failed validation triggers exact-byte compensation.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.delete_file",
@@ -1628,7 +3275,18 @@
         "ui",
         "full"
       ],
-      "description": "transaction.delete_file: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.delete_file: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.preview",
@@ -1641,7 +3299,18 @@
         "ui",
         "full"
       ],
-      "description": "transaction.preview: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.preview: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.recover",
@@ -1654,7 +3323,16 @@
         "ui",
         "full"
       ],
-      "description": "transaction.recover: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.recover: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "risky",
+        "tags": [],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.rollback",
@@ -1667,7 +3345,18 @@
         "ui",
         "full"
       ],
-      "description": "transaction.rollback: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.rollback: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.status",
@@ -1680,7 +3369,19 @@
         "ui",
         "full"
       ],
-      "description": "transaction.status: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.status: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read",
+          "control"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "transaction.write_file",
@@ -1693,7 +3394,18 @@
         "ui",
         "full"
       ],
-      "description": "transaction.write_file: declared on-disk file recovery with retained snapshots."
+      "description": "transaction.write_file: declared on-disk file recovery with retained snapshots.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/tools/recovery-tools.ts"
+      }
     },
     {
       "name": "ui.inspect_layout",
@@ -1703,7 +3415,18 @@
         "ui",
         "full"
       ],
-      "description": "Inspect Control anchors, offsets, rectangles, size flags, focus neighbors and parent Container ownership."
+      "description": "Inspect Control anchors, offsets, rectangles, size flags, focus neighbors and parent Container ownership.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-ui-tools.ts"
+      }
     },
     {
       "name": "ui.set_anchors",
@@ -1713,7 +3436,18 @@
         "ui",
         "full"
       ],
-      "description": "Set all four Control anchors atomically with Undo/Redo support."
+      "description": "Set all four Control anchors atomically with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-ui-tools.ts"
+      }
     },
     {
       "name": "ui.set_focus_neighbor",
@@ -1723,7 +3457,18 @@
         "ui",
         "full"
       ],
-      "description": "Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support."
+      "description": "Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-ui-tools.ts"
+      }
     },
     {
       "name": "ui.set_layout_preset",
@@ -1733,7 +3478,18 @@
         "ui",
         "full"
       ],
-      "description": "Apply a Godot Control layout preset with Undo/Redo support."
+      "description": "Apply a Godot Control layout preset with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-ui-tools.ts"
+      }
     },
     {
       "name": "ui.set_offsets",
@@ -1743,7 +3499,18 @@
         "ui",
         "full"
       ],
-      "description": "Set one or more Control offsets and report whether a parent Container manages layout."
+      "description": "Set one or more Control offsets and report whether a parent Container manages layout.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-ui-tools.ts"
+      }
     },
     {
       "name": "ui.set_size_flags",
@@ -1753,7 +3520,18 @@
         "ui",
         "full"
       ],
-      "description": "Set Control horizontal/vertical size flags and optional stretch ratio with Undo/Redo support."
+      "description": "Set Control horizontal/vertical size flags and optional stretch ratio with Undo/Redo support.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-ui-tools.ts"
+      }
     },
     {
       "name": "visual.capture_game",
@@ -1762,7 +3540,18 @@
         "runtime",
         "full"
       ],
-      "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime."
+      "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-visual-tools.ts"
+      }
     },
     {
       "name": "visual.capture_viewport_2d",
@@ -1772,7 +3561,18 @@
         "ui",
         "full"
       ],
-      "description": "Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor."
+      "description": "Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-visual-tools.ts"
+      }
     },
     {
       "name": "visual.capture_viewport_3d",
@@ -1781,7 +3581,18 @@
         "3d",
         "full"
       ],
-      "description": "Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG."
+      "description": "Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-visual-tools.ts"
+      }
     },
     {
       "name": "workflow.diff_since",
@@ -1790,7 +3601,18 @@
         "runtime",
         "full"
       ],
-      "description": "Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project."
+      "description": "Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-workflow-tools.ts"
+      }
     },
     {
       "name": "workflow.run_check",
@@ -1799,7 +3621,18 @@
         "runtime",
         "full"
       ],
-      "description": "Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict."
+      "description": "Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-workflow-tools.ts"
+      }
     },
     {
       "name": "workflow.snapshot",
@@ -1808,7 +3641,18 @@
         "runtime",
         "full"
       ],
-      "description": "Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture."
+      "description": "Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture.",
+      "risk": {
+        "baseline": "normal",
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "legacy",
+        "source": "packages/server/src/mcp/register-workflow-tools.ts"
+      }
     }
   ]
 }
