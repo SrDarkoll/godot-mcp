@@ -145,14 +145,14 @@ Otherwise it is unsupported with a concise reason.
 
 `navigation_handlers.gd` no longer owns version knowledge. It asks the core whether `navigation.agent3d.keep_y_velocity` is available/restricted and whether the known quirk is active.
 
-Behavior remains:
+On builds where the live quirk probe is active (including the authoritative Godot 4.6.3 gate), behavior remains:
 
 - with `use_3d_avoidance=false`, `keep_y_velocity` may be configured and inspected;
 - with `use_3d_avoidance=true`, inspection omits it;
 - configuring it while effective 3D avoidance is enabled returns `INVALID_ARGUMENT`;
 - transitioning to 3D avoidance normalizes the hidden value to Godot's default `true`.
 
-If the property is absent on a future/older engine, a request to configure it returns `UNSUPPORTED_CAPABILITY` instead of attempting a missing property.
+If the live quirk probe is inactive, `keep_y_velocity` stays normally authorable rather than inheriting a version guess. If the property is absent on a future/older engine, a request to configure it returns `CAPABILITY_UNAVAILABLE` instead of attempting a missing property.
 
 ### Visual
 
@@ -162,7 +162,7 @@ If the property is absent on a future/older engine, a request to configure it re
 
 `godot.capabilities` is a read-only local MCP tool. It returns the authenticated addon manifest already held by `BridgeServer`; it does not perform arbitrary reflection and does not issue a new editor RPC.
 
-If an older addon connects without a manifest, the tool returns `CAPABILITY_MANIFEST_UNAVAILABLE` rather than guessing.
+If an older addon connects without a manifest, the tool returns `CAPABILITY_UNAVAILABLE` rather than guessing.
 
 ## Security
 

@@ -95,7 +95,7 @@
 
 **Interfaces:**
 - Navigation handler constructor accepts the shared compatibility core.
-- Missing `navigation.agent3d.keep_y_velocity` capability yields `UNSUPPORTED_CAPABILITY` for writes.
+- Missing `navigation.agent3d.keep_y_velocity` capability yields `CAPABILITY_UNAVAILABLE` for writes.
 
 - [ ] Change contract/E2E expectations first so Navigation must consult the shared core and keep the existing 4.6 behavior.
 - [ ] Confirm the contract test fails against the old handler.
