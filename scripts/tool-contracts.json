@@ -1,0 +1,1814 @@
+{
+  "schemaVersion": 1,
+  "tools": [
+    {
+      "name": "animation.add_track",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Add and configure a non-audio Animation track with Undo/Redo support."
+    },
+    {
+      "name": "animation.configure",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Set Animation length, loop mode or step with Undo/Redo support."
+    },
+    {
+      "name": "animation.create",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Create an Animation in an AnimationMixer library with Undo/Redo support."
+    },
+    {
+      "name": "animation.insert_key",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Insert a new Animation key at an unused timestamp with Undo/Redo support."
+    },
+    {
+      "name": "animation.inspect",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Inspect an Animation resource, including tracks and bounded key values."
+    },
+    {
+      "name": "animation.list",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "List AnimationMixer libraries and animation names."
+    },
+    {
+      "name": "animation.remove",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Remove an Animation from an AnimationMixer library with Undo/Redo support."
+    },
+    {
+      "name": "animation.remove_key",
+      "domain": "animation",
+      "profiles": [
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Remove an Animation key by track/key index with Undo/Redo support."
+    },
+    {
+      "name": "camera2d.configure",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Atomically configure persistent Camera2D zoom, limits, smoothing and drag settings."
+    },
+    {
+      "name": "camera2d.inspect",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect persistent Camera2D zoom, limits, smoothing and drag settings."
+    },
+    {
+      "name": "camera3d.configure",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Atomically configure Camera3D projection, clipping, offsets and cull mask."
+    },
+    {
+      "name": "camera3d.inspect",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect persistent Camera3D projection and clipping settings."
+    },
+    {
+      "name": "checkpoint.create",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "checkpoint.create: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "checkpoint.inspect",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "checkpoint.inspect: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "checkpoint.list",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "checkpoint.list: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "checkpoint.restore",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "checkpoint.restore: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "collision2d.inspect",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect CollisionShape2D and supported shape dimensions."
+    },
+    {
+      "name": "collision2d.set_shape",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Create, replace or clear RectangleShape2D, CircleShape2D or CapsuleShape2D with Undo/Redo."
+    },
+    {
+      "name": "collision3d.inspect",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect CollisionShape3D and supported primitive dimensions."
+    },
+    {
+      "name": "collision3d.set_shape",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Assign or clear an embedded primitive Shape3D with Undo/Redo."
+    },
+    {
+      "name": "debug.errors",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content."
+    },
+    {
+      "name": "debug.output",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content."
+    },
+    {
+      "name": "debug.performance",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Sample runtime FPS and object/node counts."
+    },
+    {
+      "name": "debug.warnings",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content."
+    },
+    {
+      "name": "editor.change_scene",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Switch active scene tab to a given scene path."
+    },
+    {
+      "name": "editor.close_scene",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "editor.close_scene: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "editor.get_active_scene",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get information about the currently active edited scene tab."
+    },
+    {
+      "name": "editor.get_filesystem",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get filesystem directory and file structure under res://."
+    },
+    {
+      "name": "editor.get_open_scenes",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get list of open scene paths in the editor."
+    },
+    {
+      "name": "editor.get_selected_nodes",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get currently selected nodes in the editor scene tree."
+    },
+    {
+      "name": "editor.redo",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Trigger Redo in the Godot editor."
+    },
+    {
+      "name": "editor.scan_filesystem",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Request a rescan of the project filesystem in the editor."
+    },
+    {
+      "name": "editor.select_node",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Select a node in the editor scene tree."
+    },
+    {
+      "name": "editor.undo",
+      "domain": "editor",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Trigger Undo in the Godot editor."
+    },
+    {
+      "name": "godot.capabilities",
+      "domain": "core",
+      "profiles": [
+        "minimal",
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Return the bounded compatibility and capability manifest reported by the authenticated Godot addon."
+    },
+    {
+      "name": "godot.tools",
+      "domain": "core",
+      "profiles": [
+        "minimal",
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers."
+    },
+    {
+      "name": "light3d.configure",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Atomically configure common and subtype-specific Light3D settings."
+    },
+    {
+      "name": "light3d.inspect",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect DirectionalLight3D, OmniLight3D or SpotLight3D settings."
+    },
+    {
+      "name": "material3d.clear",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Clear the selected MeshInstance3D material override with Undo/Redo."
+    },
+    {
+      "name": "material3d.configure_standard",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Copy-on-write configure the selected StandardMaterial3D."
+    },
+    {
+      "name": "material3d.inspect",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect a MeshInstance3D material override or surface override."
+    },
+    {
+      "name": "material3d.set_standard",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Create and assign a fresh embedded StandardMaterial3D."
+    },
+    {
+      "name": "mesh3d.inspect",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect MeshInstance3D mesh type, primitive dimensions and surfaces."
+    },
+    {
+      "name": "mesh3d.set_primitive",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Assign or clear an embedded primitive Mesh on MeshInstance3D with Undo/Redo."
+    },
+    {
+      "name": "navigation.agent.configure",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Atomically configure persistent NavigationAgent2D/3D pathfinding and avoidance settings."
+    },
+    {
+      "name": "navigation.agent.inspect",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Inspect persistent NavigationAgent2D/3D pathfinding and avoidance settings without advancing a path."
+    },
+    {
+      "name": "navigation.mesh.bake",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Copy-on-write parse and synchronously bake navigation geometry from an explicit scene source root."
+    },
+    {
+      "name": "navigation.mesh.clear",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Copy-on-write clear baked navigation geometry while preserving resource configuration and 2D outlines."
+    },
+    {
+      "name": "navigation.mesh.configure",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Copy-on-write configure NavigationPolygon/NavigationMesh bake settings."
+    },
+    {
+      "name": "navigation.mesh.inspect",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Inspect the NavigationPolygon or NavigationMesh assigned to a navigation region."
+    },
+    {
+      "name": "navigation.mesh.set",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Create and assign a fresh embedded NavigationPolygon or NavigationMesh matching the region dimension."
+    },
+    {
+      "name": "navigation.mesh.set_outlines",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Atomically replace bounded NavigationPolygon outlines for a 2D navigation region."
+    },
+    {
+      "name": "navigation.region.configure",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Atomically configure common NavigationRegion2D/3D properties with Undo/Redo."
+    },
+    {
+      "name": "navigation.region.inspect",
+      "domain": "navigation",
+      "profiles": [
+        "2d",
+        "3d",
+        "navigation",
+        "full"
+      ],
+      "description": "Inspect a NavigationRegion2D or NavigationRegion3D and its navigation resource."
+    },
+    {
+      "name": "node.create",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Create a new node as a child of a parent node in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "node.delete",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Delete a node from the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "node.duplicate",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Duplicate a node in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "node.get_properties",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get multiple or all exported property values of a node."
+    },
+    {
+      "name": "node.get_property",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get a single property value of a node."
+    },
+    {
+      "name": "node.inspect",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Inspect full details of a node (class, script, groups, children count, exported properties)."
+    },
+    {
+      "name": "node.list_children",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "List immediate children of a node."
+    },
+    {
+      "name": "node.move",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Move a node to a specific child index with Undo/Redo support."
+    },
+    {
+      "name": "node.rename",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Rename a node in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "node.reparent",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Reparent a node to a new parent in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "node.set_property",
+      "domain": "node",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Set a property value on a node with Undo/Redo support."
+    },
+    {
+      "name": "node2d.inspect_transform",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect local and global Node2D transform values."
+    },
+    {
+      "name": "node2d.set_transform",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Atomically set local Node2D position, rotation, scale or skew with Undo/Redo."
+    },
+    {
+      "name": "node3d.inspect_transform",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect local and global Node3D transforms."
+    },
+    {
+      "name": "node3d.set_transform",
+      "domain": "3d",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Atomically set local Node3D position, rotation or stable scale with Undo/Redo."
+    },
+    {
+      "name": "object.call",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Call an allowed method on an object."
+    },
+    {
+      "name": "object.get",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Get a property value on an object."
+    },
+    {
+      "name": "object.get_class",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Get the Godot class name of an object (node, resource, or instance id)."
+    },
+    {
+      "name": "object.get_method_list",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Get the list of methods for an object."
+    },
+    {
+      "name": "object.get_property_list",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Get the list of properties for an object."
+    },
+    {
+      "name": "object.get_signal_list",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Get the list of signals for an object."
+    },
+    {
+      "name": "object.set",
+      "domain": "object",
+      "profiles": [
+        "core",
+        "full"
+      ],
+      "description": "Set a property value on an object."
+    },
+    {
+      "name": "parallax2d.configure",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Atomically configure Parallax2D repeat, scrolling, viewport following and limits."
+    },
+    {
+      "name": "parallax2d.inspect",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect Parallax2D repeat, scrolling, viewport following and limits."
+    },
+    {
+      "name": "permissions.disable",
+      "domain": "security",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Change a session-only permission."
+    },
+    {
+      "name": "permissions.enable",
+      "domain": "security",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Change a session-only permission."
+    },
+    {
+      "name": "permissions.set",
+      "domain": "security",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Change a permission for this MCP session only."
+    },
+    {
+      "name": "permissions.status",
+      "domain": "security",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Session-only tool permissions. These do not sandbox project code or add missing capabilities."
+    },
+    {
+      "name": "project.info",
+      "domain": "core",
+      "profiles": [
+        "minimal",
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Inspect the active Godot project through the connected editor addon."
+    },
+    {
+      "name": "project.input.add_action",
+      "domain": "project",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "full"
+      ],
+      "description": "Add an action to the InputMap and persist in project settings."
+    },
+    {
+      "name": "project.input.list",
+      "domain": "project",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "full"
+      ],
+      "description": "List all input actions and their assigned events from InputMap."
+    },
+    {
+      "name": "project.input.remove_action",
+      "domain": "project",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "full"
+      ],
+      "description": "Remove an action from the InputMap and project settings."
+    },
+    {
+      "name": "project.run",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot project.run operation on the current runtime session."
+    },
+    {
+      "name": "project.run_scene",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot project.run_scene operation on the current runtime session."
+    },
+    {
+      "name": "project.settings.get",
+      "domain": "project",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "full"
+      ],
+      "description": "Get a project setting value from project.godot."
+    },
+    {
+      "name": "project.settings.set",
+      "domain": "project",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "full"
+      ],
+      "description": "Set a project setting value and optionally save to project.godot."
+    },
+    {
+      "name": "project.stop",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot project.stop operation on the current runtime session."
+    },
+    {
+      "name": "resource.create",
+      "domain": "resource",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Create and save a new resource of a specified type."
+    },
+    {
+      "name": "resource.duplicate",
+      "domain": "resource",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Duplicate a resource to a new path."
+    },
+    {
+      "name": "resource.inspect",
+      "domain": "resource",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Inspect properties of a resource file."
+    },
+    {
+      "name": "resource.load",
+      "domain": "resource",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Load a resource file and inspect its exported properties."
+    },
+    {
+      "name": "resource.save",
+      "domain": "resource",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Save a loaded resource."
+    },
+    {
+      "name": "resource.set_property",
+      "domain": "resource",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Set a property on a resource file and save it."
+    },
+    {
+      "name": "risk.preview",
+      "domain": "security",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Read the risk, targets and required permissions of an operation without executing it."
+    },
+    {
+      "name": "runtime.get_property",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.get_property operation on the current runtime session."
+    },
+    {
+      "name": "runtime.inspect_node",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.inspect_node operation on the current runtime session."
+    },
+    {
+      "name": "runtime.pause",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.pause operation on the current runtime session."
+    },
+    {
+      "name": "runtime.restart",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.restart operation on the current runtime session."
+    },
+    {
+      "name": "runtime.resume",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.resume operation on the current runtime session."
+    },
+    {
+      "name": "runtime.scene_tree",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.scene_tree operation on the current runtime session."
+    },
+    {
+      "name": "runtime.status",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.status operation on the current runtime session."
+    },
+    {
+      "name": "runtime.stop",
+      "domain": "runtime",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Structured Godot runtime.stop operation on the current runtime session."
+    },
+    {
+      "name": "scene.create",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Create a new scene with specified root node type and optional path."
+    },
+    {
+      "name": "scene.get_root",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Get the root node info of the currently edited scene."
+    },
+    {
+      "name": "scene.get_tree",
+      "domain": "core",
+      "profiles": [
+        "minimal",
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Return the active edited scene tree with node names, classes, paths, and scripts."
+    },
+    {
+      "name": "scene.instantiate",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Instantiate a scene as a child of a node in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "scene.open",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Open a scene file in the Godot editor."
+    },
+    {
+      "name": "scene.reload",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Reload a scene from disk in the editor."
+    },
+    {
+      "name": "scene.save",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Save the currently edited scene."
+    },
+    {
+      "name": "scene.save_as",
+      "domain": "scene",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Save the currently edited scene to a new path."
+    },
+    {
+      "name": "script.attach",
+      "domain": "script",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Attach a script to a node in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "script.create",
+      "domain": "script",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Create a new script file with an optional template."
+    },
+    {
+      "name": "script.detach",
+      "domain": "script",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Detach a script from a node in the edited scene with Undo/Redo support."
+    },
+    {
+      "name": "script.inspect",
+      "domain": "script",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Inspect structure of a script (methods, properties, signals, base type)."
+    },
+    {
+      "name": "script.validate",
+      "domain": "script",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Validate GDScript syntax and compile checks without saving."
+    },
+    {
+      "name": "session.manifest",
+      "domain": "session",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Read the persistent manifest of the current session, including screenshots and visual checkpoints."
+    },
+    {
+      "name": "session.status",
+      "domain": "session",
+      "profiles": [
+        "minimal",
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "runtime",
+        "full"
+      ],
+      "description": "Return the active Godot MCP session and editor/runtime connection state."
+    },
+    {
+      "name": "shader3d.inspect",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Inspect spatial ShaderMaterial code, uniforms and current parameters."
+    },
+    {
+      "name": "shader3d.set_code",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Create or copy-on-write update an embedded spatial ShaderMaterial."
+    },
+    {
+      "name": "shader3d.set_parameter",
+      "domain": "materials",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Copy-on-write set a declared spatial shader uniform using canonical Variant encoding."
+    },
+    {
+      "name": "signal.connect",
+      "domain": "signal",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Connect a signal from a source node to a target node method with Undo/Redo support."
+    },
+    {
+      "name": "signal.connections",
+      "domain": "signal",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "List active signal connections on a node."
+    },
+    {
+      "name": "signal.disconnect",
+      "domain": "signal",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "Disconnect a signal between two nodes with Undo/Redo support."
+    },
+    {
+      "name": "signal.list",
+      "domain": "signal",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "ui",
+        "full"
+      ],
+      "description": "List all signals declared on a node and its script."
+    },
+    {
+      "name": "sprite2d.configure",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Atomically configure Sprite2D frame grid, region, flip, centering and offset."
+    },
+    {
+      "name": "sprite2d.inspect",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect Sprite2D texture, frame, region, flip and offset state."
+    },
+    {
+      "name": "sprite2d.set_texture",
+      "domain": "2d",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Assign or clear a project Texture2D on Sprite2D with Undo/Redo."
+    },
+    {
+      "name": "tilemap.clear",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Clear a TileMapLayer with bounded exact Undo/Redo."
+    },
+    {
+      "name": "tilemap.erase_cells",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Atomically erase up to 4096 TileMapLayer cells with exact Undo/Redo."
+    },
+    {
+      "name": "tilemap.get_cells",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect selected TileMapLayer cells or enumerate all used cells up to 4096."
+    },
+    {
+      "name": "tilemap.inspect",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect a modern Godot TileMapLayer without enumerating every cell."
+    },
+    {
+      "name": "tilemap.local_to_map",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Convert a TileMapLayer local pixel position to map coordinate."
+    },
+    {
+      "name": "tilemap.map_to_local",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Convert a TileMapLayer map coordinate to local pixel position."
+    },
+    {
+      "name": "tilemap.set_cell",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Set one TileMapLayer cell with Undo/Redo support."
+    },
+    {
+      "name": "tilemap.set_cells",
+      "domain": "tilemap",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Atomically set up to 4096 TileMapLayer cells in one Undo/Redo action."
+    },
+    {
+      "name": "tileset.add_atlas_source",
+      "domain": "tileset",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Add a project texture as a TileSetAtlasSource with Undo/Redo support."
+    },
+    {
+      "name": "tileset.create_atlas_tiles",
+      "domain": "tileset",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Create up to 4096 base atlas tiles atomically with Undo/Redo."
+    },
+    {
+      "name": "tileset.ensure_for_layer",
+      "domain": "tileset",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Ensure a TileMapLayer has an embedded TileSet without replacing an existing one."
+    },
+    {
+      "name": "tileset.inspect",
+      "domain": "tileset",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect the TileSet assigned to a TileMapLayer and summarize its sources."
+    },
+    {
+      "name": "tileset.inspect_atlas_source",
+      "domain": "tileset",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Inspect one TileSetAtlasSource and its base atlas tiles."
+    },
+    {
+      "name": "tileset.remove_source",
+      "domain": "tileset",
+      "profiles": [
+        "2d",
+        "full"
+      ],
+      "description": "Remove an unused TileSet source conservatively with Undo/Redo support."
+    },
+    {
+      "name": "transaction.begin",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.begin: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "transaction.commit",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "Publish and validate staged files; failed validation triggers exact-byte compensation."
+    },
+    {
+      "name": "transaction.delete_file",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.delete_file: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "transaction.preview",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.preview: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "transaction.recover",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.recover: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "transaction.rollback",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.rollback: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "transaction.status",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.status: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "transaction.write_file",
+      "domain": "recovery",
+      "profiles": [
+        "core",
+        "2d",
+        "3d",
+        "navigation",
+        "ui",
+        "full"
+      ],
+      "description": "transaction.write_file: declared on-disk file recovery with retained snapshots."
+    },
+    {
+      "name": "ui.inspect_layout",
+      "domain": "ui",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Inspect Control anchors, offsets, rectangles, size flags, focus neighbors and parent Container ownership."
+    },
+    {
+      "name": "ui.set_anchors",
+      "domain": "ui",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Set all four Control anchors atomically with Undo/Redo support."
+    },
+    {
+      "name": "ui.set_focus_neighbor",
+      "domain": "ui",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Set or clear a Control focus neighbor using logical scene paths and Undo/Redo support."
+    },
+    {
+      "name": "ui.set_layout_preset",
+      "domain": "ui",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Apply a Godot Control layout preset with Undo/Redo support."
+    },
+    {
+      "name": "ui.set_offsets",
+      "domain": "ui",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Set one or more Control offsets and report whether a parent Container manages layout."
+    },
+    {
+      "name": "ui.set_size_flags",
+      "domain": "ui",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Set Control horizontal/vertical size flags and optional stretch ratio with Undo/Redo support."
+    },
+    {
+      "name": "visual.capture_game",
+      "domain": "visual",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime."
+    },
+    {
+      "name": "visual.capture_viewport_2d",
+      "domain": "visual",
+      "profiles": [
+        "2d",
+        "ui",
+        "full"
+      ],
+      "description": "Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor."
+    },
+    {
+      "name": "visual.capture_viewport_3d",
+      "domain": "visual",
+      "profiles": [
+        "3d",
+        "full"
+      ],
+      "description": "Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG."
+    },
+    {
+      "name": "workflow.diff_since",
+      "domain": "workflow",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project."
+    },
+    {
+      "name": "workflow.run_check",
+      "domain": "workflow",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict."
+    },
+    {
+      "name": "workflow.snapshot",
+      "domain": "workflow",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture."
+    }
+  ]
+}
