@@ -12,7 +12,7 @@ Declared-file transactions, recoverable file checkpoints and session risk/permis
 
 Risky operations use MCP host/user elicitation rather than model-replayable confirmation tokens; see the [security model](docs/tools/security.md).
 
-Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md). Modern `TileMapLayer` and embedded TileSet atlas helpers are also available; see the [TileMapLayer and TileSet power-tools guide](docs/tools/tilemap-tileset.md). Common 2D authoring helpers for Node2D, Sprite2D, Camera2D, CollisionShape2D and Parallax2D are documented in the [2D power-tools guide](docs/tools/2d.md). Common 3D scene authoring plus StandardMaterial3D and spatial ShaderMaterial workflows are documented in the [3D and materials power-tools guide](docs/tools/3d-materials.md). Unified 2D/3D NavigationRegion, navigation resource baking and NavigationAgent authoring are documented in the [navigation power-tools guide](docs/tools/navigation.md). The feature-first Godot 4.x compatibility layer and bounded capability manifest are documented in [compatibility and capabilities](docs/architecture/compatibility-capabilities.md).
+Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md). Modern `TileMapLayer` and embedded TileSet atlas helpers are also available; see the [TileMapLayer and TileSet power-tools guide](docs/tools/tilemap-tileset.md). Common 2D authoring helpers for Node2D, Sprite2D, Camera2D, CollisionShape2D and Parallax2D are documented in the [2D power-tools guide](docs/tools/2d.md). Common 3D scene authoring plus StandardMaterial3D and spatial ShaderMaterial workflows are documented in the [3D and materials power-tools guide](docs/tools/3d-materials.md). Unified 2D/3D NavigationRegion, navigation resource baking and NavigationAgent authoring are documented in the [navigation power-tools guide](docs/tools/navigation.md). The feature-first Godot 4.x compatibility layer and bounded capability manifest are documented in [compatibility and capabilities](docs/architecture/compatibility-capabilities.md). The centralized tool catalog, deterministic startup profiles and bounded `godot.tools` discovery surface are documented in [tool registry and profiles](docs/architecture/tool-registry-profiles.md).
 
 > Unsaved editor-state recovery, debugger stepping and release automation remain future milestones. Visual checkpoints index images; file checkpoints restore selected on-disk files.
 
@@ -29,6 +29,7 @@ Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/Anima
 - MCP tools:
   - `session.status`
   - `godot.capabilities`
+  - `godot.tools` (bounded tool/profile discovery)
   - `project.info`
   - `scene.get_tree`
   - Scene, node, object, resource, script, signal, project settings/input and editor operations from Plan 2
@@ -84,6 +85,8 @@ node .\packages\server\dist\index.js --project C:\path\to\GodotProject
 ```
 
 The server owns stdout for MCP stdio. Diagnostics are written to stderr. When it starts, it creates a session manifest and a short-lived loopback bridge descriptor that the installed Godot addon discovers.
+
+Tool exposure defaults to the complete `full` profile. Persist a narrower surface with `godot-mcp config <project> --tool-profile 3d`, or pass `--tool-profile minimal|core|2d|3d|navigation|ui|runtime|full` to `start`/the server for a one-session override. Profiles are fixed for the lifetime of the server.
 
 ## Integration test
 
