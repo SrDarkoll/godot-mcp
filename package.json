@@ -10,7 +10,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "npm run build --workspace @godot-mcp/protocol && npm run build --workspace @godot-mcp/server && npm run build --workspace @godot-mcp/cli",
+    "build": "npm run check:tool-contracts && npm run build --workspace @godot-mcp/protocol && npm run build --workspace @godot-mcp/server && npm run build --workspace @godot-mcp/cli",
     "test": "npm run build && npm run test --workspace @godot-mcp/protocol && npm run test --workspace @godot-mcp/server && npm run test --workspace @godot-mcp/cli",
     "typecheck": "npm run build && npm run typecheck --workspace @godot-mcp/protocol && npm run typecheck --workspace @godot-mcp/server && npm run typecheck --workspace @godot-mcp/cli",
     "test:integration": "npm run build && node scripts/run-integration.mjs",
@@ -18,7 +18,9 @@
     "test:integration:runtime": "npm run build && node scripts/run-integration.mjs --runtime",
     "check:godot": "node scripts/check-addon.mjs",
     "release:pack": "npm run build && node scripts/pack-release.mjs",
-    "test:distribution": "npm run build && node scripts/smoke-release.mjs"
+    "test:distribution": "npm run build && node scripts/smoke-release.mjs",
+    "generate:tool-contracts": "node scripts/generate-tool-contracts.mjs",
+    "check:tool-contracts": "node scripts/generate-tool-contracts.mjs --check"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.0.0",

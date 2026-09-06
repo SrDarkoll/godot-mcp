@@ -28,6 +28,13 @@ const sample = {
 };
 
 describe('tool contract generator', () => {
+  it('wires generated-contract checking into the normal root build gate', async () => {
+    const packageJson = JSON.parse(await fs.readFile(new URL('../../../package.json', import.meta.url), 'utf8'));
+    expect(packageJson.scripts['generate:tool-contracts']).toBe('node scripts/generate-tool-contracts.mjs');
+    expect(packageJson.scripts['check:tool-contracts']).toBe('node scripts/generate-tool-contracts.mjs --check');
+    expect(packageJson.scripts.build).toMatch(/^npm run check:tool-contracts && /);
+  });
+
   it('validates bounded metadata and renders deterministic alphabetical artifacts', () => {
     const contracts = validateContracts(sample, { expectedCount: 2 });
     expect(contracts.map(contract => contract.name)).toEqual(['alpha.read', 'zeta.read']);
