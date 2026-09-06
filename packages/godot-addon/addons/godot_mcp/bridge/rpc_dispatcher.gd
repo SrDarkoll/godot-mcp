@@ -16,6 +16,7 @@ var _ui_handlers
 var _animation_handlers
 var _tilemap_handlers
 var _tileset_handlers
+var _power2d_handlers
 var _runtime
 var _recovery
 
@@ -37,6 +38,7 @@ func _init(editor_interface, runtime = null) -> void:
     _animation_handlers = preload("res://addons/godot_mcp/bridge/handlers/animation_handlers.gd").new(editor_interface)
     _tilemap_handlers = preload("res://addons/godot_mcp/bridge/handlers/tilemap_handlers.gd").new(editor_interface)
     _tileset_handlers = preload("res://addons/godot_mcp/bridge/handlers/tileset_handlers.gd").new(editor_interface)
+    _power2d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power2d_handlers.gd").new(editor_interface)
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
@@ -125,6 +127,28 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _tileset_handlers.create_atlas_tiles(params)
         "tileset.remove_source":
             result = _tileset_handlers.remove_source(params)
+        "node2d.inspect_transform":
+            result = _power2d_handlers.inspect_node2d_transform(params)
+        "node2d.set_transform":
+            result = _power2d_handlers.set_node2d_transform(params)
+        "sprite2d.inspect":
+            result = _power2d_handlers.inspect_sprite2d(params)
+        "sprite2d.set_texture":
+            result = _power2d_handlers.set_sprite2d_texture(params)
+        "sprite2d.configure":
+            result = _power2d_handlers.configure_sprite2d(params)
+        "camera2d.inspect":
+            result = _power2d_handlers.inspect_camera2d(params)
+        "camera2d.configure":
+            result = _power2d_handlers.configure_camera2d(params)
+        "collision2d.inspect":
+            result = _power2d_handlers.inspect_collision2d(params)
+        "collision2d.set_shape":
+            result = _power2d_handlers.set_collision2d_shape(params)
+        "parallax2d.inspect":
+            result = _power2d_handlers.inspect_parallax2d(params)
+        "parallax2d.configure":
+            result = _power2d_handlers.configure_parallax2d(params)
         "ui.inspect_layout":
             result = _ui_handlers.inspect_layout(params)
         "ui.set_layout_preset":

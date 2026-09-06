@@ -18,7 +18,8 @@ const READS = new Set([
     'runtime.inspect_node', 'runtime.get_property', 'debug.output', 'debug.errors', 'debug.warnings',
     'debug.performance', 'permissions.status', 'risk.preview', 'transaction.status', 'transaction.preview',
     'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since', 'ui.inspect_layout', 'animation.list', 'animation.inspect',
-    'tilemap.inspect', 'tilemap.get_cells', 'tilemap.map_to_local', 'tilemap.local_to_map', 'tileset.inspect', 'tileset.inspect_atlas_source'
+    'tilemap.inspect', 'tilemap.get_cells', 'tilemap.map_to_local', 'tilemap.local_to_map', 'tileset.inspect', 'tileset.inspect_atlas_source',
+    'node2d.inspect_transform', 'sprite2d.inspect', 'camera2d.inspect', 'collision2d.inspect', 'parallax2d.inspect'
 ]);
 const CONTROLS = new Set([
     'runtime.status', 'runtime.stop', 'project.stop', 'session.status', 'permissions.status',
@@ -36,7 +37,8 @@ const NORMAL_MUTATIONS = new Set([
     'ui.set_layout_preset', 'ui.set_anchors', 'ui.set_offsets', 'ui.set_size_flags', 'ui.set_focus_neighbor',
     'animation.create', 'animation.remove', 'animation.configure', 'animation.add_track', 'animation.insert_key', 'animation.remove_key',
     'tilemap.set_cell', 'tilemap.set_cells', 'tilemap.erase_cells', 'tilemap.clear', 'tileset.ensure_for_layer',
-    'tileset.add_atlas_source', 'tileset.create_atlas_tiles', 'tileset.remove_source'
+    'tileset.add_atlas_source', 'tileset.create_atlas_tiles', 'tileset.remove_source',
+    'node2d.set_transform', 'sprite2d.set_texture', 'sprite2d.configure', 'camera2d.configure', 'collision2d.set_shape', 'parallax2d.configure'
 ]);
 const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
@@ -46,7 +48,7 @@ const filesystemPathKeys = (name: string): string[] => {
     const keys = NON_FILESYSTEM_PATH_TOOLS.has(name)
         ? ['resource_path', 'script_path', 'source_path', 'target_path']
         : ['path', 'resource_path', 'script_path', 'source_path', 'target_path'];
-    return name === 'tileset.add_atlas_source' ? [...keys, 'texture_path'] : keys;
+    return ['tileset.add_atlas_source','sprite2d.set_texture'].includes(name) ? [...keys, 'texture_path'] : keys;
 };
 function canonical(value: unknown): string {
     if (Array.isArray(value))

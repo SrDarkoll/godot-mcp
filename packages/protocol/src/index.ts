@@ -18,3 +18,5 @@ export * from './ui.js';
 export * from './animation.js';
 
 export * from './tilemap.js';
+
+export * from './power2d.js';

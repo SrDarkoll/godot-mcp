@@ -159,3 +159,14 @@ it('fingerprints TileSet atlas texture paths as project files without confusing 
     expect(assessment.targets).toContain('node_path:/Main/Ground');
     expect(assessment.targets).not.toContain('/Main/Ground');
 });
+
+it('fingerprints Sprite2D texture paths without treating semantic node paths as files', async () => {
+    const { root, policy } = await setup();
+    await fs.writeFile(path.join(root, 'sprite.png'), Buffer.from('fixture'));
+    const args = { node_path: '/Main/Actor/Sprite', texture_path: 'res://sprite.png' };
+    const assessment = await policy.assess('sprite2d.set_texture', args);
+    expect(assessment.risk).toBe('normal');
+    expect(assessment.targets).toContain('res://sprite.png');
+    expect(assessment.targets).toContain('node_path:/Main/Actor/Sprite');
+    expect(assessment.targets).not.toContain('/Main/Actor/Sprite');
+});
