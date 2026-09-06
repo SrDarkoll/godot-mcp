@@ -5,7 +5,8 @@ import { spawnSync } from 'node:child_process';
 const godotBin = process.env.GODOT_BIN;
 const visual = process.argv.includes('--visual');
 const runtime = process.argv.includes('--runtime');
-const required = visual || runtime || process.env.REQUIRE_GODOT_INTEGRATION === '1';
+const headless = process.argv.includes('--headless');
+const required = visual || runtime || headless || process.env.REQUIRE_GODOT_INTEGRATION === '1';
 if(runtime && (process.platform!=='win32'||process.env.GODOT_RUNTIME_INTEGRATION!=='1')){
   console.error('Runtime integration requires Windows and GODOT_RUNTIME_INTEGRATION=1');process.exit(1);
 }
@@ -59,7 +60,7 @@ try {
   process.exit(1);
 }
 
-const selection = runtime ? ['tests/integration/runtime-debugger.test.ts','tests/integration/runtime-game-capture.test.ts','tests/integration/workflow-run-check.test.ts'] : visual ? ['tests/integration/visual-capture.test.ts'] :
+const selection = headless ? ['tests/integration/headless-process-manager.test.ts'] : runtime ? ['tests/integration/runtime-debugger.test.ts','tests/integration/runtime-game-capture.test.ts','tests/integration/workflow-run-check.test.ts'] : visual ? ['tests/integration/visual-capture.test.ts'] :
   ['tests/integration', '--exclude', 'tests/integration/visual-capture.test.ts','--exclude','tests/integration/runtime-debugger.test.ts','--exclude','tests/integration/runtime-game-capture.test.ts','--exclude','tests/integration/workflow-run-check.test.ts'];
 const result = spawnSync(process.execPath, [vitestEntry, 'run', ...selection, '--maxWorkers=1', '--no-file-parallelism'], {
   stdio: 'inherit',
