@@ -1,6 +1,7 @@
 @tool
 extends RefCounted
 
+var _compatibility
 var _project_info
 var _scene_tree
 var _object_handlers
@@ -25,6 +26,7 @@ var _recovery
 
 func _init(editor_interface, runtime = null) -> void:
     _runtime = runtime
+    _compatibility = preload("res://addons/godot_mcp/bridge/compatibility/compatibility_core.gd").new(editor_interface)
     _recovery = preload("res://addons/godot_mcp/bridge/handlers/recovery_handlers.gd").new(editor_interface)
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
     _scene_tree = preload("res://addons/godot_mcp/bridge/handlers/scene_tree.gd").new(editor_interface)
@@ -45,6 +47,12 @@ func _init(editor_interface, runtime = null) -> void:
     _power3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/power3d_handlers.gd").new(editor_interface)
     _material3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/material3d_handlers.gd").new(editor_interface)
     _navigation_handlers = preload("res://addons/godot_mcp/bridge/handlers/navigation_handlers.gd").new(editor_interface)
+
+func compatibility_manifest() -> Dictionary:
+    return _compatibility.manifest()
+
+func compatibility_core():
+    return _compatibility
 
 func _failure(request_id: String, code: String, message: String) -> Dictionary:
     return {
