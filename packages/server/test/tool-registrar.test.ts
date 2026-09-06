@@ -2,12 +2,13 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type { CallToolResult, McpServer, ServerContext } from '@modelcontextprotocol/server';
-import { expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { RecoveryService } from '../src/recovery/recovery-service.js';
 import { guardedRegistrar, type RiskApprovalState } from '../src/security/tool-registrar.js';
 import { ToolPolicy } from '../src/security/tool-policy.js';
 import { createSession } from '../src/session/session.js';
 import { SessionStore } from '../src/session/session-store.js';
+import { ToolRegistry } from '../src/tooling/tool-registry.js';
 
 type Handler = (args: Record<string, unknown>, context: ServerContext) => unknown | Promise<unknown>;
 
@@ -104,4 +105,27 @@ it('rejects replay of an already-consumed risky approval state', async () => {
     expect(replay.isError).toBe(true);
     expect(replay.structuredContent).toMatchObject({ error: { code: 'APPROVAL_REPLAYED' } });
     expect(runs).toBe(1);
+});
+
+
+describe('profiled tool registrar', () => {
+    it('observes declarations but forwards only tools active in the selected profile', () => {
+        const registerTool = vi.fn(() => ({}) as never);
+        const registry = new ToolRegistry('minimal');
+        const registrar = registry.registeringRegistrar({ registerTool } as never);
+        const handler = vi.fn();
+        registrar.registerTool('session.status', { description: 'Session state', inputSchema: {} } as never, handler as never);
+        registrar.registerTool('node.create', { description: 'Create node', inputSchema: {} } as never, handler as never);
+        expect(registerTool.mock.calls.map(call => call[0])).toEqual(['session.status']);
+        expect(registry.observedNames()).toEqual(['node.create', 'session.status']);
+    });
+
+    it('rejects uncataloged declarations before they reach MCP', () => {
+        const registerTool = vi.fn(() => ({}) as never);
+        const registry = new ToolRegistry('full');
+        const registrar = registry.registeringRegistrar({ registerTool } as never);
+        expect(() => registrar.registerTool('physics.future_tool', { description: 'x', inputSchema: {} } as never, vi.fn() as never))
+            .toThrow('Uncataloged MCP tool: physics.future_tool');
+        expect(registerTool).not.toHaveBeenCalled();
+    });
 });
