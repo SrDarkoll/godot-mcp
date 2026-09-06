@@ -3,7 +3,6 @@ import type { ToolRegistrar } from '../security/tool-registrar.js';
 import { TOOL_CATALOG, TOOL_PROFILES, toolCatalogEntry, toolNamesForProfile } from './tool-catalog.js';
 
 export class ToolRegistry {
-  private readonly descriptions = new Map<string,string>();
   private readonly observed = new Set<string>();
 
   constructor(readonly activeProfile:ToolProfile) {}
@@ -12,11 +11,10 @@ export class ToolRegistry {
     const register = (name:string, config:any, handler:any) => {
       const entry=toolCatalogEntry(name);
       if(!entry) throw new Error(`Uncataloged MCP tool: ${name}`);
-      const description=typeof config?.description==='string'?config.description.trim():'';
-      if(!description) throw new Error(`MCP tool description is required: ${name}`);
+      const declaredDescription=typeof config?.description==='string'?config.description.trim():'';
+      if(declaredDescription&&declaredDescription!==entry.description) throw new Error(`MCP tool description drift: ${name}`);
       this.observed.add(name);
-      this.descriptions.set(name,description);
-      if(entry.profiles.includes(this.activeProfile)) return base.registerTool(name,config,handler);
+      if(entry.profiles.includes(this.activeProfile)) return base.registerTool(name,{...config,description:entry.description},handler);
       return undefined as never;
     };
     return {registerTool:register as ToolRegistrar['registerTool']};
@@ -24,8 +22,7 @@ export class ToolRegistry {
 
   observedNames():string[]{return [...this.observed].sort((a,b)=>a.localeCompare(b));}
   activeNames():string[]{return toolNamesForProfile(this.activeProfile);}
-  description(name:string):string|undefined{return this.descriptions.get(name);}
-
+  description(name:string):string|undefined{return toolCatalogEntry(name)?.description;}
 
   discover(params:ToolDiscoveryParams):ToolDiscoveryResult {
     const selectedProfile=params.profile??this.activeProfile;
@@ -34,13 +31,13 @@ export class ToolRegistry {
     let entries=TOOL_CATALOG.filter(entry=>entry.profiles.includes(selectedProfile));
     if(activeOnly) entries=entries.filter(entry=>entry.profiles.includes(this.activeProfile));
     if(params.domain) entries=entries.filter(entry=>entry.domain===params.domain);
-    if(query) entries=entries.filter(entry=>entry.name.toLocaleLowerCase().includes(query)||(this.description(entry.name)??'').toLocaleLowerCase().includes(query));
+    if(query) entries=entries.filter(entry=>entry.name.toLocaleLowerCase().includes(query)||entry.description.toLocaleLowerCase().includes(query));
     const total=entries.length;
     const page=entries.slice(params.offset,params.offset+params.limit);
     const tools:ToolCatalogEntry[]=page.map(entry=>({
       name:entry.name,
       domain:entry.domain,
-      description:this.requiredDescription(entry.name),
+      description:entry.description,
       active:entry.profiles.includes(this.activeProfile),
       profiles:[...entry.profiles]
     }));
@@ -51,12 +48,6 @@ export class ToolRegistry {
       profiles:TOOL_PROFILES.map(id=>({id,toolCount:toolNamesForProfile(id).length})),
       total,offset:params.offset,limit:params.limit,nextOffset:next,tools
     };
-  }
-
-  private requiredDescription(name:string):string {
-    const description=this.descriptions.get(name);
-    if(!description) throw new Error(`MCP tool declaration missing description: ${name}`);
-    return description;
   }
 
   assertFullyObserved():void {

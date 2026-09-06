@@ -114,8 +114,8 @@ describe('profiled tool registrar', () => {
         const registry = new ToolRegistry('minimal');
         const registrar = registry.registeringRegistrar({ registerTool } as never);
         const handler = vi.fn();
-        registrar.registerTool('session.status', { description: 'Session state', inputSchema: {} } as never, handler as never);
-        registrar.registerTool('node.create', { description: 'Create node', inputSchema: {} } as never, handler as never);
+        registrar.registerTool('session.status', { description: 'Return the active Godot MCP session and editor/runtime connection state.', inputSchema: {} } as never, handler as never);
+        registrar.registerTool('node.create', { description: 'Create a new node as a child of a parent node in the edited scene with Undo/Redo support.', inputSchema: {} } as never, handler as never);
         expect(registerTool.mock.calls.map(call => call[0])).toEqual(['session.status']);
         expect(registry.observedNames()).toEqual(['node.create', 'session.status']);
     });
@@ -124,8 +124,24 @@ describe('profiled tool registrar', () => {
     it('fails fast when the static catalog has declarations that were never observed', () => {
         const registry = new ToolRegistry('minimal');
         const registrar = registry.registeringRegistrar({ registerTool: vi.fn(() => ({}) as never) } as never);
-        registrar.registerTool('session.status', { description: 'Session state', inputSchema: {} } as never, vi.fn() as never);
+        registrar.registerTool('session.status', { description: 'Return the active Godot MCP session and editor/runtime connection state.', inputSchema: {} } as never, vi.fn() as never);
         expect(() => registry.assertFullyObserved()).toThrow('Undeclared MCP tool catalog entries:');
+    });
+
+
+
+    it('rejects registration description drift and forwards the canonical description', () => {
+        const registerTool = vi.fn(() => ({}) as never);
+        const registry = new ToolRegistry('full');
+        const registrar = registry.registeringRegistrar({ registerTool } as never);
+        expect(() => registrar.registerTool('session.status', { description: 'Drifted session description', inputSchema: {} } as never, vi.fn() as never))
+            .toThrow('MCP tool description drift: session.status');
+        expect(registerTool).not.toHaveBeenCalled();
+        registrar.registerTool('session.status', { inputSchema: {} } as never, vi.fn() as never);
+        expect(registerTool).toHaveBeenCalledTimes(1);
+        expect(registerTool.mock.calls[0]?.[1]).toMatchObject({
+            description: 'Return the active Godot MCP session and editor/runtime connection state.'
+        });
     });
 
     it('rejects uncataloged declarations before they reach MCP', () => {

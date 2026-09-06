@@ -29,6 +29,9 @@ it('discovers the active profile without requiring an editor connection',async()
     expect((result.structuredContent as any).tools.map((tool:any)=>tool.name)).toEqual([
       'godot.capabilities','godot.tools','project.info','scene.get_tree','session.status'
     ]);
+    expect((result.structuredContent as any).tools.find((tool:any)=>tool.name==='godot.tools')?.description).toBe(
+      'Discover bounded Godot MCP tool metadata and profile membership without exposing tool schemas or handlers.'
+    );
   }finally{await client.close();await server.close();}
 });
 
