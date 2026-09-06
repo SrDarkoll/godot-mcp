@@ -15,7 +15,7 @@ it('installs addon and local config without deleting existing project files', as
   await initProject({ projectRoot: root, enable: false });
   await expect(stat(path.join(root, 'addons', 'godot_mcp', 'plugin.cfg'))).resolves.toBeDefined();
   const config = JSON.parse(await readFile(path.join(root, '.godot-mcp', 'config.json'), 'utf8'));
-  expect(config).toEqual({ protocol: 1, bridgePort: 61337, godotBin:null });
+  expect(config).toEqual({ protocol: 1, bridgePort: 61337, godotBin:null, toolProfile:'full' });
   expect(await readFile(path.join(root, 'project.godot'), 'utf8')).toContain('config/name');
 });
 

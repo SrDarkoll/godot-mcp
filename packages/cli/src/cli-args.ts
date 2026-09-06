@@ -1,13 +1,14 @@
+import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 export type Command='help'|'version'|'init'|'doctor'|'start'|'stop'|'status'|'config'|'permissions'|'sessions.list'|'sessions.inspect'|'addon.install'|'addon.update'|'setup.codex';
-export interface ParsedCommand {command:Command;projectRoot:string;godotBin:string|null;bridgePort?:number;json:boolean;limit:number;before?:string;sessionId?:string;}
+export interface ParsedCommand {command:Command;projectRoot:string;godotBin:string|null;bridgePort?:number;toolProfile?:ToolProfile;json:boolean;limit:number;before?:string;sessionId?:string;}
 export const SESSION_ID=/^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}$/;
 export function usage():string{return [
  'Usage: godot-mcp <command> [path] [options]',
  '  init | addon install | addon update  [--godot <exe>] [--json]',
  '  doctor [--godot <exe>] [--json]',
- '  start [--bridge-port <0..65535>]       MCP stdio, no CLI output',
+ '  start [--bridge-port <0..65535>] [--tool-profile <profile>]  MCP stdio, no CLI output',
  '  status | stop | permissions [--json]',
- '  config [--godot <exe>] [--bridge-port <0..65535>] [--json]',
+ '  config [--godot <exe>] [--bridge-port <0..65535>] [--tool-profile <profile>] [--json]',
  '  sessions list [--limit <1..200>] [--before <id>] [--json]',
  '  sessions inspect <id> [path] [--json]',
  '  setup codex [path] [--json]            print recipe; do not change profile',
@@ -32,6 +33,7 @@ export function parseCliArgs(argv:string[]):ParsedCommand{
   const value=argv[++index];if(!value||value.startsWith('--'))throw new Error(`${arg} requires a value`);
   if(arg==='--godot'&&['init','doctor','config','addon.install','addon.update'].includes(name)){parsed.godotBin=value;continue;}
   if(arg==='--bridge-port'&&['config','start'].includes(name)){if(!/^\d+$/.test(value)||Number(value)>65535)throw new Error('Invalid bridge port');parsed.bridgePort=Number(value);continue;}
+  if(arg==='--tool-profile'&&['config','start'].includes(name)){const profile=ToolProfileSchema.safeParse(value);if(!profile.success)throw new Error('Invalid tool profile');parsed.toolProfile=profile.data;continue;}
   if(arg==='--limit'&&name==='sessions.list'){if(!/^\d+$/.test(value)||Number(value)<1||Number(value)>200)throw new Error('Invalid session limit');parsed.limit=Number(value);continue;}
   if(arg==='--before'&&name==='sessions.list'){if(!SESSION_ID.test(value))throw new Error('Invalid session cursor');parsed.before=value;continue;}
   throw new Error(`Unknown or inapplicable option: ${arg}`);

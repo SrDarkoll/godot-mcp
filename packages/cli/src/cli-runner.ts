@@ -24,7 +24,7 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
  try{
   const root=await resolveProjectRoot(args.projectRoot);
   if(args.command==='start'){
-   await runServer(['--project',root,...(args.bridgePort===undefined?[]:['--bridge-port',String(args.bridgePort)])]);
+   await runServer(['--project',root,...(args.bridgePort===undefined?[]:['--bridge-port',String(args.bridgePort)]),...(args.toolProfile===undefined?[]:['--tool-profile',args.toolProfile])]);
    return 0;
   }
   const cliGodot=args.godotBin?path.resolve(args.godotBin):null;
@@ -59,10 +59,10 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    }
    case 'config':{
     const config=await readProjectConfig(root);
-    const changes={...(args.godotBin?{godotBin:path.resolve(args.godotBin)}:{}),...(args.bridgePort===undefined?{}:{bridgePort:args.bridgePort})};
+    const changes={...(args.godotBin?{godotBin:path.resolve(args.godotBin)}:{}),...(args.bridgePort===undefined?{}:{bridgePort:args.bridgePort}),...(args.toolProfile===undefined?{}:{toolProfile:args.toolProfile})};
     const saved=Object.keys(changes).length>0;
     const value=saved?await writeProjectConfig(root,changes):config;
-    emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,saved,restartRequired:saved});return 0;
+    emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,toolProfile:value.toolProfile,saved,restartRequired:saved});return 0;
    }
   }
  }catch(error){

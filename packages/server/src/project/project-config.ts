@@ -2,12 +2,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import * as z from 'zod/v4';
+import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 import {secureDirectory} from '../recovery/project-files.js';
 
 const ConfigSchema=z.object({
  protocol:z.literal(1).default(1),
  bridgePort:z.number().int().min(0).max(65535).default(61337),
- godotBin:z.string().min(1).nullable().default(null)
+ godotBin:z.string().min(1).nullable().default(null),
+ toolProfile:ToolProfileSchema.default('full')
 }).passthrough();
 export type ProjectConfig=z.infer<typeof ConfigSchema>;
 
@@ -22,7 +24,7 @@ export async function readProjectConfig(root:string):Promise<ProjectConfig>{
  }catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return ConfigSchema.parse({});throw new Error('Invalid or inaccessible project configuration');}
 }
 
-export async function writeProjectConfig(root:string,changes:{godotBin?:string|null;bridgePort?:number}):Promise<ProjectConfig>{
+export async function writeProjectConfig(root:string,changes:{godotBin?:string|null;bridgePort?:number;toolProfile?:ToolProfile}):Promise<ProjectConfig>{
  const config=ConfigSchema.parse({...await readProjectConfig(root),...changes});
  const directory=await secureDirectory(root,['.godot-mcp']);
  const temporary=path.join(directory,`config-${randomUUID()}.tmp`);

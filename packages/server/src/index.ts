@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { pathToFileURL } from 'node:url';
+import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import { BridgeServer } from './bridge/bridge-server.js';
 import { createMcpServer } from './mcp/create-server.js';
@@ -16,6 +17,7 @@ import {readProjectConfig} from './project/project-config.js';
 interface ServerArgs {
   project?: string;
   bridgePort?: number;
+  toolProfile?: ToolProfile;
 }
 
 export function parseServerArgs(argv: string[]): ServerArgs {
@@ -36,6 +38,14 @@ export function parseServerArgs(argv: string[]): ServerArgs {
       result.bridgePort = port;
       continue;
     }
+    if (arg === '--tool-profile') {
+      const raw = argv[++i];
+      if (!raw) throw new Error('--tool-profile requires a profile');
+      const parsed = ToolProfileSchema.safeParse(raw);
+      if (!parsed.success) throw new Error(`Invalid tool profile: ${raw}`);
+      result.toolProfile = parsed.data;
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}`);
   }
   return result;
@@ -45,6 +55,7 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const args = parseServerArgs(argv);
   const projectRoot = await resolveProjectRoot(args.project ?? process.cwd());
   const config=await readProjectConfig(projectRoot);
+  const toolProfile=args.toolProfile??config.toolProfile;
   const session = createSession(projectRoot);
   const sessions = new SessionStore(projectRoot);
   await sessions.create(session);
@@ -66,7 +77,7 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const { port } = await bridge.start();
   await descriptor.write({ port, token, sessionId: session.id });
 
-  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, recovery, policy }), {
+  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, recovery, policy, toolProfile }), {
     onerror: error => console.error(`[godot-mcp] MCP error: ${error.message}`)
   });
 
