@@ -2,6 +2,7 @@ export * from './version.js';
 export * from './errors.js';
 export * from './rpc.js';
 export * from './capabilities.js';
+export * from './compatibility.js';
 export * from './tools.js';
 export * from './variant.js';
 export * from './visual.js';

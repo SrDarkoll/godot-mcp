@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import {RuntimeFeaturesSchema} from './runtime.js';
+import {CompatibilityManifestSchema} from './compatibility.js';
 
 export const AddonCapabilitiesSchema = z.object({
   editor: z.boolean(),
@@ -18,7 +19,8 @@ export const AddonHelloSchema = z.object({
   addonVersion: z.string().min(1),
   godotVersion: z.string().min(1),
   projectRoot: z.string().min(1),
-  capabilities: AddonCapabilitiesSchema
+  capabilities: AddonCapabilitiesSchema,
+  compatibility: CompatibilityManifestSchema.optional()
 });
 
 export type AddonCapabilities = z.infer<typeof AddonCapabilitiesSchema>;
