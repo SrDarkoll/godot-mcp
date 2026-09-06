@@ -463,6 +463,8 @@ func _commit_agent_change(action_name: String, target_node: Node, before: Dictio
 
 func _agent_result(root: Node, agent) -> Dictionary:
 	var result := _agent_snapshot(agent)
+	if agent is NavigationAgent3D and agent.use_3d_avoidance:
+		result.erase("keep_y_velocity")
 	result.node_path = _logical_path(root, agent)
 	result.type = agent.get_class()
 	result.dimension = _dimension(agent)
@@ -495,6 +497,11 @@ func configure_agent(params: Dictionary) -> Dictionary:
 		for field in ["height", "use_3d_avoidance", "keep_y_velocity", "path_height_offset"]:
 			if params.has(field):
 				return _error("NAVIGATION_DIMENSION_MISMATCH", "%s is only supported for NavigationAgent3D" % field)
+	var effective_use_3d_avoidance := false
+	if agent is NavigationAgent3D:
+		effective_use_3d_avoidance = bool(params.get("use_3d_avoidance", agent.use_3d_avoidance))
+		if effective_use_3d_avoidance and params.has("keep_y_velocity"):
+			return _error("INVALID_ARGUMENT", "keep_y_velocity is unavailable when use_3d_avoidance is true because Godot does not persist it in that mode")
 	var before := _agent_snapshot(agent)
 	var after := before.duplicate(true)
 	for key in before.keys():
@@ -504,5 +511,7 @@ func configure_agent(params: Dictionary) -> Dictionary:
 		for key in ["height", "use_3d_avoidance", "keep_y_velocity", "path_height_offset"]:
 			if params.has(key):
 				after[key] = params[key]
+		if effective_use_3d_avoidance:
+			after.keep_y_velocity = true
 	_commit_agent_change("Configure Navigation Agent", agent, before, after)
 	return _agent_result(root, agent)

@@ -178,7 +178,7 @@ For 2D, at least one outline must already exist before baking; otherwise return 
 - `NavigationAgent2D`
 - `NavigationAgent3D`
 
-`navigation.agent.inspect` reports dimension, current persistent settings, target position, and current velocity, but does not call `get_next_path_position()` or trigger a path update.
+`navigation.agent.inspect` reports dimension, current persistent settings, target position, and current velocity, but does not call `get_next_path_position()` or trigger a path update. On `NavigationAgent3D`, `keep_y_velocity` is omitted while `use_3d_avoidance` is `true` because Godot 4.6 marks that property with `PROPERTY_USAGE_NONE` in that mode and therefore does not serialize it.
 
 `navigation.agent.configure` supports common fields:
 - `navigation_layers: uint32`
@@ -205,6 +205,8 @@ For 2D, at least one outline must already exist before baking; otherwise return 
 - `path_height_offset: finite`
 
 Passing 3D-only fields to NavigationAgent2D returns `NAVIGATION_DIMENSION_MISMATCH`.
+
+`keep_y_velocity` is only authorable when the effective `use_3d_avoidance` value is `false`. Supplying `keep_y_velocity` while 3D avoidance is enabled returns `INVALID_ARGUMENT`. Enabling 3D avoidance normalizes the hidden runtime value to Godot's default `true`, so save/reload does not expose history-dependent state for a property Godot refuses to serialize in that mode.
 
 `target_position`, `velocity`, `set_velocity_forced()`, `get_next_path_position()`, and autonomous movement are intentionally not authored in this phase. They are runtime behavior, not persistent editor setup.
 
@@ -284,8 +286,8 @@ The test will:
 6. Inspect/configure Region3D and verify Undo/Redo.
 7. Create/configure NavigationMesh, bake from explicit 3D source geometry, and require polygons > 0.
 8. Clear/undo baked 3D geometry.
-9. Inspect/configure Agent3D including `height`, `use_3d_avoidance`, `keep_y_velocity`, and `path_height_offset`.
-10. Save/reload and verify persistent region/resource/agent state.
+9. Inspect/configure Agent3D with 2D avoidance and persistent `keep_y_velocity`, then enable `use_3d_avoidance`, verify `keep_y_velocity` becomes unavailable/omitted, and reject attempts to author it while 3D avoidance is active.
+10. Save/reload and verify persistent region/resource/agent state, including the absence of non-serializable `keep_y_velocity` while 3D avoidance is enabled.
 11. Exercise missing resource, wrong node type, missing source root, 3D outlines, and dimension mismatch error contracts.
 
 ## Acceptance gates

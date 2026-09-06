@@ -24,4 +24,12 @@ describe('navigation addon contract',()=>{
     ]) expect(source).toContain(marker);
     expect(source).toContain('_commit_resource_change');
   });
+
+  it('keeps NavigationAgent3D keep_y_velocity persistent only when 3D avoidance is disabled',()=>{
+    const source=fs.readFileSync(file,'utf8');
+    expect(source).toContain('keep_y_velocity is unavailable when use_3d_avoidance is true');
+    expect(source).toContain('result.erase("keep_y_velocity")');
+    expect(source).toContain('after.keep_y_velocity = true');
+  });
+
 });

@@ -80,7 +80,7 @@ A 2D `NavigationPolygon` must already have at least one outline before baking. `
 
 Common authored fields include navigation layers, desired/path distances, radius, neighbor distance/count, max speed, avoidance enable/layers/mask/priority, time horizons, and path simplification.
 
-3D additionally supports `height`, `use_3d_avoidance`, `keep_y_velocity`, and `path_height_offset`.
+3D additionally supports `height`, `use_3d_avoidance`, `keep_y_velocity`, and `path_height_offset`. `keep_y_velocity` is only authorable while `use_3d_avoidance=false`; Godot 4.6 hides it from storage when 3D avoidance is enabled, so the MCP omits it from inspection in that mode and rejects attempts to set it with `INVALID_ARGUMENT`.
 
 `target_position` and `velocity` are inspectable but intentionally not authored by these editor tools. Runtime path following remains game logic: the MCP does not install a movement loop or call `get_next_path_position()` automatically.
 
