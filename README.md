@@ -12,7 +12,7 @@ Declared-file transactions, recoverable file checkpoints and session risk/permis
 
 Risky operations use MCP host/user elicitation rather than model-replayable confirmation tokens; see the [security model](docs/tools/security.md).
 
-Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md).
+Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md). Modern `TileMapLayer` and embedded TileSet atlas helpers are also available; see the [TileMapLayer and TileSet power-tools guide](docs/tools/tilemap-tileset.md).
 
 > Unsaved editor-state recovery, debugger stepping and release automation remain future milestones. Visual checkpoints index images; file checkpoints restore selected on-disk files.
 
@@ -39,6 +39,7 @@ Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/Anima
   - `visual.capture_game`
   - `transaction.*`, file `checkpoint.*`, `permissions.*` and `risk.preview`
   - `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers
+  - `tilemap.*` TileMapLayer editing helpers and `tileset.*` embedded TileSet/atlas helpers
 - CLI commands:
   - `godot-mcp init`
   - `godot-mcp doctor`
