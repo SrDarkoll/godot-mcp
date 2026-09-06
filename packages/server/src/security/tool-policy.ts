@@ -20,7 +20,8 @@ const READS = new Set([
     'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since', 'ui.inspect_layout', 'animation.list', 'animation.inspect',
     'tilemap.inspect', 'tilemap.get_cells', 'tilemap.map_to_local', 'tilemap.local_to_map', 'tileset.inspect', 'tileset.inspect_atlas_source',
     'node2d.inspect_transform', 'sprite2d.inspect', 'camera2d.inspect', 'collision2d.inspect', 'parallax2d.inspect',
-    'node3d.inspect_transform', 'mesh3d.inspect', 'camera3d.inspect', 'collision3d.inspect', 'light3d.inspect', 'material3d.inspect', 'shader3d.inspect'
+    'node3d.inspect_transform', 'mesh3d.inspect', 'camera3d.inspect', 'collision3d.inspect', 'light3d.inspect', 'material3d.inspect', 'shader3d.inspect',
+    'navigation.region.inspect', 'navigation.mesh.inspect', 'navigation.agent.inspect'
 ]);
 const CONTROLS = new Set([
     'runtime.status', 'runtime.stop', 'project.stop', 'session.status', 'permissions.status',
@@ -41,7 +42,8 @@ const NORMAL_MUTATIONS = new Set([
     'tileset.add_atlas_source', 'tileset.create_atlas_tiles', 'tileset.remove_source',
     'node2d.set_transform', 'sprite2d.set_texture', 'sprite2d.configure', 'camera2d.configure', 'collision2d.set_shape', 'parallax2d.configure',
     'node3d.set_transform', 'mesh3d.set_primitive', 'camera3d.configure', 'collision3d.set_shape', 'light3d.configure',
-    'material3d.set_standard', 'material3d.configure_standard', 'material3d.clear', 'shader3d.set_code', 'shader3d.set_parameter'
+    'material3d.set_standard', 'material3d.configure_standard', 'material3d.clear', 'shader3d.set_code', 'shader3d.set_parameter',
+    'navigation.region.configure', 'navigation.mesh.set', 'navigation.mesh.configure', 'navigation.mesh.set_outlines', 'navigation.mesh.bake', 'navigation.mesh.clear', 'navigation.agent.configure'
 ]);
 const LOCAL = (name: string): boolean => /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
@@ -243,7 +245,7 @@ export class ToolPolicy {
         if (name === 'object.call' && isBlockedReflectiveMethod(args))
             risk = 'blocked';
         const displayTargets = [...new Set(targets)];
-        for (const key of ['node_path', 'parent_path', 'source_node_path', 'target_node_path', 'new_parent_path']) {
+        for (const key of ['node_path', 'parent_path', 'source_node_path', 'target_node_path', 'new_parent_path', 'source_root_path']) {
             if (typeof args[key] === 'string')
                 displayTargets.push(`${key}:${args[key]}`);
         }

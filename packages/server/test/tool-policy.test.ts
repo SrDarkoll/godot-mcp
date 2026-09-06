@@ -190,3 +190,14 @@ describe('Phase 3 material path classification',()=>{
     expect(assessment.targets).toContain('node_path:/Main/Model');
   });
 });
+
+
+it('treats navigation source roots as semantic node paths instead of filesystem paths',async()=>{
+  const {policy}=await setup();
+  const assessment=await policy.assess('navigation.mesh.bake',{node_path:'/Main/Region',source_root_path:'/Main/Source'});
+  expect(assessment.risk).toBe('normal');
+  expect(assessment.targets).toContain('node_path:/Main/Region');
+  expect(assessment.targets).toContain('source_root_path:/Main/Source');
+  expect(assessment.targets).not.toContain('/Main/Region');
+  expect(assessment.targets).not.toContain('/Main/Source');
+});
