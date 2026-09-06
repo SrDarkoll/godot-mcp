@@ -1,103 +1,87 @@
 # Tool contracts and generated artifacts
 
-Phase 7 introduces a code-generation boundary for **static public MCP tool metadata**. It does not generate tool execution logic.
+Phase 7 introduces a code-generation boundary for **static public MCP tool contracts**. It deliberately does not generate execution logic.
 
 ## Source of truth
 
-Edit only:
+Edit only `scripts/tool-contracts.json` for static contract metadata. Every public tool has exactly one entry with:
 
-```text
-scripts/tool-contracts.json
-```
+- `name`, `domain`, `profiles`, `description`;
+- `risk.baseline`, `risk.tags`, `risk.dynamic`;
+- `binding.status` and a concrete registration `source`;
+- `schemaRef` and `handlerRef` for bindings already migrated to canonical verification.
 
-Each public tool has exactly one entry containing:
-
-- `name`
-- `domain`
-- `profiles`
-- `description`
-
-The manifest currently contains exactly 165 tools, matching the Phase 6 full surface.
+The manifest contains exactly 165 tools, matching the Phase 6 full surface.
 
 ## Generated artifacts
 
-Run:
-
-```text
-npm run generate:tool-contracts
-```
-
-This writes:
+`npm run generate:tool-contracts` writes:
 
 ```text
 packages/server/src/tooling/tool-catalog.generated.ts
+packages/server/src/security/tool-policy.generated.ts
 docs/generated/tool-inventory.md
 ```
 
-Both files are committed so changes remain reviewable. Do not edit them directly.
+The catalog powers profiles and `godot.tools`. The policy artifact provides the static read/control/normal-mutation name sets consumed by `ToolPolicy`. The inventory is a deterministic human-readable view of profiles, risk metadata, binding migration status, source, and description.
 
-`tool-catalog.generated.ts` is the runtime catalog consumed by profiles and `godot.tools`. `tool-inventory.md` is a deterministic inventory, not a replacement for curated domain documentation.
+All three outputs are committed and must not be edited directly.
+
+## Risk boundary
+
+The generator owns only static classification metadata. `ToolPolicy` still owns argument-dependent behavior such as overwrite elevation, permission enablement, approval fingerprints, reflective-method blocking, filesystem fingerprints, and transaction barriers.
+
+The generated static memberships intentionally reproduce the exact Phase 6 sets:
+
+```text
+READS             67
+CONTROLS           9
+NORMAL_MUTATIONS  86
+```
+
+Changing those memberships is therefore a reviewed contract change rather than an incidental edit in policy code.
+
+## Binding migration
+
+Every entry records the TypeScript source that declares the tool. Phase 7 verifies concrete schema/handler references for 21 representative tools:
+
+- `godot.tools`;
+- 10 `navigation.*` tools;
+- 10 Node3D/Mesh3D/Camera3D/Collision3D/Light3D tools.
+
+These use `binding.status = canonical`. The generator requires the source file and declared `schemaRef`/`handlerRef` tokens to exist. Remaining entries are `legacy` and retain only the concrete registration source until migrated incrementally.
+
+Pilot registrars keep their actual Zod schemas and handlers hand-authored but omit duplicated descriptions; `ToolRegistry` injects the canonical description. A legacy registrar may still supply a description, but a mismatch fails server construction.
 
 ## Drift gate
 
-Run:
+`npm run check:tool-contracts` validates the manifest/bindings, renders all expected artifacts in memory, and byte-compares them with the committed files. Check mode never writes.
 
-```text
-npm run check:tool-contracts
-```
-
-The command renders the expected artifacts in memory and compares them with the committed files. It never rewrites files in check mode.
-
-The root `npm run build` executes this check before TypeScript compilation. A stale catalog or inventory therefore fails the normal build gate with a focused message.
-
-## Registration behavior
-
-Existing specialized registrar files continue to own:
-
-- Zod input schemas;
-- handler functions;
-- RPC forwarding;
-- recovery/Undo/Redo behavior;
-- security semantics.
-
-`ToolRegistry` validates each declared name against the generated catalog. If a registrar still includes a description, it must match the canonical contract exactly. The registry forwards the canonical description to MCP and uses it for `godot.tools` discovery.
-
-This permits incremental cleanup of old duplicated descriptions without requiring a big-bang rewrite of 165 handlers.
+Root `npm run build` begins with this check, so stale catalog, static-policy metadata, or inventory fails before TypeScript compilation.
 
 ## What codegen does not own
 
-Phase 7 intentionally does **not** generate:
+Phase 7 does **not** generate:
 
 ```text
 GDScript handlers
-TypeScript handlers
+TypeScript handler functions
 Zod schemas
 RPC methods
-risk/permission decisions
+argument-dependent risk/permission decisions
 capability probes
 Undo/Redo logic
 ```
 
-Those remain explicit specialized code because their semantics are not mechanical metadata.
+Those remain explicit specialized code.
 
 ## Contributor workflow
 
-When adding or changing static tool metadata:
+1. Update the canonical contract in `scripts/tool-contracts.json`.
+2. Keep schema/handler implementation in the normal registrar/tool files.
+3. For a migrated binding, record exact `source`, `schemaRef`, and `handlerRef`.
+4. Run `npm run generate:tool-contracts`.
+5. Review all generated diffs.
+6. Run `npm run check:tool-contracts` and normal build/tests.
 
-1. update `scripts/tool-contracts.json`;
-2. run `npm run generate:tool-contracts`;
-3. review both generated diffs;
-4. run `npm run check:tool-contracts`;
-5. run the normal build/test gates.
-
-If a registrar description and contract description diverge, server construction fails with:
-
-```text
-MCP tool description drift: <tool-name>
-```
-
-If a registrar declares a name absent from the contract source, construction fails with:
-
-```text
-Uncataloged MCP tool: <tool-name>
-```
+Runtime still fails fast on uncataloged declarations, missing declarations, or registrar description drift.
