@@ -18,8 +18,8 @@ The server supports exactly eight profiles:
 | `3d` | 107 | 3D, materials, animation and navigation authoring |
 | `navigation` | 67 | focused NavigationRegion/mesh/agent workflows |
 | `ui` | 81 | Control layout and AnimationPlayer workflows |
-| `runtime` | 30 | run/debug/capture/workflow verification |
-| `full` | 165 | complete surface; backwards-compatible default |
+| `runtime` | 38 | run/debug/capture/workflow verification plus headless Godot process control |
+| `full` | 173 | complete surface; backwards-compatible default |
 
 Counts include `godot.tools`, the Phase 6 discovery tool.
 
@@ -154,7 +154,7 @@ Adds scene/node/resource/script/signal/editor authoring, security/recovery, UI/a
 
 ### `runtime`
 
-Adds security, runtime control/inspection, debug output, game capture, workflow verification and `session.manifest`; editor mutation and file recovery tools remain hidden.
+Adds security, runtime control/inspection, debug output, game capture, workflow verification, all eight `headless.*` tools and `session.manifest`; editor mutation and file recovery tools remain hidden.
 
 ## Security
 

@@ -4,7 +4,7 @@ Phase 7 introduced a code-generation boundary for **static public MCP tool contr
 
 ## Source of truth
 
-`scripts/tool-contracts.json` uses manifest `schemaVersion: 2`. Every one of the 165 public tools has exactly one entry with:
+`scripts/tool-contracts.json` uses manifest `schemaVersion: 2`. Every one of the 173 public tools has exactly one entry with:
 
 - `name`, `domain`, `profiles`, `description`;
 - `risk.tags` and `risk.dynamic`;
@@ -34,8 +34,8 @@ The generator owns only static classification metadata. `ToolPolicy` still owns 
 The generated static memberships intentionally reproduce the exact Phase 6/7 sets:
 
 ```text
-READS             67
-CONTROLS           9
+READS             69
+CONTROLS          10
 NORMAL_MUTATIONS  86
 ```
 
@@ -43,11 +43,12 @@ NORMAL_MUTATIONS  86
 
 ## Typed canonical binding migration
 
-The existing 21 representative pilots remain canonical:
+There are 29 canonical typed bindings:
 
 - `godot.tools`;
 - 10 `navigation.*` tools;
-- 10 Node3D/Mesh3D/Camera3D/Collision3D/Light3D tools.
+- 10 Node3D/Mesh3D/Camera3D/Collision3D/Light3D tools;
+- 8 `headless.*` tools introduced by Phase 8.
 
 Each pilot source defines the actual binding with real TypeScript references:
 
