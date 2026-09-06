@@ -49,6 +49,42 @@ describe('HeadlessProcessManager',()=>{
     expect((await testPromise).exitCode).toBe(7);
   });
 
+
+  it('uses exact fixed argv for bounded validate and import jobs',async()=>{
+    const f=await fixture();const calls:Array<{args:string[];child:FakeChild}>=[];
+    const spawnImpl=((_bin:string,args:string[])=>{const child=new FakeChild();calls.push({args,child});queueMicrotask(()=>child.spawn());return child as any;}) as any;
+    const manager=new HeadlessProcessManager(f.session,f.sessions,{godotBin:f.bin,spawnImpl});
+
+    const validating=manager.validateProject({timeout_ms:1000});
+    await new Promise(resolve=>setImmediate(resolve));
+    expect(calls[0]!.args).toEqual(['--headless','--path',f.root,'--editor','--quit']);
+    calls[0]!.child.close(0);
+    expect((await validating).exitCode).toBe(0);
+
+    const importing=manager.importProject({timeout_ms:1000});
+    await new Promise(resolve=>setImmediate(resolve));
+    expect(calls[1]!.args).toEqual(['--headless','--path',f.root,'--import']);
+    calls[1]!.child.close(0);
+    expect((await importing).exitCode).toBe(0);
+  });
+
+  it('retains ownership when a spawned child emits an error until the child is actually stopped',async()=>{
+    const f=await fixture();let child:FakeChild|undefined;
+    const spawnImpl=((_bin:string,_args:string[],_options:any)=>{child=new FakeChild();queueMicrotask(()=>child!.spawn());return child as any;}) as any;
+    const manager=new HeadlessProcessManager(f.session,f.sessions,{godotBin:f.bin,spawnImpl});
+    const run=await manager.run();
+
+    child!.emit('error',new Error('post-spawn child error'));
+    await new Promise(resolve=>setImmediate(resolve));
+    expect((await manager.status()).active?.executionId).toBe(run.executionId);
+    await expect(manager.run()).rejects.toMatchObject({code:'HEADLESS_BUSY'});
+
+    const stopped=manager.stop();
+    queueMicrotask(()=>child!.close(null,'SIGTERM'));
+    expect(await stopped).toMatchObject({stopped:true,execution:{state:'failed',errorCode:'HEADLESS_PROCESS_ERROR'}});
+    expect((await manager.status()).active).toBeNull();
+  });
+
   it('enforces one active child and stops only the owned child',async()=>{
     const f=await fixture();let child:FakeChild|undefined;
     const spawnImpl=((_bin:string,_args:string[],_options:any)=>{child=new FakeChild();queueMicrotask(()=>child!.spawn());return child as any;}) as any;

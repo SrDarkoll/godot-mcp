@@ -37,6 +37,7 @@ interface ActiveExecution {
   rejectSpawned:(error:Error)=>void;
   timer:ReturnType<typeof setTimeout>|null;
   finalized:boolean;
+  spawnedSuccessfully:boolean;
 }
 
 const STOP_GRACE_MS=1500;
@@ -142,6 +143,9 @@ export class HeadlessProcessManager {
     let resolveCompletion!:(value:HeadlessExecutionRecord)=>void;
     let rejectCompletion!:(error:Error)=>void;
     const completion=new Promise<HeadlessExecutionRecord>((resolve,reject)=>{resolveCompletion=resolve;rejectCompletion=reject;});
+    // Persistent starts return before completion; keep the lifecycle rejection observed
+    // so a later process failure cannot surface as an unhandled rejection.
+    void completion.catch(()=>{});
     let resolveSpawned!:()=>void;
     let rejectSpawned!:(error:Error)=>void;
     const spawned=new Promise<void>((resolve,reject)=>{resolveSpawned=resolve;rejectSpawned=reject;});
@@ -155,29 +159,46 @@ export class HeadlessProcessManager {
       throw new BridgeRpcError('HEADLESS_SPAWN_FAILED','Unable to spawn Godot headless process');
     }
 
-    const active:ActiveExecution={child,record,completion,resolveCompletion,rejectCompletion,spawned,resolveSpawned,rejectSpawned,timer:null,finalized:false};
+    const active:ActiveExecution={child,record,completion,resolveCompletion,rejectCompletion,spawned,resolveSpawned,rejectSpawned,timer:null,finalized:false,spawnedSuccessfully:false};
     this.active=active;
     child.stdout.on('data',chunk=>this.capture(active,'stdout',chunk));
     child.stderr.on('data',chunk=>this.capture(active,'stderr',chunk));
     child.once('spawn',()=>{
+      active.spawnedSuccessfully=true;
       void (async()=>{
         if(active.finalized)return;
         active.record={...active.record,state:'running',pid:child.pid ?? null};
         await this.persist(this.snapshot(active.record));
         active.resolveSpawned();
-      })().catch(error=>void this.fail(active,new BridgeRpcError('MANIFEST_WRITE_FAILED',error instanceof Error?error.message:'Unable to persist headless state')));
+      })().catch(error=>{
+        const failure=new BridgeRpcError('MANIFEST_WRITE_FAILED',error instanceof Error?error.message:'Unable to persist headless state');
+        // The OS child already exists. Preserve ownership even though start cannot
+        // report success, otherwise another Godot process could be launched.
+        active.record={...active.record,errorCode:'MANIFEST_WRITE_FAILED'};
+        active.rejectSpawned(failure);
+      });
     });
-    child.once('error',()=>{void this.fail(active,new BridgeRpcError('HEADLESS_SPAWN_FAILED','Godot headless process failed'));});
+    child.once('error',error=>{
+      if(!active.spawnedSuccessfully){
+        void this.fail(active,new BridgeRpcError('HEADLESS_SPAWN_FAILED','Godot headless process failed'));
+        return;
+      }
+      // After 'spawn', an error event is process state, not a spawn failure.
+      // Keep the child owned until close/stop proves termination.
+      const message=error instanceof Error?error.message:String(error);
+      active.record={...active.record,errorCode:'HEADLESS_PROCESS_ERROR'};
+      this.capture(active,'stderr',`[godot-mcp] child process error: ${message}\n`);
+      void this.persist(this.snapshot(active.record)).catch(()=>{});
+    });
     child.once('close',(code,signal)=>{
       void (async()=>{
         if(active.finalized)return;
-        const timedOut=active.record.timedOut;
-        const outputFailed=active.record.errorCode==='HEADLESS_OUTPUT_FAILED';
+        const terminalErrorCode=active.record.timedOut?'HEADLESS_TIMEOUT':active.record.errorCode;
         await this.finalize(active,{
-          state:timedOut||outputFailed?'failed':'exited',
+          state:terminalErrorCode?'failed':'exited',
           exitCode:code,
           signal:signal?String(signal):null,
-          errorCode:timedOut?'HEADLESS_TIMEOUT':outputFailed?'HEADLESS_OUTPUT_FAILED':null
+          errorCode:terminalErrorCode
         });
       })().catch(error=>active.rejectCompletion(error instanceof Error?error:new Error(String(error))));
     });
