@@ -19,8 +19,15 @@ import {
 } from '../src/tools/animation-tools.js';
 import {registerUiTools} from '../src/mcp/register-ui-tools.js';
 import {registerAnimationTools} from '../src/mcp/register-animation-tools.js';
+import {omitUndefinedValues} from '../src/mcp/omit-undefined.js';
 
 function rpc(){return {call:vi.fn(async()=>({ok:true}))};}
+
+describe('MCP argument normalization',()=>{
+  it('removes present undefined values while preserving null and defined optional values',()=>{
+    expect(omitUndefinedValues({required:'x',missing:undefined,clear:null,count:0})).toEqual({required:'x',clear:null,count:0});
+  });
+});
 
 describe('UI power tools',()=>{
   it('forwards every UI operation to the matching bridge method',async()=>{
