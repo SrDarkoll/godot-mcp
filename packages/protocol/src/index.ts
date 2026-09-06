@@ -25,3 +25,5 @@ export * from './power2d.js';
 export * from './power3d.js';
 
 export * from './navigation.js';
+
+export * from './tooling.js';
