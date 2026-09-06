@@ -8,43 +8,10 @@ import type { SessionStore } from '../session/session-store.js';
 import type { Session } from '../session/session.js';
 import { OperationGate } from './operation-gate.js';
 import { isBlockedReflectiveMethod } from './reflection-safety.js';
-const READS = new Set([
-    'session.status', 'session.manifest', 'project.info', 'godot.capabilities', 'godot.tools', 'scene.get_tree', 'scene.get_root',
-    'node.inspect', 'node.list_children', 'node.get_property', 'node.get_properties',
-    'object.get_class', 'object.get_property_list', 'object.get_method_list', 'object.get_signal_list', 'object.get',
-    'resource.load', 'resource.inspect', 'script.inspect', 'script.validate', 'signal.list', 'signal.connections',
-    'project.settings.get', 'project.input.list', 'editor.get_active_scene', 'editor.get_open_scenes',
-    'editor.get_selected_nodes', 'editor.get_filesystem', 'runtime.status', 'runtime.scene_tree',
-    'runtime.inspect_node', 'runtime.get_property', 'debug.output', 'debug.errors', 'debug.warnings',
-    'debug.performance', 'permissions.status', 'risk.preview', 'transaction.status', 'transaction.preview',
-    'checkpoint.list', 'checkpoint.inspect', 'workflow.diff_since', 'ui.inspect_layout', 'animation.list', 'animation.inspect',
-    'tilemap.inspect', 'tilemap.get_cells', 'tilemap.map_to_local', 'tilemap.local_to_map', 'tileset.inspect', 'tileset.inspect_atlas_source',
-    'node2d.inspect_transform', 'sprite2d.inspect', 'camera2d.inspect', 'collision2d.inspect', 'parallax2d.inspect',
-    'node3d.inspect_transform', 'mesh3d.inspect', 'camera3d.inspect', 'collision3d.inspect', 'light3d.inspect', 'material3d.inspect', 'shader3d.inspect',
-    'navigation.region.inspect', 'navigation.mesh.inspect', 'navigation.agent.inspect'
-]);
-const CONTROLS = new Set([
-    'runtime.status', 'runtime.stop', 'project.stop', 'session.status', 'permissions.status',
-    'transaction.status', 'debug.output', 'debug.errors', 'debug.warnings'
-]);
-const NORMAL_MUTATIONS = new Set([
-    'node.create', 'node.delete', 'node.duplicate', 'node.rename', 'node.reparent', 'node.move', 'node.set_property',
-    'object.set', 'scene.create', 'scene.open', 'scene.save', 'scene.instantiate', 'resource.create', 'resource.save',
-    'resource.duplicate', 'resource.set_property', 'script.create', 'script.attach', 'script.detach', 'signal.connect',
-    'signal.disconnect', 'project.input.add_action', 'project.input.remove_action', 'editor.select_node',
-    'editor.change_scene', 'editor.scan_filesystem', 'project.run', 'project.run_scene',
-    'runtime.pause', 'runtime.resume', 'runtime.restart', 'visual.capture_game', 'visual.capture_viewport_2d',
-    'visual.capture_viewport_3d', 'workflow.snapshot', 'workflow.run_check', 'transaction.begin', 'transaction.write_file', 'transaction.delete_file',
-    'transaction.rollback', 'checkpoint.create', 'permissions.set', 'permissions.enable', 'permissions.disable',
-    'ui.set_layout_preset', 'ui.set_anchors', 'ui.set_offsets', 'ui.set_size_flags', 'ui.set_focus_neighbor',
-    'animation.create', 'animation.remove', 'animation.configure', 'animation.add_track', 'animation.insert_key', 'animation.remove_key',
-    'tilemap.set_cell', 'tilemap.set_cells', 'tilemap.erase_cells', 'tilemap.clear', 'tileset.ensure_for_layer',
-    'tileset.add_atlas_source', 'tileset.create_atlas_tiles', 'tileset.remove_source',
-    'node2d.set_transform', 'sprite2d.set_texture', 'sprite2d.configure', 'camera2d.configure', 'collision2d.set_shape', 'parallax2d.configure',
-    'node3d.set_transform', 'mesh3d.set_primitive', 'camera3d.configure', 'collision3d.set_shape', 'light3d.configure',
-    'material3d.set_standard', 'material3d.configure_standard', 'material3d.clear', 'shader3d.set_code', 'shader3d.set_parameter',
-    'navigation.region.configure', 'navigation.mesh.set', 'navigation.mesh.configure', 'navigation.mesh.set_outlines', 'navigation.mesh.bake', 'navigation.mesh.clear', 'navigation.agent.configure'
-]);
+import { CONTROL_TOOL_NAMES, NORMAL_MUTATION_TOOL_NAMES, READ_TOOL_NAMES } from './tool-policy.generated.js';
+const READS = new Set(READ_TOOL_NAMES);
+const CONTROLS = new Set(CONTROL_TOOL_NAMES);
+const NORMAL_MUTATIONS = new Set(NORMAL_MUTATION_TOOL_NAMES);
 const LOCAL = (name: string): boolean => name === 'godot.tools' || /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
     /^debug\.(output|errors|warnings)$/.test(name);

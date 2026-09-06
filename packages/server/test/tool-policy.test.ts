@@ -213,3 +213,11 @@ it('treats navigation source roots as semantic node paths instead of filesystem 
   expect(assessment.targets).not.toContain('/Main/Region');
   expect(assessment.targets).not.toContain('/Main/Source');
 });
+
+it('sources static risk classifications from generated contract metadata', async () => {
+    const source = await fs.readFile(new URL('../src/security/tool-policy.ts', import.meta.url), 'utf8');
+    expect(source).toContain("from './tool-policy.generated.js'");
+    expect(source).not.toMatch(/const READS = new Set\(\[/);
+    expect(source).not.toMatch(/const CONTROLS = new Set\(\[/);
+    expect(source).not.toMatch(/const NORMAL_MUTATIONS = new Set\(\[/);
+});
