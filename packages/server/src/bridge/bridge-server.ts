@@ -1,6 +1,6 @@
 import { realpath } from 'node:fs/promises';
 import path from 'node:path';
-import { AddonHelloSchema, MAX_BRIDGE_PAYLOAD, type AddonHello, type AddonCapabilities } from '@godot-mcp/protocol';
+import { AddonHelloSchema, MAX_BRIDGE_PAYLOAD, type AddonHello, type AddonCapabilities, type CompatibilityManifest } from '@godot-mcp/protocol';
 import WebSocket, { WebSocketServer } from 'ws';
 import {BridgeRuntimeEventSchema,type BridgeRuntimeEvent} from '@godot-mcp/protocol';
 import type { Session } from '../session/session.js';
@@ -48,6 +48,10 @@ export class BridgeServer {
 
   get capabilities(): AddonCapabilities | null {
     return this.connected ? this.client!.hello.capabilities : null;
+  }
+
+  get compatibility(): CompatibilityManifest | null {
+    return this.connected ? this.client!.hello.compatibility ?? null : null;
   }
 
   async start(): Promise<{ port: number }> {

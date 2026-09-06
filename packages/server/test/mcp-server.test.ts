@@ -77,6 +77,7 @@ describe('MCP server', () => {
             'editor.scan_filesystem',
             'editor.select_node',
             'editor.undo',
+            'godot.capabilities',
             'light3d.configure',
             'light3d.inspect',
             'material3d.clear',
@@ -212,6 +213,9 @@ describe('MCP server', () => {
         const project = await client.callTool({ name: 'project.info', arguments: {} });
         expect(project.isError).toBe(true);
         expect(JSON.stringify(project)).toContain('EDITOR_NOT_CONNECTED');
+        const capabilities = await client.callTool({ name: 'godot.capabilities', arguments: {} });
+        expect(capabilities.isError).toBe(true);
+        expect(JSON.stringify(capabilities)).toContain('EDITOR_NOT_CONNECTED');
         await client.close();
         await server.close();
     }, 15000);

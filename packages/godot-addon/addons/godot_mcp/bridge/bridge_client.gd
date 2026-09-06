@@ -114,6 +114,7 @@ func _send_hello() -> void:
         "addonVersion": ADDON_VERSION,
         "godotVersion": Engine.get_version_info().string,
         "projectRoot": ProjectSettings.globalize_path("res://").replace("\\", "/").trim_suffix("/"),
+        "compatibility": _dispatcher.compatibility_manifest(),
         "capabilities": {
             "editor": true,
             "runtime": _runtime != null,

@@ -3,6 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { createSession } from '../src/session/session.js';
 import { BridgeServer } from '../src/bridge/bridge-server.js';
 
+const compatibility = {
+  schemaVersion: 1 as const,
+  engine: { major: 4, minor: 6, patch: 3, status: 'stable', build: 'official', hash: 'abc', string: '4.6.3.stable.official.abc' },
+  capabilities: { 'navigation.region.2d': { status: 'supported' as const } },
+  quirks: {}
+};
+
 async function connect(bridge: BridgeServer, token = 'a'.repeat(64)) {
   const { port } = await bridge.start();
   const ws = new WebSocket(`ws://127.0.0.1:${port}`);
@@ -56,6 +63,26 @@ describe('BridgeServer', () => {
     expect(bridge.capabilities?.viewport2d).toBe(true);
     ws.close(); await bridge.stop();
     expect(bridge.capabilities).toBeNull();
+  });
+  it('publishes authenticated compatibility metadata and clears it on disconnect', async () => {
+    const session = createSession('C:/Games/Test');
+    const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+    const { port } = await bridge.start();
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+    await new Promise<void>((resolve, reject) => { ws.once('open', resolve); ws.once('error', reject); });
+    ws.send(JSON.stringify({
+      type: 'hello', token: 'a'.repeat(64), protocol: 1, addonVersion: '0.1.0',
+      godotVersion: compatibility.engine.string, projectRoot: 'C:/Games/Test',
+      capabilities: { editor: true, runtime: false, debugger: false, viewport2d: true, viewport3d: true, undoRedo: true },
+      compatibility
+    }));
+    await bridge.waitUntilConnected(1000);
+    expect(bridge.compatibility).toEqual(compatibility);
+    const closed = new Promise<void>(resolve => ws.once('close', () => resolve()));
+    ws.close();
+    await closed;
+    expect(bridge.compatibility).toBeNull();
+    await bridge.stop();
   });
   it('accepts exactly one authenticated addon for the active project', async () => {
     const session = createSession('C:/Games/Test');

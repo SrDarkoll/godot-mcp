@@ -5,12 +5,28 @@ import { getProjectInfo } from '../tools/project-info.js';
 import { getSceneTree } from '../tools/scene-tree.js';
 import { getSessionStatus } from '../tools/session-status.js';
 import type { ToolRegistrar } from '../security/tool-registrar.js';
+import { BridgeRpcError } from '../bridge/rpc-router.js';
 import { toolError, toolSuccess } from './tool-result.js';
-export function registerCoreTools(registrar: ToolRegistrar, rpc: BridgeServer['rpc'], session: Session): void {
+export function registerCoreTools(registrar: ToolRegistrar, bridge: BridgeServer, session: Session): void {
+    const rpc = bridge.rpc;
     registrar.registerTool('session.status', {
         description: 'Return the active Godot MCP session and editor/runtime connection state.',
         inputSchema: z.object({})
     }, async () => toolSuccess(getSessionStatus(session)));
+    registrar.registerTool('godot.capabilities', {
+        description: 'Return the bounded compatibility and capability manifest reported by the authenticated Godot addon.',
+        inputSchema: z.object({})
+    }, async () => {
+        try {
+            if (!bridge.connected) throw new BridgeRpcError('EDITOR_NOT_CONNECTED', 'Editor is not connected');
+            const compatibility = bridge.compatibility;
+            if (!compatibility) throw new BridgeRpcError('CAPABILITY_UNAVAILABLE', 'Compatibility manifest is unavailable for this addon');
+            return toolSuccess(compatibility);
+        }
+        catch (error) {
+            return toolError(error);
+        }
+    });
     registrar.registerTool('project.info', {
         description: 'Inspect the active Godot project through the connected editor addon.',
         inputSchema: z.object({})

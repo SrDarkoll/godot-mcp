@@ -9,7 +9,7 @@ import type { Session } from '../session/session.js';
 import { OperationGate } from './operation-gate.js';
 import { isBlockedReflectiveMethod } from './reflection-safety.js';
 const READS = new Set([
-    'session.status', 'session.manifest', 'project.info', 'scene.get_tree', 'scene.get_root',
+    'session.status', 'session.manifest', 'project.info', 'godot.capabilities', 'scene.get_tree', 'scene.get_root',
     'node.inspect', 'node.list_children', 'node.get_property', 'node.get_properties',
     'object.get_class', 'object.get_property_list', 'object.get_method_list', 'object.get_signal_list', 'object.get',
     'resource.load', 'resource.inspect', 'script.inspect', 'script.validate', 'signal.list', 'signal.connections',

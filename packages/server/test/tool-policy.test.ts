@@ -45,6 +45,12 @@ it('enforces disabled permissions and resets permissions for a new service insta
     }
     expect(new ToolPolicy(session, sessions, recovery).permissions()['editor.modify']).toBe(true);
 });
+it('classifies godot.capabilities as a normal read-only operation', async () => {
+    const { policy } = await setup();
+    const assessment = await policy.assess('godot.capabilities', {});
+    expect(assessment.risk).toBe('normal');
+    expect(assessment.permissions).not.toContain('editor.modify');
+});
 it('accepts synchronous operations as well as promises', async () => {
     const { policy } = await setup();
     expect(await policy.execute('session.status', {}, () => ({ ok: true }))).toEqual({ ok: true });

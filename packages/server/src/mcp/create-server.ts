@@ -68,7 +68,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerSecurityTools(registrar, policy);
     registerVisualTools(registrar, visual, ctx.sessions, ctx.session);
     registerWorkflowTools(registrar, workflow);
-    registerCoreTools(registrar, rpc, ctx.session);
+    registerCoreTools(registrar, ctx.bridge, ctx.session);
     registerUiTools(registrar, rpc);
     registerAnimationTools(registrar, rpc);
     registerTilemapTools(registrar, rpc);
