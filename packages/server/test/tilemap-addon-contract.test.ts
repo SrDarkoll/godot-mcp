@@ -18,5 +18,8 @@ describe('TileMapLayer addon contract',()=>{
     expect(handler).toContain(', 0, layer)');
     expect(handler).toContain('SOURCE_NOT_FOUND');
     expect(handler).toContain('var stored_alternative: int = int(alternative_tile)');
+    expect(handler).toContain('var coords := _snapshot_vector2i(cell.coords)');
+    expect(handler).toContain('var atlas_coords := _snapshot_vector2i(cell.atlas_coords)');
+    expect(handler).toContain('layer.set_cell(coords, int(cell.source_id), atlas_coords, int(cell.alternative_tile))');
   });
 });

@@ -106,6 +106,9 @@ func _coord_dict(value: Vector2i) -> Dictionary:
 func _vector2_dict(value: Vector2) -> Dictionary:
 	return {"x": value.x, "y": value.y}
 
+func _snapshot_vector2i(value) -> Vector2i:
+	return Vector2i(int(value.get("x", 0)), int(value.get("y", 0)))
+
 func _cell(layer: TileMapLayer, coords: Vector2i) -> Dictionary:
 	return {
 		"coords": _coord_dict(coords),
@@ -208,11 +211,12 @@ func _apply_cell(layer: TileMapLayer, cell: Dictionary) -> void:
 	layer.set_cell(cell.coords, int(cell.source_id), cell.atlas_coords, int(cell.alternative_tile))
 
 func _restore_cell(layer: TileMapLayer, cell: Dictionary) -> void:
-	var coords: Vector2i = cell.coords
+	var coords := _snapshot_vector2i(cell.coords)
 	if _cell_is_empty(cell):
 		layer.erase_cell(coords)
 	else:
-		_apply_cell(layer, cell)
+		var atlas_coords := _snapshot_vector2i(cell.atlas_coords)
+		layer.set_cell(coords, int(cell.source_id), atlas_coords, int(cell.alternative_tile))
 
 func _set_cells_internal(root: Node, layer: TileMapLayer, raw_cells: Array) -> Dictionary:
 	if raw_cells.is_empty() or raw_cells.size() > MAX_BATCH:
