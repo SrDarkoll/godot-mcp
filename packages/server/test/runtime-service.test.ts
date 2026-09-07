@@ -44,3 +44,21 @@ it('ignores debugger breakpoint inventory events in RuntimeService',async()=>{
  expect(await service.status()).toEqual(status);
  expect(append).not.toHaveBeenCalled();
 });
+
+it('publishes immutable lifecycle snapshots to subscribers and stops after unsubscribe',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-runtime-subscribe-'));const session=createSession(root);const store=new SessionStore(root);await store.create(session);
+ let status:any={state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:NO_RUNTIME_FEATURES,errorCode:null};
+ const bridge={connected:true,rpc:{call:async(method:string,params:any)=>{
+  if(method==='runtime.status')return status;
+  if(method==='runtime.start'){status={...status,state:'running',runId:params.runId,scenePath:'res://main.tscn',connected:true,ownership:'session'};return status;}
+  if(method==='runtime.stop'){status={...status,state:'stopped',connected:false};return {stopped:true,runId:status.runId};}
+  throw new Error(method);
+ }}};
+ const service=new RuntimeService(session,store,bridge);const seen:any[]=[];const unsubscribe=service.subscribe(value=>seen.push(value));
+ const run=await service.run({target:'main'});
+ service.acceptEvent({type:'event',protocol:1,sessionId:session.id,sequence:2,event:'runtime.state',data:{...run,state:'breaked'}});
+ expect(seen.map(value=>value.state)).toEqual(['stopped','running','breaked']);
+ seen[seen.length-1].state='tampered';expect(service.peek().state).toBe('breaked');
+ unsubscribe();service.acceptEvent({type:'event',protocol:1,sessionId:session.id,sequence:3,event:'runtime.state',data:{...run,state:'running'}});
+ expect(seen.map(value=>value.state)).toEqual(['stopped','running','tampered']);
+});

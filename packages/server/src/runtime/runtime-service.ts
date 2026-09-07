@@ -17,6 +17,7 @@ export class RuntimeService {
   private readonly diagnosticRuns=new Set<string>();
   private writes:Promise<void>=Promise.resolve();
   private writeError:Error|null=null;
+  private readonly listeners=new Set<(status:RuntimeStatus)=>void>();
   readonly diagnostics:DiagnosticStore;
   constructor(private readonly session:Session,private readonly sessions:SessionStore,private readonly bridge:RuntimeBridge){this.diagnostics=new DiagnosticStore(sessions,session.id);}
   private apply(status:RuntimeStatus):void {
@@ -26,7 +27,10 @@ export class RuntimeService {
       const ended=['stopped','failed','disconnected'].includes(status.state);
       this.writes=this.writes.then(()=>this.sessions.update(this.session.id,m=>({...m,runtimeRuns:m.runtimeRuns.map(r=>r.runId===status.runId?{...r,state:status.state,scenePath:status.scenePath??r.scenePath,endedAt:ended?(r.endedAt??new Date().toISOString()):r.endedAt,diagnosticsComplete:false,persistenceTruncated:this.diagnostics.degraded(r.runId)}:r)}))).then(()=>{this.writeError=null;}).catch(error=>{this.writeError=error;});
     }
+    for(const listener of this.listeners){try{listener(this.peek());}catch{}}
   }
+  peek():RuntimeStatus{return structuredClone(this.current);}
+  subscribe(listener:(status:RuntimeStatus)=>void):()=>void{this.listeners.add(listener);listener(this.peek());return()=>this.listeners.delete(listener);}
   acceptEvent(event:BridgeRuntimeEvent):void {
     if(event.sessionId!==this.session.id)return;
     if(event.event==='runtime.state') {
