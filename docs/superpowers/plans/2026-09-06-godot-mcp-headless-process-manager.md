@@ -576,7 +576,7 @@ Test sequence:
 Windows authoritative command:
 
 ```powershell
-$env:GODOT_BIN='C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe'
+$env:GODOT_BIN='C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe'
 npm run build
 npm run test:integration -- --headless
 ```
@@ -604,7 +604,7 @@ Add a `--headless` selection that includes `tests/integration/headless-process-m
 - [ ] **Step 5: Run integration suite and verify GREEN**
 
 ```powershell
-$env:GODOT_BIN='C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe'
+$env:GODOT_BIN='C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe'
 npm run build
 node .\scripts\run-integration.mjs --headless
 ```
@@ -642,7 +642,7 @@ Expected: all GREEN; generated count 173.
 - [ ] **Step 2: Run authoritative Windows integration gates**
 
 ```powershell
-$env:GODOT_BIN='C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe'
+$env:GODOT_BIN='C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe'
 npm run test:integration
 node .\scripts\run-integration.mjs --headless
 $env:GODOT_RUNTIME_INTEGRATION='1'

@@ -1340,7 +1340,7 @@ Use condition polling (`waitFor`) instead of fixed sleeps.
 On the authoritative Windows machine:
 
 ```powershell
-$env:GODOT_BIN="C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe"
+$env:GODOT_BIN="C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 $env:GODOT_RUNTIME_INTEGRATION="1"
 npx vitest run tests/integration/runtime-debugger-advanced.test.ts --maxWorkers=1 --no-file-parallelism
 ```
@@ -1401,7 +1401,7 @@ Ensure the default general integration excludes the advanced debugger test so it
 - [ ] **Step 9: Run the dedicated Phase 9 gate until green under root-cause discipline**
 
 ```powershell
-$env:GODOT_BIN="C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe"
+$env:GODOT_BIN="C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 $env:GODOT_RUNTIME_INTEGRATION="1"
 npm run test:integration:debugger
 ```
@@ -1482,7 +1482,7 @@ Record actual counts rather than copying expected counts into the validation doc
 - [ ] **Step 4: Run general integration gate**
 
 ```powershell
-$env:GODOT_BIN="C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe"
+$env:GODOT_BIN="C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 npm run test:integration
 ```
 

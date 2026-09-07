@@ -257,7 +257,7 @@ Expected: all green.
 - [ ] **Step 3: Run real Godot gates on Windows**
 
 ```powershell
-$env:GODOT_BIN="C:\Users\ramir\Desktop\Godot_v4.6.3-stable_win64.exe"
+$env:GODOT_BIN="C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 npm run check:godot
 npm run test:integration
 $env:GODOT_RUNTIME_INTEGRATION="1"

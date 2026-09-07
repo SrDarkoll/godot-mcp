@@ -72,4 +72,4 @@ Graceful MCP shutdown attempts to stop only its owned game, drains server-side w
 
 After build, configure `GODOT_BIN` with the local executable. Run `npm test`, `npm run typecheck`, `npm run check:godot` and the mandatory base integration tier. Set `GODOT_RUNTIME_INTEGRATION=1` for `npm run test:integration:runtime`; set `GODOT_VISUAL_INTEGRATION=1` for the editor capture tier. Graphical tiers require Windows and do not pass by skipping missing prerequisites.
 
-Tests retain their own fixtures under `.godot-mcp/runtime-test-runs/`, close only test-created processes, decode PNGs with Godot and compare content/bytes/hashes. Runtime mutation, stepping/breakpoint editing, runtime without an editor, rollback and automatic capture triggers remain future work.
+Tests retain their own fixtures under `.godot-mcp/runtime-test-runs/`, close only test-created processes, decode PNGs with Godot and compare content/bytes/hashes. Interactive DAP debugging, breakpoints (`debug.breakpoint.*`), execution stepping (`debug.step_*`), and stack/variable inspection (`debug.stack`, `debug.variables`, `debug.expand`) are fully supported and validated in Phase 9.

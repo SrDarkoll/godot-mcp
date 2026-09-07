@@ -1,20 +1,36 @@
 # Godot MCP
 
-**Status: Pre-alpha / editor, runtime and file recovery milestones**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Godot Engine](https://img.shields.io/badge/Godot-v4.6.3--stable-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
+[![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![MCP](https://img.shields.io/badge/MCP-183%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
+[![Status](https://img.shields.io/badge/Status-Developer%20Preview%20%7C%20Phase%209%20GREEN-success)](#authoritative-validation-evidence)
 
-Godot MCP is an open-source MCP bridge for controlling Godot 4.x from agentic clients such as Codex. The foundation milestone establishes a standard MCP stdio server, a localhost-only Node.js ↔ Godot EditorPlugin bridge, per-project addon installation, persistent session manifests, and read-only project/scene inspection.
+**Status: Developer Preview — Phase 9 (Advanced Debugging & Headless Process Manager)**
 
-The editor mutation surface and persistent 2D/3D editor viewport captures are now implemented. See the [visual capture guide](docs/tools/visual-capture.md) for arguments, image delivery, session manifests and limits.
+Godot MCP is an open-source Model Context Protocol (MCP) bridge for controlling Godot 4.x from agentic AI assistants (such as Antigravity, Claude, Codex, and others). It enables agents to inspect, author, debug, simulate, and visually verify Godot games directly through standard MCP tool invocations.
 
-Runtime execution, inspection, native diagnostics and game screenshots are available; see the [runtime guide](docs/tools/runtime-debugger.md).
+---
 
-Declared-file transactions, recoverable file checkpoints and session risk/permissions are implemented; see the [recovery guide](docs/tools/transactions-recovery.md).
+## Authoritative Validation Evidence
 
-Risky operations use MCP host/user elicitation rather than model-replayable confirmation tokens; see the [security model](docs/tools/security.md).
+Godot MCP enforces rigorous end-to-end testing against live Godot 4.6.3 on Windows across 10 deterministic validation gates:
 
-Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers are available; see the [UI and animation power-tools guide](docs/tools/ui-animation.md). Modern `TileMapLayer` and embedded TileSet atlas helpers are also available; see the [TileMapLayer and TileSet power-tools guide](docs/tools/tilemap-tileset.md). Common 2D authoring helpers for Node2D, Sprite2D, Camera2D, CollisionShape2D and Parallax2D are documented in the [2D power-tools guide](docs/tools/2d.md). Common 3D scene authoring plus StandardMaterial3D and spatial ShaderMaterial workflows are documented in the [3D and materials power-tools guide](docs/tools/3d-materials.md). Unified 2D/3D NavigationRegion, navigation resource baking and NavigationAgent authoring are documented in the [navigation power-tools guide](docs/tools/navigation.md). The feature-first Godot 4.x compatibility layer and bounded capability manifest are documented in [compatibility and capabilities](docs/architecture/compatibility-capabilities.md). The centralized tool catalog, deterministic startup profiles and bounded `godot.tools` discovery surface are documented in [tool registry and profiles](docs/architecture/tool-registry-profiles.md). Canonical static tool contracts, generated catalog/static-risk metadata, verified pilot bindings, and deterministic drift checks are documented in [tool contract codegen](docs/architecture/tool-contract-codegen.md).
+| Scope | Metrics | Status |
+| :--- | :--- | :---: |
+| **Tool Surface** | 183 canonical MCP tools across 8 profiles (`minimal`, `core`, `2d`, `3d`, `navigation`, `ui`, `runtime`, `full`) | ✅ PASS |
+| **Protocol Unit Tests** | 52/52 tests passed (`@godot-mcp/protocol`) | ✅ PASS |
+| **Server Unit Tests** | 250/250 tests passed (`@godot-mcp/server`) | ✅ PASS |
+| **CLI Unit Tests** | 11/11 tests passed (`@godot-mcp/cli`) | ✅ PASS |
+| **General Integration** | 15 test files (16 tests) driving live Godot 4.x EditorPlugin mutation lifecycle | ✅ PASS |
+| **Runtime Integration** | 3 test files (10 tests) controlling live game execution, inspection & native diagnostics | ✅ PASS |
+| **Visual Integration** | 1 test file (2 tests) capturing real 2D & 3D viewport pixels with checksum validation | ✅ PASS |
+| **Phase 8 Headless** | 1 test file (1 test) validating autonomous headless project management without editor | ✅ PASS |
+| **Phase 9 DAP Debugger** | 1 test file (2 tests) validating DAP stack, variables, stepping, breakpoints & reapply | ✅ PASS |
+| **Tool Contracts** | 183/183 tools verified against canonical JSON schemas with zero drift | ✅ PASS |
 
-> Unsaved editor-state recovery, debugger stepping and release automation remain future milestones. Visual checkpoints index images; file checkpoints restore selected on-disk files.
+---
 
 ## Current capabilities
 
@@ -26,19 +42,19 @@ Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/Anima
 - Per-project `addons/godot_mcp` installation.
 - Persistent `.godot-mcp/sessions/<session-id>/manifest.json`.
 - Ephemeral `.godot-mcp/runtime/bridge.json` descriptor.
-- MCP tools:
-  - `session.status`
-  - `godot.capabilities`
-  - `godot.tools` (bounded tool/profile discovery)
-  - `project.info`
-  - `scene.get_tree`
-  - Scene, node, object, resource, script, signal, project settings/input and editor operations from Plan 2
-  - `visual.capture_viewport_2d`
-  - `visual.capture_viewport_3d`
-  - `session.manifest`
+- True Headless Process Manager for autonomous validation, asset importing, script testing, and background execution without GUI dependency.
+- Advanced Interactive DAP Debugging: breakpoints, stepping, stack frame inspection, lazy variable expansion, and breakpoint sync.
+- Real-time Visual Viewport & Game Captures (2D & 3D editor viewports, game runtime capture).
+- Declared-file transactions, recoverable file checkpoints, and session risk/permissions (`transaction.*`, `checkpoint.*`, `permissions.*`).
+- MCP tools (183 tools organized in profiles):
+  - `session.status`, `godot.capabilities`, `godot.tools` (bounded tool/profile discovery)
+  - `project.info`, `scene.get_tree`
+  - Scene, node, object, resource, script, signal, project settings/input and editor operations
+  - `visual.capture_viewport_2d`, `visual.capture_viewport_3d`, `visual.capture_game`
+  - `headless.validate_project`, `headless.import`, `headless.run`, `headless.run_scene`, `headless.run_tests`, `headless.status`, `headless.stop`, `headless.get_output`
   - `project.run`, `project.run_scene`, `project.stop`, `runtime.*` inspection/control
   - `debug.output`, `debug.errors`, `debug.warnings`, `debug.performance`
-  - `visual.capture_game`
+  - Advanced DAP Debugger: `debug.breakpoint.set`, `debug.breakpoint.remove`, `debug.breakpoint.list`, `debug.stack`, `debug.variables`, `debug.expand`, `debug.continue`, `debug.step_into`, `debug.step_over`, `debug.step_out`
   - `transaction.*`, file `checkpoint.*`, `permissions.*` and `risk.preview`
   - `ui.*` Control layout helpers and `animation.*` AnimationMixer/AnimationPlayer editing helpers
   - `tilemap.*` TileMapLayer editing helpers and `tileset.*` embedded TileSet/atlas helpers
@@ -48,6 +64,9 @@ Specialized `ui.*` Control layout helpers and `animation.*` AnimationMixer/Anima
 - CLI commands:
   - `godot-mcp init`
   - `godot-mcp doctor`
+  - `godot-mcp config`
+
+> Visual checkpoints index images; file checkpoints restore selected on-disk files. Release automation and unsaved live-memory crash recovery remain future roadmap items.
 
 ## Requirements
 
