@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {describe,expect,it,vi} from 'vitest';
 import {NO_RUNTIME_FEATURES,type BridgeRuntimeEvent,type RuntimeStatus} from '@godot-mcp/protocol';
 import {DebuggerService} from '../src/debugger/debugger-service.js';
-import type {DapCloseListener,DapEvent,DapEventListener,DapTransport} from '../src/debugger/dap-transport.js';
+import {DapRequestError,type DapCloseListener,type DapEvent,type DapEventListener,type DapTransport} from '../src/debugger/dap-transport.js';
 
 class FakeRuntime {
   private listeners=new Set<(status:RuntimeStatus)=>void>();
@@ -118,6 +118,27 @@ describe('DebuggerService',()=>{
     dap.emit({seq:5,type:'event',event:'continued',body:{threadId:3}});
     runtime.set({...run,state:'running'});
     await expect(service.variables({frame_id:stack.frames[0]!.frameId})).rejects.toMatchObject({code:'RUNTIME_NOT_BREAKED'});
+    await service.close();
+  });
+
+  it('retries Godot variables while an async frame dump is still becoming available',async()=>{
+    const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
+    let variableAttempts=0;
+    dap.handler=async command=>{
+      if(command==='stackTrace')return {stackFrames:[{id:51,name:'vars_pending',source:{path:`${process.cwd()}/debug_target.gd`},line:17,column:1}]};
+      if(command==='scopes')return {scopes:[{name:'Locals',variablesReference:40}]};
+      if(command==='variables'){
+        variableAttempts++;
+        if(variableAttempts===1)throw new DapRequestError('variables','unknown');
+        return {variables:[{name:'local_value',type:'int',value:'42',variablesReference:0}]};
+      }
+      return {};
+    };
+    runtime.set({...run,state:'breaked'});
+    const stack=await service.stack();
+    const vars=await service.variables({frame_id:stack.frames[0]!.frameId});
+    expect(variableAttempts).toBe(2);
+    expect(vars.scopes[0]?.variables[0]).toMatchObject({name:'local_value',value:'42'});
     await service.close();
   });
 
