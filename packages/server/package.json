@@ -46,7 +46,7 @@
     "@modelcontextprotocol/client": "^2.0.0"
   },
   "license": "MIT",
-  "description": "Godot MCP server package (Windows-first pre-alpha)",
+  "description": "Godot MCP server package (Windows-first Developer Preview)",
   "files": [
     "dist",
     "LICENSE",

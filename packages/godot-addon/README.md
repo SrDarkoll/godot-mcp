@@ -1,5 +1,5 @@
 # Godot MCP godot-addon
 
-MIT-licensed, Windows-first Godot 4.x integration. Node.js 22+ is required for the CLI/server. This package is a private pre-alpha distribution artifact; it has not been published to a registry.
+Godot 4.x EditorPlugin providing the authenticated WebSocket loopback bridge and viewport capture hooks for Godot MCP.
 
-Install all four sibling tarballs together. The CLI provides help with `godot-mcp --help`, initializes a selected project and starts the MCP stdio server with `godot-mcp start <project>`. No API keys or global Codex configuration changes are needed for basic installation.
+Part of the [Godot MCP](https://github.com/SrDarkoll/godot-mcp) monorepo. Distributed as a hardened Developer Preview package (v0.1.0).

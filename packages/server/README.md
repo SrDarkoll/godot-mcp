@@ -1,5 +1,5 @@
 # Godot MCP server
 
-MIT-licensed, Windows-first Godot 4.x integration. Node.js 22+ is required for the CLI/server. This package is a private pre-alpha distribution artifact; it has not been published to a registry.
+Model Context Protocol (MCP) stdio server, tool registry, session manager, headless runner, and DAP debugging bridge for Godot 4.x.
 
-Install all four sibling tarballs together. The CLI provides help with `godot-mcp --help`, initializes a selected project and starts the MCP stdio server with `godot-mcp start <project>`. No API keys or global Codex configuration changes are needed for basic installation.
+Part of the [Godot MCP](https://github.com/SrDarkoll/godot-mcp) monorepo. Node.js 22+ is required. Distributed as a hardened Developer Preview package (v0.1.0).

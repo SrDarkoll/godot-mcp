@@ -19,7 +19,7 @@
     "@godot-mcp/godot-addon": "0.1.0"
   },
   "license": "MIT",
-  "description": "Godot MCP cli package (Windows-first pre-alpha)",
+  "description": "Godot MCP cli package (Windows-first Developer Preview)",
   "files": [
     "dist",
     "LICENSE",

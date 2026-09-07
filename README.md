@@ -4,13 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Godot Engine](https://img.shields.io/badge/Godot-v4.6.3--stable-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![MCP](https://img.shields.io/badge/MCP-183%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
-[![Status](https://img.shields.io/badge/Status-Developer%20Preview%20%7C%20Phase%209%20GREEN-success)](#authoritative-validation-evidence)
+[![Status](https://img.shields.io/badge/Status-Hardened%20Developer%20Preview%20%7C%20Phase%209%20GREEN-success)](#authoritative-validation-evidence)
 
 > **Give your AI coding assistants hands, eyes, and deep debugging powers directly inside Godot Engine 4.x.**
 
-Godot MCP is an open-source, production-hardened [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to **Godot Engine 4.x**.
+Godot MCP is an open-source, hardened Developer Preview [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to **Godot Engine 4.x**.
 
 Instead of copying and pasting GDScript snippets, guessing node hierarchy paths, or struggling to describe visual bugs to an LLM, Godot MCP provides a bidirectional control plane: agents can inspect scene trees, author 2D/3D nodes, build TileMaps, edit animations, step through code with a live DAP debugger, and capture high-resolution viewport screenshots for visual grounding.
 
@@ -96,11 +96,11 @@ To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 
 
 ---
 
-## Requirements
+## Requirements & Compatibility Boundary
 
-- **Operating System:** Windows 10/11 (Tier-1 verified). Linux and macOS are compatible via Node.js and Godot CLI.
+- **Operating System:** Windows 10/11 is the primary **Tier-1 validated target**. Linux and macOS are expected to work via Node.js and the Godot CLI, but are not yet Tier-1 validated in continuous integration.
+- **Godot Engine:** Tested and hardened specifically against **Godot 4.6.3-stable** on Windows. Other Godot 4.x releases are expected to work, but have not been formally certified across all 10 gates.
 - **Node.js:** v22.0.0 or newer.
-- **Godot Engine:** Godot 4.2+ (tested and hardened against **Godot 4.6.3-stable**).
 - **Package Manager:** npm (bundled with Node.js).
 
 ---
@@ -235,32 +235,44 @@ godot-mcp/
 │   ├── cli/            # CLI commands (init, doctor, config)
 │   └── godot-addon/    # Godot 4 EditorPlugin (WebSocket bridge, viewport grabbers)
 ├── tests/
-│   ├── integration/    # Live Godot 4.x editor & runtime test suites
-│   ├── headless/       # Headless runner & validation tests
-│   └── dap/            # Live DAP debugger integration tests
+│   └── integration/    # Live Godot 4.x editor, runtime, headless & DAP test suites
 ├── docs/               # Comprehensive architecture, protocol, and tool documentation
-└── scripts/            # CI scripts and automated test gate runners
+└── scripts/            # CI scripts, code generators, and automated test runners
 ```
 
 ---
 
 ## Running Tests Locally
 
-To run the local unit tests:
+You can run individual test suites using the supported npm scripts:
 
 ```powershell
+# Run unit tests across all packages (protocol, server, cli)
 npm test
-```
 
-To run the full 10-gate validation suite against a live Godot executable:
+# Check type safety and tool schema synchronization
+npm run typecheck
+npm run check:tool-contracts
 
-```powershell
+# Check Godot addon GDScript syntax
+npm run check:godot
+
+# Run live integration tests (requires Godot 4.x)
 $env:GODOT_BIN = "C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 $env:REQUIRE_GODOT_INTEGRATION = "1"
-$env:GODOT_RUNTIME_INTEGRATION = "1"
-$env:GODOT_VISUAL_INTEGRATION = "1"
+npm run test:integration
 
-powershell -ExecutionPolicy Bypass -File scripts/phase9-windows-gates-v14.ps1
+# Specific integration tiers
+npm run test:integration:runtime    # Live game runtime & diagnostics
+npm run test:integration:visual     # Viewport and game pixel capture
+npm run test:integration:debugger   # DAP interactive debugger (Phase 9)
+npm run test:distribution           # Packaged tarball distribution smoke test
+```
+
+To execute the complete 10-gate validation suite in a single automated run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run-all-gates.ps1 -GodotBin "C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 ```
 
 ---

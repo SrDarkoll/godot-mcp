@@ -20,7 +20,7 @@
     "zod": "^4.0.0"
   },
   "license": "MIT",
-  "description": "Godot MCP protocol package (Windows-first pre-alpha)",
+  "description": "Godot MCP protocol package (Windows-first Developer Preview)",
   "files": [
     "dist",
     "LICENSE",

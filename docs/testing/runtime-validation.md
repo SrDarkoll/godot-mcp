@@ -1,5 +1,8 @@
 # Runtime and debugger validation — 2026-09-05
 
+> [!NOTE]
+> **Historical Phase 4 Validation Record**: This document records the initial runtime validation completed during Plan 4 (Phase 4). Capabilities deferred at this stage (interactive DAP stepping, breakpoints, variable inspection, headless execution, and transactions) were implemented and verified in subsequent milestones (Phase 5 Transactions, Phase 8 Headless, and Phase 9 Advanced DAP Debugging). See [`docs/tools/runtime-debugger.md`](../tools/runtime-debugger.md) for current documentation.
+
 Plan 4 was implemented over the uncommitted Plan 3 changes on `feat/foundation-editor-handshake`, based on `7e0b327`. No commit, push, merge, screenshot cleanup or personal-project edits were performed.
 
 ## Results
@@ -46,8 +49,8 @@ Repository-relative locations, intentionally ignored by Git:
 
 This is task-directed validation, not a complete engine/GPU/version matrix. Other Godot 4.x versions and exported standalone debug builds were not exercised as compatibility targets. The runtime agent's standalone guard is present; this report does not claim an export/release validation suite.
 
-Diagnostic delivery is best effort after Logger installation. Errors before installation and final queued messages lost on abrupt termination cannot be recovered. `diagnosticsComplete` intentionally stays false. Origin metadata is included; interactive breakpoint editing, stepping, captured variables and full debugger stack inspection are deferred. JSONL is capped at 10 MiB per run without deleting earlier data; there is no replay/recovery system for truncated streams.
+Diagnostic delivery is best effort after Logger installation. Errors before installation and final queued messages lost on abrupt termination cannot be recovered. `diagnosticsComplete` intentionally stays false. Origin metadata is included. *(Note: interactive breakpoint editing, stepping, captured variables and full debugger stack inspection were subsequently implemented in Phase 9 DAP Debugger).* JSONL is capped at 10 MiB per run without deleting earlier data; there is no replay/recovery system for truncated streams.
 
 The pre-existing mutation suite intentionally validates broken GDScript and emits that parse diagnostic. Godot's headless dummy renderer also reports a null thumbnail texture during that suite's scene save. Its assertions pass; this is not described as a pristine engine log. The dedicated addon syntax and graphical runtime tests contain no addon parse failures. The runtime fixture deliberately prints/pushes its output, warning and error markers.
 
-The work remains pre-alpha and does not establish production readiness for the full specification. Transactions, rollback, runtime property mutation, runtime without an editor and automatic visual triggers remain future milestones.
+*(Phase 4 Status note: At the time of this test run, the work was in pre-alpha; transactions, rollback, headless execution without an editor, and DAP debugging were subsequently completed and verified in Phases 5, 8, and 9).*
