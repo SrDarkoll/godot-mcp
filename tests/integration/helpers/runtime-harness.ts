@@ -64,6 +64,11 @@ func _process(_delta: float) -> void:
     if FileAccess.file_exists(manual_marker):
         var file := FileAccess.open(manual_marker, FileAccess.READ)
         var payload = JSON.parse_string(file.get_as_text()) if file != null else null
+        # Windows does not allow deleting this marker while FileAccess still
+        # owns the handle. Close it before remove or this branch repeats every
+        # frame and starves the dump-breakpoints marker below.
+        if file != null:
+            file.close()
         DirAccess.remove_absolute(ProjectSettings.globalize_path(manual_marker))
         if typeof(payload) == TYPE_DICTIONARY:
             var breakpoint_path := str(payload.get("script_path", ""))
