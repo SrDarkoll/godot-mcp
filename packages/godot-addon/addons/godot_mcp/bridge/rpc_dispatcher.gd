@@ -91,6 +91,10 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _runtime.set_mcp_breakpoint(params)
         "debugger.breakpoint.remove":
             result = _runtime.remove_mcp_breakpoint(params)
+        "debugger.dap_sync.begin":
+            result = _runtime.begin_dap_sync()
+        "debugger.dap_sync.end":
+            result = _runtime.end_dap_sync()
         "debugger.step_out":
             result = _runtime.step_out()
         "runtime.status":

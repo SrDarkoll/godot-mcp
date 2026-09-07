@@ -17,6 +17,7 @@ var _stopping := false
 var _mcp_breakpoints: Dictionary = {}
 var _mcp_breakpoint_session := ""
 var _mcp_origin_depth := 0
+var _dap_sync_depth := 0
 
 func configure(editor_interface) -> void:
     _editor = editor_interface
@@ -33,6 +34,7 @@ func bind_session(session_id: String) -> void:
     _publish_breakpoints()
 func unbind_session() -> void:
     _mcp_session = ""
+    _dap_sync_depth = 0
     _cancel_pending("EDITOR_NOT_CONNECTED","Editor bridge disconnected")
 func _has_capture(prefix: String) -> bool:
     return prefix == "godot_mcp"
@@ -42,6 +44,9 @@ func _setup_session(session_id: int) -> void:
     session.stopped.connect(_on_stopped.bind(session_id))
     session.breaked.connect(_on_breaked.bind(session_id))
     session.continued.connect(_on_continued.bind(session_id))
+func _apply_owned_breakpoints(session) -> void:
+    if session == null or not session.is_active():
+        return
     _mcp_origin_depth += 1
     for owned_breakpoint in _mcp_breakpoints.values():
         session.set_breakpoint(str(owned_breakpoint.scriptPath), int(owned_breakpoint.line), true)
@@ -49,6 +54,7 @@ func _setup_session(session_id: int) -> void:
 func _active_sessions() -> Array:
     return get_sessions().filter(func(session): return session.is_active())
 func _on_started(id: int) -> void:
+    _apply_owned_breakpoints(get_session(id))
     if not _launching or _state != "starting":
         # A later manually started game must not inherit the previous run's owner.
         _owner_session = ""
@@ -151,6 +157,14 @@ func _user_cmdline_value(flag: String) -> String:
         if current.begins_with(flag + "="):
             return current.substr(flag.length() + 1)
     return ""
+func begin_dap_sync() -> Dictionary:
+    _dap_sync_depth += 1
+    return {"active":true}
+func end_dap_sync() -> Dictionary:
+    if _dap_sync_depth <= 0:
+        return _error("DEBUG_PROTOCOL_ERROR","DAP breakpoint sync guard is not active")
+    _dap_sync_depth -= 1
+    return {"active":_dap_sync_depth > 0}
 func debugger_info() -> Dictionary:
     var settings = _editor.get_editor_settings()
     # Engine-consumed flags such as --dap-port are intentionally absent from
@@ -237,12 +251,16 @@ func _publish_breakpoints() -> void:
         return
     runtime_event.emit("debugger.breakpoints", {"breakpoints":_breakpoint_inventory()})
 func _breakpoint_set_in_tree(script: Script, line: int, _enabled: bool) -> void:
+    if _dap_sync_depth > 0:
+        return
     if _mcp_origin_depth == 0:
         var path := script.resource_path if script != null else ""
         if not path.is_empty():
             _mcp_breakpoints.erase(_breakpoint_key(path,line))
         _publish_breakpoints()
 func _breakpoints_cleared_in_tree() -> void:
+    if _dap_sync_depth > 0:
+        return
     if _mcp_origin_depth == 0:
         _mcp_breakpoints.clear()
     _publish_breakpoints()

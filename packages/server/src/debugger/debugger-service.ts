@@ -12,6 +12,7 @@ import {DebugReferenceStore} from './debug-reference-store.js';
 import {TcpDapTransport,type DapEvent,type DapTransport} from './dap-transport.js';
 
 type DebuggerState='DETACHED'|'ATTACHING'|'READY'|'BREAKED'|'RESUMING'|'UNAVAILABLE';
+const GODOT_MAIN_DEBUG_THREAD_ID=1;
 type DapTransportFactory=()=>DapTransport;
 interface RuntimeObserver {peek():RuntimeStatus;subscribe(listener:(status:RuntimeStatus)=>void):()=>void;}
 interface DebuggerBridge {connected:boolean;rpc:Pick<RpcRouter,'call'>;}
@@ -219,17 +220,20 @@ export class DebuggerService {
     transport.onEvent(event=>{if(this.transport===transport)this.onDapEvent(event);});
     transport.onClose(error=>{if(this.transport===transport)this.onUnexpectedTransportClose(transport,error);});
     try{
-      // Godot 4.6.3 emits `initialized` while it is still servicing the
-      // initialize request. Install the waiter first or the event can be lost
-      // before the initialize promise resumes.
-      const initialized=this.waitForInitialized(transport,5000);
-      const initialize=transport.request('initialize',{
-        clientID:'godot-mcp',clientName:'Godot MCP',adapterID:'godot',pathFormat:'path',linesStartAt1:true,columnsStartAt1:true,supportsVariableType:true,supportsVariablePaging:true
-      },5000);
-      initialize.catch(error=>this.rejectInitialized(transport,error instanceof Error?error:new Error(String(error))));
-      await Promise.all([initialize,initialized]);
-      await transport.request('attach',{address:info.debugHost,port:info.debugPort},5000);
-      await transport.request('configurationDone',{},5000);
+      await this.withDapBreakpointSync(async()=>{
+        // Godot 4.6.3 emits `initialized` while it is still servicing the
+        // initialize request. Install the waiter first or the event can be lost
+        // before the initialize promise resumes.
+        const initialized=this.waitForInitialized(transport,5000);
+        const initialize=transport.request('initialize',{
+          clientID:'godot-mcp',clientName:'Godot MCP',adapterID:'godot',pathFormat:'path',linesStartAt1:true,columnsStartAt1:true,supportsVariableType:true,supportsVariablePaging:true
+        },5000);
+        initialize.catch(error=>this.rejectInitialized(transport,error instanceof Error?error:new Error(String(error))));
+        await Promise.all([initialize,initialized]);
+        await this.restoreManualEditorBreakpoints(transport,info);
+        await transport.request('attach',{address:info.debugHost,port:info.debugPort},5000);
+        await transport.request('configurationDone',{},5000);
+      });
       const after=this.runtime.peek();
       if(this.transport!==transport||after.runId!==runId||after.ownership!=='session')throw new BridgeRpcError('RUNTIME_NOT_OWNED','Runtime changed during debugger attach');
       this.unavailableReason=null;this.state='READY';if(after.state==='breaked')this.maybeEstablishBreak();
@@ -239,6 +243,37 @@ export class DebuggerService {
       if(error instanceof BridgeRpcError)throw error;
       throw new BridgeRpcError('DEBUGGER_ATTACH_FAILED',error instanceof Error?error.message:'Godot DAP handshake failed');
     }
+  }
+
+  private async withDapBreakpointSync<T>(work:()=>Promise<T>):Promise<T>{
+    await this.bridge.rpc.call('debugger.dap_sync.begin',{});
+    let value:T|undefined;let primary:unknown=null;
+    try{value=await work();}catch(error){primary=error;}
+    try{await this.bridge.rpc.call('debugger.dap_sync.end',{});}catch(error){if(primary===null)primary=error;}
+    if(primary!==null)throw primary;
+    return value as T;
+  }
+
+  private async restoreManualEditorBreakpoints(transport:DapTransport,info:DebuggerInfoResult):Promise<void>{
+    const owned=new Set(info.mcpBreakpoints.map(value=>this.breakpointKey(value.scriptPath,value.line)));
+    const byScript=new Map<string,number[]>();
+    for(const breakpoint of info.breakpoints){
+      if(owned.has(this.breakpointKey(breakpoint.scriptPath,breakpoint.line)))continue;
+      const lines=byScript.get(breakpoint.scriptPath)??[];lines.push(breakpoint.line);byScript.set(breakpoint.scriptPath,lines);
+    }
+    for(const scriptPath of [...byScript.keys()].sort()){
+      const lines=[...new Set(byScript.get(scriptPath)!)].sort((a,b)=>a-b);
+      const sourcePath=this.dapSourcePath(scriptPath);
+      await transport.request('setBreakpoints',{
+        source:{name:scriptPath.slice(scriptPath.lastIndexOf('/')+1),path:sourcePath},
+        breakpoints:lines.map(line=>({line}))
+      },5000);
+    }
+  }
+
+  private dapSourcePath(scriptPath:string):string{
+    const root=this.session.projectRoot.replaceAll('\\','/').replace(/\/+$/,'');
+    return `${root}/${scriptPath.slice('res://'.length)}`;
   }
 
   private waitForInitialized(transport:DapTransport,timeoutMs:number):Promise<void>{
@@ -270,8 +305,16 @@ export class DebuggerService {
 
   private maybeEstablishBreak():void{
     const status=this.runtime.peek();
-    if(!this.transport||this.attachedRunId!==status.runId||status.ownership!=='session'||status.state!=='breaked'||this.pendingStoppedThreadId===null)return;
-    this.stoppedThreadId=this.pendingStoppedThreadId;this.pendingStoppedThreadId=null;this.refs.beginBreak();this.state='BREAKED';
+    if(!this.transport||this.attachedRunId!==status.runId||status.ownership!=='session'||status.state!=='breaked')return;
+    if(this.state==='BREAKED'){this.pendingStoppedThreadId=null;return;}
+    // Godot 4.6.3 exposes exactly one DAP thread (id=1). Session-owned
+    // breakpoints applied through EditorDebuggerSession can interrupt the
+    // runtime without producing a DAP `stopped` event because they are not
+    // members of DAP's own breakpoint list. RuntimeService's correlated
+    // `breaked` state is still authoritative, so use Godot's single thread as
+    // the compatibility fallback while retaining a real DAP transport.
+    this.stoppedThreadId=this.pendingStoppedThreadId??GODOT_MAIN_DEBUG_THREAD_ID;
+    this.pendingStoppedThreadId=null;this.refs.beginBreak();this.state='BREAKED';
   }
 
   private async control(action:DebugControlAction,command:string):Promise<DebugControlResult>{
