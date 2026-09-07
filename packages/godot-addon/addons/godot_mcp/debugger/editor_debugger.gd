@@ -43,8 +43,8 @@ func _setup_session(session_id: int) -> void:
     session.breaked.connect(_on_breaked.bind(session_id))
     session.continued.connect(_on_continued.bind(session_id))
     _mcp_origin_depth += 1
-    for breakpoint in _mcp_breakpoints.values():
-        session.set_breakpoint(str(breakpoint.scriptPath), int(breakpoint.line), true)
+    for owned_breakpoint in _mcp_breakpoints.values():
+        session.set_breakpoint(str(owned_breakpoint.scriptPath), int(owned_breakpoint.line), true)
     _mcp_origin_depth -= 1
 func _active_sessions() -> Array:
     return get_sessions().filter(func(session): return session.is_active())

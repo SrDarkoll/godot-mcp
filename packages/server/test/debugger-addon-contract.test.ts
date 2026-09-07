@@ -19,6 +19,11 @@ it('drops addon ownership when the user changes or clears an MCP-owned breakpoin
   expect(source).toContain('_mcp_breakpoints.clear()\n    _publish_breakpoints()');
 });
 
+it('does not use reserved GDScript breakpoint keyword as an identifier',async()=>{
+  const source=await fs.readFile(new URL('../../godot-addon/addons/godot_mcp/debugger/editor_debugger.gd',import.meta.url),'utf8');
+  expect(source).not.toMatch(/\b(?:var|for)\s+breakpoint\b/);
+});
+
 it('routes only the approved private debugger bridge methods',async()=>{
   const source=await fs.readFile(new URL('../../godot-addon/addons/godot_mcp/bridge/rpc_dispatcher.gd',import.meta.url),'utf8');
   for(const method of ['debugger.info','debugger.breakpoint.set','debugger.breakpoint.remove']) {
