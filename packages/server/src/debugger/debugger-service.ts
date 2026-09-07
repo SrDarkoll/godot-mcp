@@ -9,10 +9,12 @@ import {
 import type {Session} from '../session/session.js';
 import {BridgeRpcError,type RpcRouter} from '../bridge/rpc-router.js';
 import {DebugReferenceStore} from './debug-reference-store.js';
-import {TcpDapTransport,type DapEvent,type DapTransport} from './dap-transport.js';
+import {DapRequestError,TcpDapTransport,type DapEvent,type DapTransport} from './dap-transport.js';
 
 type DebuggerState='DETACHED'|'ATTACHING'|'READY'|'BREAKED'|'RESUMING'|'UNAVAILABLE';
 const GODOT_MAIN_DEBUG_THREAD_ID=1;
+const GODOT_SCOPE_VARIABLE_RETRY_DELAY_MS=25;
+const GODOT_SCOPE_VARIABLE_RETRY_LIMIT=40;
 type DapTransportFactory=()=>DapTransport;
 interface RuntimeObserver {peek():RuntimeStatus;subscribe(listener:(status:RuntimeStatus)=>void):()=>void;}
 interface DebuggerBridge {connected:boolean;rpc:Pick<RpcRouter,'call'>;}
@@ -134,7 +136,7 @@ export class DebuggerService {
     for(const rawScope of body.scopes.slice(0,64)){
       if(!rawScope||typeof rawScope!=='object'||Array.isArray(rawScope))throw new BridgeRpcError('DEBUG_PROTOCOL_ERROR','DAP scope is malformed');
       const scope=rawScope as Record<string,unknown>;const name=typeof scope.name==='string'?scope.name.slice(0,1024):'';const reference=this.requiredInteger(scope.variablesReference,'scope variablesReference',1);
-      const varsBody=await transport.request('variables',{variablesReference:reference,start:0,count:DEFAULT_DEBUG_VARIABLE_PAGE},5000);this.assertGeneration(generation);
+      const varsBody=await this.requestScopeVariables(transport,reference,generation);
       scopes.push({name,variables:this.mapVariables(varsBody,DEFAULT_DEBUG_VARIABLE_PAGE)});
     }
     return {frameId:input.frame_id,scopes};
@@ -247,6 +249,23 @@ export class DebuggerService {
       if(error instanceof BridgeRpcError)throw error;
       throw new BridgeRpcError('DEBUGGER_ATTACH_FAILED',error instanceof Error?error.message:'Godot DAP handshake failed');
     }
+  }
+
+  private async requestScopeVariables(transport:DapTransport,reference:number,generation:{runtime:number;break:number}):Promise<Record<string,unknown>>{
+    for(let attempt=0;attempt<GODOT_SCOPE_VARIABLE_RETRY_LIMIT;attempt++){
+      try{
+        const body=await transport.request('variables',{variablesReference:reference,start:0,count:DEFAULT_DEBUG_VARIABLE_PAGE},5000);
+        this.assertGeneration(generation);
+        return body;
+      }catch(error){
+        this.assertGeneration(generation);
+        const pending=error instanceof DapRequestError&&error.command==='variables'&&error.message==='DAP variables failed: unknown';
+        if(!pending||attempt===GODOT_SCOPE_VARIABLE_RETRY_LIMIT-1)throw error;
+        await new Promise(resolve=>setTimeout(resolve,GODOT_SCOPE_VARIABLE_RETRY_DELAY_MS));
+        this.assertGeneration(generation);
+      }
+    }
+    throw new BridgeRpcError('DEBUG_PROTOCOL_ERROR','Godot DAP scope variables did not become available');
   }
 
   private async withDapBreakpointSync<T>(work:()=>Promise<T>):Promise<T>{
