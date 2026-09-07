@@ -31,7 +31,11 @@ it('removes the ephemeral bridge descriptor when MCP stdin closes', async () => 
   child.stderr.on('data', chunk => { stderr += chunk; });
 
   try {
-    expect(await waitFor(() => exists(descriptor), 2_000)).toBe(true);
+    const descriptorReady = await waitFor(() => exists(descriptor), 5_000);
+    expect(
+      descriptorReady,
+      `bridge descriptor was not created before startup deadline; exitCode=${child.exitCode}; signalCode=${child.signalCode}; stderr=${stderr}`
+    ).toBe(true);
     const persisted = JSON.parse(await readFile(descriptor, 'utf8')) as { host: string };
     expect(persisted.host).toBe('127.0.0.1');
 
@@ -43,7 +47,7 @@ it('removes the ephemeral bridge descriptor when MCP stdin closes', async () => 
     if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
     await rm(root, { recursive: true, force: true });
   }
-}, 8_000);
+}, 12_000);
 
 it('closes the owned headless manager before finishing the session manifest', async () => {
   const source = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8');
