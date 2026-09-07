@@ -193,7 +193,12 @@ describe('DebuggerService',()=>{
 
   it('invalidates old references and closes the old transport when runId changes',async()=>{
     const first=running();const runtime=new FakeRuntime(stopped());const daps=[new FakeDap(),new FakeDap()];let index=0;
-    const call=vi.fn(async(method:string)=>{if(method==='debugger.info')return info();throw new Error(method);});
+    const call=vi.fn(async(method:string)=>{
+      if(method==='debugger.info')return info();
+      if(method==='debugger.dap_sync.begin')return {active:true};
+      if(method==='debugger.dap_sync.end')return {active:false};
+      throw new Error(method);
+    });
     const service=new DebuggerService({id:'session-1',projectRoot:process.cwd()} as any,runtime as any,{connected:true,rpc:{call}} as any,()=>daps[index++]!);
     await service.editorConnected();runtime.set(first);await new Promise(resolve=>setTimeout(resolve,0));
     const dap=daps[0]!;dap.handler=async command=>command==='stackTrace'?{stackFrames:[{id:1,name:'first',source:{path:`${process.cwd()}/first.gd`},line:2,column:1}]}:{};
