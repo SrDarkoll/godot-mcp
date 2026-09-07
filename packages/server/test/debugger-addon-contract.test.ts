@@ -7,6 +7,10 @@ it('exposes individual breakpoint mutation and local debugger discovery without 
   expect(source).toContain('set_breakpoint(');
   expect(source).toContain('network/debug_adapter/remote_port');
   expect(source).toContain('network/debug/remote_port');
+  expect(source).toContain('OS.get_cmdline_user_args()');
+  expect(source).toContain('--godot-mcp-dap-port');
+  expect(source).toContain('--godot-mcp-debug-server');
+  expect(source).not.toContain('_cmdline_value("--dap-port")');
   expect(source).toContain('debugger.breakpoints');
   expect(source).not.toContain('debug.send_dap_request');
   expect(source).not.toContain('setVariable');

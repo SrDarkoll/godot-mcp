@@ -142,8 +142,8 @@ func _owned_breakpoint_inventory() -> Array:
         result.append(value.duplicate(true))
     result.sort_custom(func(a,b): return a.scriptPath < b.scriptPath or (a.scriptPath == b.scriptPath and a.line < b.line))
     return result
-func _cmdline_value(flag: String) -> String:
-    var args := OS.get_cmdline_args()
+func _user_cmdline_value(flag: String) -> String:
+    var args := OS.get_cmdline_user_args()
     for i in range(args.size()):
         var current := str(args[i])
         if current == flag and i + 1 < args.size():
@@ -153,12 +153,15 @@ func _cmdline_value(flag: String) -> String:
     return ""
 func debugger_info() -> Dictionary:
     var settings = _editor.get_editor_settings()
-    var dap_port := int(_cmdline_value("--dap-port"))
+    # Engine-consumed flags such as --dap-port are intentionally absent from
+    # OS.get_cmdline_args(). Test/managed launchers may mirror their effective
+    # local endpoints after `--`; normal editor launches fall back to settings.
+    var dap_port := int(_user_cmdline_value("--godot-mcp-dap-port"))
     if dap_port <= 0:
         dap_port = int(settings.get_setting("network/debug_adapter/remote_port"))
     var debug_host := str(settings.get_setting("network/debug/remote_host"))
     var debug_port := int(settings.get_setting("network/debug/remote_port"))
-    var debug_server := _cmdline_value("--debug-server")
+    var debug_server := _user_cmdline_value("--godot-mcp-debug-server")
     if debug_server.begins_with("tcp://127.0.0.1:"):
         debug_host = "127.0.0.1"
         debug_port = int(debug_server.trim_prefix("tcp://127.0.0.1:"))

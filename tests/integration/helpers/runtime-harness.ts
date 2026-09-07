@@ -83,7 +83,11 @@ func _process(_delta: float) -> void:
   }
   const dapPort=await allocateLoopbackPort();const debugPort=await allocateLoopbackPort(dapPort);
   const client=await startClient(root);
-  const child=spawn(godot,['--editor','--dap-port',String(dapPort),'--debug-server',`tcp://127.0.0.1:${debugPort}`,'--path',root,'res://main.tscn'],{windowsHide:true});let logs='';
+  const debugServer=`tcp://127.0.0.1:${debugPort}`;
+  const child=spawn(godot,[
+    '--editor','--dap-port',String(dapPort),'--debug-server',debugServer,'--path',root,'res://main.tscn',
+    '--',`--godot-mcp-dap-port=${dapPort}`,`--godot-mcp-debug-server=${debugServer}`
+  ],{windowsHide:true});let logs='';
   child.stdout.on('data',d=>logs+=d);child.stderr.on('data',d=>logs+=d);
   await waitFor(async()=>(await client.callTool({name:'session.status',arguments:{}})).structuredContent?.editorConnected===true);
   await waitFor(async()=>!!(await client.callTool({name:'scene.get_tree',arguments:{}})).structuredContent?.root);

@@ -16,7 +16,16 @@ async function markerLines(root:string):Promise<Record<string,number>>{
 
 function errorCode(result:any):string|null{return result?.structuredContent?.error?.code??null;}
 async function waitForDebuggerReady(client:any):Promise<void>{
-  await waitFor(async()=>errorCode(await client.callTool({name:'debug.stack',arguments:{}}))==='RUNTIME_NOT_BREAKED',15000);
+  let last:unknown=null;
+  try{
+    await waitFor(async()=>{
+      const result=await client.callTool({name:'debug.stack',arguments:{}});
+      last=result.structuredContent??result.content;
+      return errorCode(result)==='RUNTIME_NOT_BREAKED';
+    },15000);
+  }catch(error){
+    throw new Error(`Debugger readiness deadline exceeded; last debug.stack=${JSON.stringify(last)}`,{cause:error});
+  }
 }
 async function waitForStack(client:any,predicate:(stack:any)=>boolean,timeout=15000):Promise<any>{
   let observed:any=null;
