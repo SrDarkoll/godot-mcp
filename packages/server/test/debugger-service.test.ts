@@ -72,6 +72,7 @@ describe('DebuggerService',()=>{
     const ref=vars.scopes[0]?.variables[1]?.variableRef;expect(ref).toMatch(/^[0-9a-f-]{36}$/);
     const page=await service.expand({variable_ref:ref!,start:0,limit:100});expect(page.entries).toHaveLength(2);
     dap.emit({seq:5,type:'event',event:'continued',body:{threadId:3}});
+    runtime.set({...run,state:'running'});
     await expect(service.variables({frame_id:stack.frames[0]!.frameId})).rejects.toMatchObject({code:'RUNTIME_NOT_BREAKED'});
     await service.close();
   });

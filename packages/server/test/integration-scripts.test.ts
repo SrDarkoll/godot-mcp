@@ -20,7 +20,9 @@ it('provides a dedicated headless integration selection without runtime or visua
   const source = await readFile(runnerPath, 'utf8');
   expect(source).toContain("process.argv.includes('--headless')");
   expect(source).toContain("['tests/integration/headless-process-manager.test.ts']");
-  expect(source).toContain("if(runtime && (process.platform!=='win32'||process.env.GODOT_RUNTIME_INTEGRATION!=='1'))");
+  expect(source).toContain("const debuggerGate = process.argv.includes('--debugger')");
+  expect(source).toContain("debuggerGate ? ['tests/integration/runtime-debugger-advanced.test.ts']");
+  expect(source).toContain("if((runtime||debuggerGate) && (process.platform!=='win32'||process.env.GODOT_RUNTIME_INTEGRATION!=='1'))");
   expect(source).toContain("if (visual && (process.platform !== 'win32' || process.env.GODOT_VISUAL_INTEGRATION !== '1'))");
   expect(source).not.toContain('if(headless &&');
   expect(source).not.toContain('if (headless &&');

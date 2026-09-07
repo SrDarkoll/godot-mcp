@@ -55,6 +55,7 @@ it('publishes immutable lifecycle snapshots to subscribers and stops after unsub
   throw new Error(method);
  }}};
  const service=new RuntimeService(session,store,bridge);const seen:any[]=[];const unsubscribe=service.subscribe(value=>seen.push(value));
+ expect(seen.map(value=>value.state)).toEqual(['stopped']);seen.length=0;
  const run=await service.run({target:'main'});
  service.acceptEvent({type:'event',protocol:1,sessionId:session.id,sequence:2,event:'runtime.state',data:{...run,state:'breaked'}});
  expect(seen.map(value=>value.state)).toEqual(['stopped','running','breaked']);

@@ -25,8 +25,9 @@ describe('DebugReferenceStore',()=>{
   it('distinguishes unknown current-generation frame and variable UUIDs from stale references',()=>{
     const refs=new DebugReferenceStore();refs.resetRuntime();refs.beginBreak();
     const frame=refs.createFrameRef(1);const variable=refs.createVariableRef(2);
-    const otherFrame=frame.replace(/.$/,frame.endsWith('0')?'1':'0');
-    const otherVariable=variable.replace(/.$/,variable.endsWith('0')?'1':'0');
+    const mutateCurrentGenerationRef=(ref:string)=>{const index=9;const replacement=ref[index]==='0'?'1':'0';return `${ref.slice(0,index)}${replacement}${ref.slice(index+1)}`;};
+    const otherFrame=mutateCurrentGenerationRef(frame);
+    const otherVariable=mutateCurrentGenerationRef(variable);
     expect(()=>refs.resolveFrameRef(otherFrame)).toThrowError(expect.objectContaining({code:'DEBUG_FRAME_NOT_FOUND'}));
     expect(()=>refs.resolveVariableRef(otherVariable)).toThrowError(expect.objectContaining({code:'DEBUG_VARIABLE_NOT_FOUND'}));
   });
