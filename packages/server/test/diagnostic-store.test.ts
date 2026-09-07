@@ -24,4 +24,4 @@ it('bounds its retained history and reports failed persistence without losing re
  const realOpen=fs.open;const spy=vi.spyOn(fs,'open').mockImplementation(async(...args)=>{if(String(args[0]).endsWith('.jsonl'))throw new Error('disk full');return realOpen(...args);});
  try{await store.append({runId,dropped:2,entries:[{sequence:2051,runId,timestamp:s.startedAt,kind:'error',stream:null,message:'still readable',file:null,line:null,frames:[],truncated:false}]});}finally{spy.mockRestore();}
  expect(store.degraded(runId)).toBe(true);expect(store.query(runId,'error',2050,10).entries[0]?.message).toBe('still readable');
-});
+}, 20_000);

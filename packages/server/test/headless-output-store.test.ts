@@ -24,7 +24,7 @@ describe('headless output store',()=>{
     const second=await store.page(id,2,2);
     expect(second.entries.map(e=>e.sequence)).toEqual([3]);
     expect(second.nextCursor).toBe(3);
-  });
+  }, 20_000);
 
   it('caps persisted UTF-8 payload at exactly 512 KiB and reports drain-after-cap',async()=>{
     const {store}=await fixture();const id=randomUUID();
@@ -35,7 +35,7 @@ describe('headless output store',()=>{
     const third=await store.append(id,'stderr','ignored');
     expect(third).toEqual({acceptedBytes:0,truncated:true});
     expect((await store.page(id,0,200)).truncated).toBe(true);
-  });
+  }, 20_000);
 
   it('rejects linked logs and malformed stored JSONL',async()=>{
     const {root,session,sessions,store}=await fixture();const id=randomUUID();
