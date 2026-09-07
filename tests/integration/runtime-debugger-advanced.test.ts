@@ -29,12 +29,16 @@ async function waitForDebuggerReady(client:any):Promise<void>{
 }
 async function waitForStack(client:any,predicate:(stack:any)=>boolean,timeout=15000):Promise<any>{
   let observed:any=null;
-  await waitFor(async()=>{
-    const result=await client.callTool({name:'debug.stack',arguments:{}});
-    if(result.isError)return false;
-    observed=result.structuredContent;
-    return predicate(observed);
-  },timeout);
+  try{
+    await waitFor(async()=>{
+      const result=await client.callTool({name:'debug.stack',arguments:{}});
+      observed=result.structuredContent??result.content;
+      if(result.isError)return false;
+      return predicate(observed);
+    },timeout);
+  }catch(error){
+    throw new Error(`Debugger stack deadline exceeded; last debug.stack=${JSON.stringify(observed)}`,{cause:error});
+  }
   return observed;
 }
 async function call(client:any,name:string,args:Record<string,unknown>={}):Promise<any>{
