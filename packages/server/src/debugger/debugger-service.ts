@@ -182,8 +182,9 @@ export class DebuggerService {
       return;
     }
     if(status.state==='breaked')this.maybeEstablishBreak();
-    else if(this.state==='BREAKED'){
-      this.invalidateBreakContext();if(this.transport)this.state='READY';
+    else if(this.state==='BREAKED'||this.state==='RESUMING'){
+      if(this.state==='BREAKED')this.invalidateBreakContext();
+      if(this.transport)this.state='READY';
     }
     if(this.bridge.connected&&this.state==='DETACHED')void this.ensureAttached().catch(()=>{});
   }
@@ -319,7 +320,14 @@ export class DebuggerService {
       this.pendingStoppedThreadId=threadId;this.maybeEstablishBreak();return;
     }
     if(event.event==='continued'){
-      this.pendingStoppedThreadId=null;this.invalidateBreakContext();if(this.transport)this.state='READY';return;
+      this.pendingStoppedThreadId=null;
+      const status=this.runtime.peek();
+      // RuntimeService is the ownership-correlated lifecycle authority. Godot's
+      // DAP and EditorDebuggerSession signals can cross in flight, so a late
+      // `continued` event must not erase a newer real break already observed
+      // for this same owned run.
+      if(status.ownership==='session'&&status.runId===this.attachedRunId&&status.state==='breaked')return;
+      this.invalidateBreakContext();if(this.transport)this.state='READY';return;
     }
     if(event.event==='terminated'||event.event==='exited'){
       this.invalidateBreakContext();const status=this.runtime.peek();this.detachTransport();this.state=this.isActiveOwned(status)?'UNAVAILABLE':'DETACHED';
@@ -342,24 +350,27 @@ export class DebuggerService {
 
   private async control(action:DebugControlAction,command:string):Promise<DebugControlResult>{
     const context=this.requireBreakContext();if(this.controlBusy)throw new BridgeRpcError('DEBUG_CONTROL_BUSY','Another debugger control operation is in flight');
-    this.controlBusy=true;const runId=context.runId;const transport=this.transport!;
+    this.controlBusy=true;const runId=context.runId;const transport=this.transport!;const breakGeneration=this.refs.currentBreakGeneration();
     try{
       await transport.request(command,{threadId:context.threadId},5000);
       const current=this.runtime.peek();if(current.runId!==runId||current.ownership!=='session')throw new BridgeRpcError('STALE_DEBUG_REFERENCE','Runtime changed during debugger control');
-      if(this.state==='BREAKED'){this.invalidateBreakContext();this.state='RESUMING';}
+      // A fast step can continue, stop again, and publish its new break before
+      // Godot returns the DAP response. Invalidate only the context that issued
+      // this control; never clobber a newer break generation.
+      if(this.state==='BREAKED'&&this.refs.currentBreakGeneration()===breakGeneration){this.invalidateBreakContext();this.state='RESUMING';}
       return {accepted:true,runId,action};
     }finally{this.controlBusy=false;}
   }
 
   private async controlViaBridge(action:DebugControlAction,method:string):Promise<DebugControlResult>{
     const context=this.requireBreakContext();if(this.controlBusy)throw new BridgeRpcError('DEBUG_CONTROL_BUSY','Another debugger control operation is in flight');
-    this.controlBusy=true;const runId=context.runId;
+    this.controlBusy=true;const runId=context.runId;const breakGeneration=this.refs.currentBreakGeneration();
     try{
       const raw=await this.bridge.rpc.call(method,{run_id:runId});
       const result=this.parseBridge(DebugControlResultSchema,raw,'debugger control');
       if(result.runId!==runId||result.action!==action)throw new BridgeRpcError('DEBUG_PROTOCOL_ERROR','Private debugger control response does not match the active runtime');
       const current=this.runtime.peek();if(current.runId!==runId||current.ownership!=='session')throw new BridgeRpcError('STALE_DEBUG_REFERENCE','Runtime changed during debugger control');
-      if(this.state==='BREAKED'){this.invalidateBreakContext();this.state='RESUMING';}
+      if(this.state==='BREAKED'&&this.refs.currentBreakGeneration()===breakGeneration){this.invalidateBreakContext();this.state='RESUMING';}
       return result;
     }finally{this.controlBusy=false;}
   }
