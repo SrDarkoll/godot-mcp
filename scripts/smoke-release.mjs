@@ -8,7 +8,7 @@ import {StdioClientTransport} from '@modelcontextprotocol/client/stdio';
 import {packRelease,npm} from './pack-release.mjs';
 
 const packed=await packRelease();
-const consumer=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-consumer-'));
+const consumer=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-consumer-')));
 await fs.writeFile(path.join(consumer,'package.json'),JSON.stringify({name:'godot-mcp-consumer',version:'1.0.0',private:true,type:'module'}));
 npm(['install','--ignore-scripts','--no-audit','--no-fund',...packed.packages.map(pkg=>path.join(packed.out,pkg.filename))],consumer);
 const entry=path.join(consumer,'node_modules/@godot-mcp/cli/dist/index.js');
