@@ -206,13 +206,15 @@ describe('DebuggerService',()=>{
     await service.close();
   });
 
-  it('supports runtime-breaked-before-DAP-stopped ordering',async()=>{
+  it('keeps the Godot main-thread fallback when runtime breaked arrives before the duplicate DAP stopped event',async()=>{
     const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
-    runtime.set({...run,state:'breaked'});
-    await expect(service.stack()).rejects.toMatchObject({code:'DEBUGGER_UNAVAILABLE'});
     dap.handler=async command=>command==='stackTrace'?{stackFrames:[{id:7,name:'late',source:{path:`${process.cwd()}/late.gd`},line:3,column:1}]}:{};
-    dap.emit({seq:5,type:'event',event:'stopped',body:{threadId:9}});
-    await expect(service.stack()).resolves.toMatchObject({frames:[{name:'late',scriptPath:'res://late.gd'}]});
+    runtime.set({...run,state:'breaked'});
+    const before=await service.stack();
+    dap.emit({seq:5,type:'event',event:'stopped',body:{threadId:1}});
+    const after=await service.stack();
+    expect(after.breakId).toBe(before.breakId);
+    expect(after.frames[0]).toMatchObject({name:'late',scriptPath:'res://late.gd'});
     await service.close();
   });
 
@@ -229,6 +231,38 @@ describe('DebuggerService',()=>{
     const stack=await service.stack();const vars=await service.variables({frame_id:stack.frames[0]!.frameId});
     expect(vars.scopes[0]?.variables[0]).toMatchObject({valueTruncated:true});
     expect(vars.scopes[0]?.variables[0]?.value).toHaveLength(4096);
+    await service.close();
+  });
+
+  it('keeps a newer stop context when a step completes before its DAP response returns',async()=>{
+    const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
+    runtime.set({...run,state:'breaked'});dap.emit({seq:7,type:'event',event:'stopped',body:{threadId:1}});
+    dap.handler=async command=>{
+      if(command==='stackTrace')return {stackFrames:[{id:31,name:'fast-step',source:{path:`${process.cwd()}/fast-step.gd`},line:9,column:1}]};
+      if(command==='next'){
+        dap.emit({seq:8,type:'event',event:'continued',body:{threadId:1}});runtime.set({...run,state:'running'});
+        runtime.set({...run,state:'breaked'});dap.emit({seq:9,type:'event',event:'stopped',body:{threadId:1}});
+        return {};
+      }
+      return {};
+    };
+    const before=await service.stack();
+    await service.stepOver();
+    const after=await service.stack();
+    expect(after.breakId).not.toBe(before.breakId);
+    expect(after.frames[0]).toMatchObject({name:'fast-step',line:9});
+    await service.close();
+  });
+
+  it('does not let a DAP continued event erase a correlated runtime break',async()=>{
+    const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
+    dap.handler=async command=>command==='stackTrace'?{stackFrames:[{id:32,name:'manual-break',source:{path:`${process.cwd()}/manual-break.gd`},line:17,column:1}]}:{};
+    runtime.set({...run,state:'breaked'});dap.emit({seq:10,type:'event',event:'stopped',body:{threadId:1}});
+    const before=await service.stack();
+    dap.emit({seq:11,type:'event',event:'continued',body:{threadId:1}});
+    const after=await service.stack();
+    expect(after.breakId).toBe(before.breakId);
+    expect(after.frames[0]).toMatchObject({name:'manual-break',line:17});
     await service.close();
   });
 
