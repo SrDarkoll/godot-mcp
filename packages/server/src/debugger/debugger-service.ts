@@ -114,7 +114,11 @@ export class DebuggerService {
       if(!frame||typeof frame!=='object'||Array.isArray(frame))throw new BridgeRpcError('DEBUG_PROTOCOL_ERROR','DAP stack frame is malformed');
       const value=frame as Record<string,unknown>;const backendId=this.requiredInteger(value.id,'stack frame id',0);
       const name=typeof value.name==='string'?value.name.slice(0,1024):'';
-      const line=this.requiredInteger(value.line,'stack frame line',1);const column=value.column===undefined?1:this.requiredInteger(value.column,'stack frame column',1);
+      const line=this.requiredInteger(value.line,'stack frame line',1);
+      // Godot 4.6.3 currently reports stack frame column=0 (unknown) even
+      // when the DAP client requests 1-based columns. Keep the public MCP
+      // contract 1-based by normalizing only that documented adapter sentinel.
+      const rawColumn=value.column===undefined?1:this.requiredInteger(value.column,'stack frame column',0);const column=rawColumn===0?1:rawColumn;
       const source=value.source;if(!source||typeof source!=='object'||Array.isArray(source)||typeof (source as Record<string,unknown>).path!=='string')throw new BridgeRpcError('DEBUG_PROTOCOL_ERROR','DAP stack frame source is missing');
       const scriptPath=this.normalizeSourcePath((source as Record<string,unknown>).path as string);
       return {frameId:this.refs.createFrameRef(backendId),name,scriptPath,line,column};
