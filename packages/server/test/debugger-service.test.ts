@@ -16,7 +16,15 @@ class FakeDap implements DapTransport {
   events=new Set<DapEventListener>();closes=new Set<DapCloseListener>();closed=false;
   handler:((command:string,args:Record<string,unknown>)=>Promise<Record<string,unknown>>)|null=null;
   async connect(host:string,port:number,_timeoutMs:number){if(host!=='127.0.0.1'||port!==6006)throw new Error('bad endpoint');}
-  async request(command:string,args:Record<string,unknown>,_timeoutMs:number){this.requests.push({command,args});if(this.handler)return this.handler(command,args);if(command==='attach')queueMicrotask(()=>this.emit({seq:2,type:'event',event:'initialized'}));return {};}
+  async request(command:string,args:Record<string,unknown>,_timeoutMs:number){
+    this.requests.push({command,args});
+    if(this.handler)return this.handler(command,args);
+    // Godot 4.6.3 emits `initialized` while processing `initialize`, before the
+    // initialize response promise has resumed on the client. Keep the fake in
+    // that ordering so a late waiter cannot regress unnoticed.
+    if(command==='initialize')this.emit({seq:2,type:'event',event:'initialized'});
+    return {};
+  }
   onEvent(listener:DapEventListener){this.events.add(listener);return()=>this.events.delete(listener);}
   onClose(listener:DapCloseListener){this.closes.add(listener);return()=>this.closes.delete(listener);}
   emit(event:DapEvent){for(const listener of this.events)listener(event);}

@@ -219,15 +219,17 @@ export class DebuggerService {
     transport.onEvent(event=>{if(this.transport===transport)this.onDapEvent(event);});
     transport.onClose(error=>{if(this.transport===transport)this.onUnexpectedTransportClose(transport,error);});
     try{
-      await transport.request('initialize',{
+      // Godot 4.6.3 emits `initialized` while it is still servicing the
+      // initialize request. Install the waiter first or the event can be lost
+      // before the initialize promise resumes.
+      const initialized=this.waitForInitialized(transport,5000);
+      const initialize=transport.request('initialize',{
         clientID:'godot-mcp',clientName:'Godot MCP',adapterID:'godot',pathFormat:'path',linesStartAt1:true,columnsStartAt1:true,supportsVariableType:true,supportsVariablePaging:true
       },5000);
-      const initialized=this.waitForInitialized(transport,5000);
-      const attach=transport.request('attach',{address:info.debugHost,port:info.debugPort},5000);
-      attach.catch(error=>this.rejectInitialized(transport,error instanceof Error?error:new Error(String(error))));
-      await initialized;
-      const configuration=transport.request('configurationDone',{},5000);
-      await Promise.all([attach,configuration]);
+      initialize.catch(error=>this.rejectInitialized(transport,error instanceof Error?error:new Error(String(error))));
+      await Promise.all([initialize,initialized]);
+      await transport.request('attach',{address:info.debugHost,port:info.debugPort},5000);
+      await transport.request('configurationDone',{},5000);
       const after=this.runtime.peek();
       if(this.transport!==transport||after.runId!==runId||after.ownership!=='session')throw new BridgeRpcError('RUNTIME_NOT_OWNED','Runtime changed during debugger attach');
       this.unavailableReason=null;this.state='READY';if(after.state==='breaked')this.maybeEstablishBreak();
