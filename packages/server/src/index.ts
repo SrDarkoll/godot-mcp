@@ -10,6 +10,8 @@ import { createSession } from './session/session.js';
 import { SessionStore } from './session/session-store.js';
 import { VisualTools } from './tools/visual-tools.js';
 import {RuntimeService} from './runtime/runtime-service.js';
+import {DebuggerService} from './debugger/debugger-service.js';
+import {TcpDapTransport} from './debugger/dap-transport.js';
 import {HeadlessProcessManager} from './headless/headless-process-manager.js';
 import {RecoveryService} from './recovery/recovery-service.js';
 import {ToolPolicy} from './security/tool-policy.js';
@@ -63,14 +65,18 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
 
   const token = createBridgeToken();
   let runtime:RuntimeService;
+  let debuggerService!:DebuggerService;
   let requestShutdown:()=>Promise<void>=async()=>{throw new Error('Server is starting');};
   const bridge = new BridgeServer({ session, token,
     onManagementStatus:async()=>({permissions:policy.permissions(),activeTransactionId:recovery.activeId,recoveryRequired:await recovery.barrier().then(Boolean).catch(()=>true)}),
     onShutdown:()=>requestShutdown(),
-    onRuntimeEvent:event=>runtime?.acceptEvent(event),onDisconnected:()=>runtime?.disconnect(),
+    onRuntimeEvent:event=>{runtime?.acceptEvent(event);debuggerService?.acceptBridgeEvent(event);},
+    onDisconnected:()=>{runtime?.disconnect();debuggerService?.editorDisconnected();},
+    onConnected:()=>debuggerService?.editorConnected(),
     onAuthenticated:hello => sessions.update(session.id,m=>({...m,godotVersion:hello.godotVersion,addonVersion:hello.addonVersion})),
     port:args.bridgePort??config.bridgePort });
   runtime=new RuntimeService(session,sessions,bridge);
+  debuggerService=new DebuggerService(session,runtime,bridge,()=>new TcpDapTransport());
   const visual = new VisualTools(session,sessions,bridge,runtime);
   const recovery=new RecoveryService(session,sessions,bridge);
   const godotBin=config.godotBin ?? (process.env.GODOT_BIN?.trim() || null);
@@ -80,7 +86,7 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const { port } = await bridge.start();
   await descriptor.write({ port, token, sessionId: session.id });
 
-  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, recovery, headless, policy, toolProfile }), {
+  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, debugger:debuggerService, recovery, headless, policy, toolProfile }), {
     onerror: error => console.error(`[godot-mcp] MCP error: ${error.message}`)
   });
 
@@ -88,7 +94,7 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const shutdown = async (exitCode = 0) => {
     if (shuttingDown) return;
     shuttingDown = true;
-    const steps = [async() => { await Promise.all([policy.close(),headless.close()]); },() => recovery.close(),() => runtime.close(),() => visual.close(),() => policy.flush(),() => bridge.stop(),
+    const steps = [async() => { await Promise.all([policy.close(),headless.close()]); },() => debuggerService.close(),() => recovery.close(),() => runtime.close(),() => visual.close(),() => policy.flush(),() => bridge.stop(),
       () => sessions.finish(session.id,new Date().toISOString()),() => sessions.flush(),
       () => descriptor.remove(),() => stdio.close()];
     for (const step of steps) {

@@ -55,3 +55,17 @@ it('closes the owned headless manager before finishing the session manifest', as
   expect(source).toContain('Promise.all([policy.close(),headless.close()])');
   expect(source).toContain('GODOT_BIN');
 });
+
+
+it('closes debugger before runtime and bridge teardown',async()=>{
+  const source=await readFile(new URL('../src/index.ts',import.meta.url),'utf8');
+  const debuggerClose=source.indexOf('debuggerService.close()');
+  const runtimeClose=source.indexOf('runtime.close()');
+  const bridgeStop=source.indexOf('bridge.stop()');
+  expect(debuggerClose).toBeGreaterThanOrEqual(0);
+  expect(runtimeClose).toBeGreaterThan(debuggerClose);
+  expect(bridgeStop).toBeGreaterThan(runtimeClose);
+  expect(source).toContain('debuggerService?.acceptBridgeEvent(event)');
+  expect(source).toContain('debuggerService?.editorDisconnected()');
+  expect(source).toContain('debuggerService?.editorConnected()');
+});

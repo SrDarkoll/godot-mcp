@@ -14,6 +14,7 @@ export interface BridgeServerOptions {
   token: string;
   port?: number;
   onAuthenticated?: (hello: AddonHello) => Promise<void>;
+  onConnected?: (hello: AddonHello) => void | Promise<void>;
   onRuntimeEvent?: (event:BridgeRuntimeEvent)=>void;
   onDisconnected?: ()=>void;
   onManagementStatus?: ()=>Promise<Record<string,unknown>>;
@@ -76,11 +77,12 @@ export class BridgeServer {
 
   async stop(): Promise<void> {
     this.closing=true;
+    const hadConnection=this.client!==null||this.options.session.editorConnected||this.options.session.runtimeConnected;
     this.client?.socket.close(1001, 'server shutdown');
     this.client = null;
     this.options.session.editorConnected = false;
     this.options.session.runtimeConnected = false;
-    this.options.onDisconnected?.();
+    if(hadConnection)this.options.onDisconnected?.();
     this.rpc.disconnect();
     const server = this.server;
     this.server = null;
@@ -234,5 +236,8 @@ export class BridgeServer {
     });
 
     socket.send(JSON.stringify({ type: 'hello_ack', protocol: 1, sessionId: this.options.session.id }));
+    void Promise.resolve().then(()=>this.options.onConnected?.(hello)).catch(error=>{
+      console.error(`[godot-mcp] Post-authentication editor initialization failed: ${error instanceof Error?error.message:String(error)}`);
+    });
   }
 }

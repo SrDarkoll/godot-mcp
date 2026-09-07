@@ -27,6 +27,45 @@ async function connect(bridge: BridgeServer, token = 'a'.repeat(64)) {
 }
 
 describe('BridgeServer', () => {
+  it('validates and forwards debugger breakpoint events with monotonic sequencing',async()=>{
+    const session=createSession('C:/Games/Test');const seen:any[]=[];
+    const bridge=new BridgeServer({session,token:'a'.repeat(64),port:0,onRuntimeEvent:event=>seen.push(event)});
+    const ws=await connect(bridge);await bridge.waitUntilConnected(1000);
+    const base={type:'event',protocol:1,sessionId:session.id,sequence:1,event:'debugger.breakpoints'};
+    ws.send(JSON.stringify({...base,data:{breakpoints:[{scriptPath:'res://x.gd',line:0}]}}));
+    ws.send(JSON.stringify({...base,data:{breakpoints:[{scriptPath:'res://x.gd',line:7}]}}));
+    ws.send(JSON.stringify({...base,sequence:1,data:{breakpoints:[]}}));
+    await new Promise(resolve=>setTimeout(resolve,30));
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toMatchObject({event:'debugger.breakpoints',sequence:1,data:{breakpoints:[{scriptPath:'res://x.gd',line:7}]}});
+    ws.close();await bridge.stop();
+  });
+
+  it('queues hello_ack before onConnected-triggered RPC traffic',async()=>{
+    const session=createSession('C:/Games/Test');const observed:string[]=[];let bridge!:BridgeServer;
+    let connectedDone!:()=>void;const done=new Promise<void>(resolve=>{connectedDone=resolve;});
+    bridge=new BridgeServer({session,token:'a'.repeat(64),port:0,onConnected:async()=>{await bridge.rpc.call('debugger.info',{});connectedDone();}});
+    const {port}=await bridge.start();const ws=new WebSocket(`ws://127.0.0.1:${port}`);
+    await new Promise<void>((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject);});
+    ws.on('message',raw=>{
+      const message=JSON.parse(raw.toString());
+      if(message.type==='hello_ack')observed.push('ack');
+      if(message.id){observed.push('rpc');ws.send(JSON.stringify({id:message.id,ok:true,result:{}}));}
+    });
+    ws.send(JSON.stringify({type:'hello',token:'a'.repeat(64),protocol:1,addonVersion:'0.1.0',godotVersion:'4.6.3',projectRoot:session.projectRoot,capabilities:{editor:true,runtime:false,debugger:true,viewport2d:true,viewport3d:true,undoRedo:true}}));
+    await done;expect(observed.slice(0,2)).toEqual(['ack','rpc']);
+    ws.close();await bridge.stop();
+  });
+
+  it('fires onDisconnected once even when stop follows a socket disconnect',async()=>{
+    const session=createSession('C:/Games/Test');let disconnected=0;
+    const bridge=new BridgeServer({session,token:'a'.repeat(64),port:0,onDisconnected:()=>{disconnected++;}});
+    const ws=await connect(bridge);await bridge.waitUntilConnected(1000);
+    const closed=new Promise<void>(resolve=>ws.once('close',()=>resolve()));ws.close();await closed;
+    await new Promise(resolve=>setTimeout(resolve,0));
+    expect(session.editorConnected).toBe(false);expect(disconnected).toBe(1);
+    await bridge.stop();expect(disconnected).toBe(1);
+  });
   it('accepts only monotonic events for the authenticated MCP session',async()=>{
     const session=createSession('C:/Games/Test');const seen:any[]=[];
     const bridge=new BridgeServer({session,token:'a'.repeat(64),port:0,onRuntimeEvent:e=>seen.push(e)});
