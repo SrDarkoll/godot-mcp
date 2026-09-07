@@ -19,6 +19,7 @@ func start_debug_flow() -> void:
 func _level_one(value: int, nested: Dictionary) -> void:
     var doubled := value * 2 # MCP_STEP_OVER
     _level_two(doubled, nested) # MCP_STEP_INTO
+    doubled += 1 # MCP_STEP_OUT_RETURN
 
 func _level_two(value: int, nested: Dictionary) -> void:
     var final_value: int = value + int(nested["numbers"][0]) # MCP_STEP_OUT
