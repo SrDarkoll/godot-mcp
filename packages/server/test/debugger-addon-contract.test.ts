@@ -12,6 +12,13 @@ it('exposes individual breakpoint mutation and local debugger discovery without 
   expect(source).not.toContain('setVariable');
 });
 
+it('drops addon ownership when the user changes or clears an MCP-owned breakpoint',async()=>{
+  const source=await fs.readFile(new URL('../../godot-addon/addons/godot_mcp/debugger/editor_debugger.gd',import.meta.url),'utf8');
+  expect(source).toContain('if _mcp_origin_depth == 0:');
+  expect(source).toContain('_mcp_breakpoints.erase(_breakpoint_key(path,line))');
+  expect(source).toContain('_mcp_breakpoints.clear()\n    _publish_breakpoints()');
+});
+
 it('routes only the approved private debugger bridge methods',async()=>{
   const source=await fs.readFile(new URL('../../godot-addon/addons/godot_mcp/bridge/rpc_dispatcher.gd',import.meta.url),'utf8');
   for(const method of ['debugger.info','debugger.breakpoint.set','debugger.breakpoint.remove']) {

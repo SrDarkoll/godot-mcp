@@ -215,10 +215,15 @@ func _publish_breakpoints() -> void:
     if _mcp_session.is_empty():
         return
     runtime_event.emit("debugger.breakpoints", {"breakpoints":_breakpoint_inventory()})
-func _breakpoint_set_in_tree(_script: Script, _line: int, _enabled: bool) -> void:
+func _breakpoint_set_in_tree(script: Script, line: int, _enabled: bool) -> void:
     if _mcp_origin_depth == 0:
+        var path := script.resource_path if script != null else ""
+        if not path.is_empty():
+            _mcp_breakpoints.erase(_breakpoint_key(path,line))
         _publish_breakpoints()
 func _breakpoints_cleared_in_tree() -> void:
+    if _mcp_origin_depth == 0:
+        _mcp_breakpoints.clear()
     _publish_breakpoints()
 func launch(params: Dictionary) -> Dictionary:
     if _launching or _editor.is_playing_scene() or not _active_sessions().is_empty():
