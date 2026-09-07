@@ -91,6 +91,14 @@ describe('DebuggerService',()=>{
     await service.close();
   });
 
+  it('normalizes Godot 4.6.3 zero stack columns to the public 1-based contract',async()=>{
+    const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
+    dap.handler=async command=>command==='stackTrace'?{stackFrames:[{id:42,name:'godot_zero_column',source:{path:`${process.cwd()}/debug_target.gd`},line:17,column:0}]}:{};
+    runtime.set({...run,state:'breaked'});
+    await expect(service.stack()).resolves.toMatchObject({frames:[{name:'godot_zero_column',scriptPath:'res://debug_target.gd',line:17,column:1}]});
+    await service.close();
+  });
+
   it('establishes a break context only after both runtime breaked state and DAP stopped event',async()=>{
     const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
     dap.handler=async(command,args)=>{
