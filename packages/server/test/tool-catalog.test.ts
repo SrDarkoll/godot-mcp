@@ -9,7 +9,7 @@ describe('tool catalog', () => {
     expect(TOOL_CATALOG.every(entry => entry.profiles.includes('full'))).toBe(true);
     expect(TOOL_CATALOG.every(entry => entry.description.trim().length > 0)).toBe(true);
     expect(Object.fromEntries(TOOL_PROFILES.map(profile => [profile, toolNamesForProfile(profile).length]))).toEqual({
-      minimal:5, core:78, '2d':121, '3d':107, navigation:67, ui:81, runtime:38, full:173
+      minimal:5, core:78, '2d':121, '3d':107, navigation:67, ui:81, runtime:48, full:183
     });
   });
 
@@ -36,8 +36,15 @@ describe('tool catalog', () => {
     expect(runtime.has('headless.get_output')).toBe(true);
     expect(runtime.has('headless.stop')).toBe(true);
     expect(runtime.has('headless.run_scene')).toBe(true);
+    const advancedDebuggerTools=[
+      'debug.breakpoint.set','debug.breakpoint.remove','debug.breakpoint.list','debug.stack','debug.variables',
+      'debug.expand','debug.continue','debug.step_into','debug.step_over','debug.step_out'
+    ];
+    for(const name of advancedDebuggerTools)expect(runtime.has(name),name).toBe(true);
 
     for (const profile of ['minimal','core','2d','3d','navigation','ui'] as const) {
+      const names=new Set(toolNamesForProfile(profile));
+      for(const name of advancedDebuggerTools)expect(names.has(name),`${profile}:${name}`).toBe(false);
       expect(toolNamesForProfile(profile).some(name => name.startsWith('headless.'))).toBe(false);
     }
 

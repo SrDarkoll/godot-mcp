@@ -11,7 +11,7 @@ const TOOL_DOMAINS = [
 const RISK_TAGS = ['read','control','normal_mutation'];
 const RISK_DYNAMIC = ['none','conditional','blockable'];
 const BINDING_STATUSES = ['legacy','canonical'];
-const DEFAULT_EXPECTED_COUNT = 173;
+const DEFAULT_EXPECTED_COUNT = 183;
 
 function fail(message) { throw new Error(message); }
 function asStringArray(value, field, name) {

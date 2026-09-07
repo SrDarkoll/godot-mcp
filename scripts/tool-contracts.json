@@ -420,6 +420,90 @@
       }
     },
     {
+      "name": "debug.breakpoint.list",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "List GDScript line breakpoints owned by the current MCP session.",
+      "risk": {
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugBreakpointListSchema",
+        "handlerRef": "listDebugBreakpoints"
+      }
+    },
+    {
+      "name": "debug.breakpoint.remove",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Remove a GDScript line breakpoint only when it is owned by the current MCP session.",
+      "risk": {
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugBreakpointRemoveSchema",
+        "handlerRef": "removeDebugBreakpoint"
+      }
+    },
+    {
+      "name": "debug.breakpoint.set",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Create a session-owned GDScript line breakpoint without adopting manual editor breakpoints.",
+      "risk": {
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugBreakpointSetSchema",
+        "handlerRef": "setDebugBreakpoint"
+      }
+    },
+    {
+      "name": "debug.continue",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Continue execution of the current session-owned debugger break.",
+      "risk": {
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugContinueSchema",
+        "handlerRef": "continueDebugger"
+      }
+    },
+    {
       "name": "debug.errors",
       "domain": "debug",
       "profiles": [
@@ -437,6 +521,27 @@
       "binding": {
         "status": "legacy",
         "source": "packages/server/src/tools/debug-tools.ts"
+      }
+    },
+    {
+      "name": "debug.expand",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Expand one bounded page of an opaque complex debugger variable reference.",
+      "risk": {
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugExpandSchema",
+        "handlerRef": "expandDebugVariable"
       }
     },
     {
@@ -476,6 +581,111 @@
       "binding": {
         "status": "legacy",
         "source": "packages/server/src/tools/debug-tools.ts"
+      }
+    },
+    {
+      "name": "debug.stack",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Read the bounded source stack for the current debugger break context.",
+      "risk": {
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugStackSchema",
+        "handlerRef": "getDebugStack"
+      }
+    },
+    {
+      "name": "debug.step_into",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Step into source execution from the current session-owned debugger break.",
+      "risk": {
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugStepIntoSchema",
+        "handlerRef": "stepIntoDebugger"
+      }
+    },
+    {
+      "name": "debug.step_out",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Step out of the current source frame in the session-owned debugger break.",
+      "risk": {
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugStepOutSchema",
+        "handlerRef": "stepOutDebugger"
+      }
+    },
+    {
+      "name": "debug.step_over",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Step over source execution from the current session-owned debugger break.",
+      "risk": {
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugStepOverSchema",
+        "handlerRef": "stepOverDebugger"
+      }
+    },
+    {
+      "name": "debug.variables",
+      "domain": "debug",
+      "profiles": [
+        "runtime",
+        "full"
+      ],
+      "description": "Read bounded scopes and variables for an opaque current debugger frame.",
+      "risk": {
+        "tags": [
+          "read"
+        ],
+        "dynamic": "none"
+      },
+      "binding": {
+        "status": "canonical",
+        "source": "packages/server/src/mcp/register-debugger-tools.ts",
+        "schemaRef": "DebugVariablesSchema",
+        "handlerRef": "getDebugVariables"
       }
     },
     {

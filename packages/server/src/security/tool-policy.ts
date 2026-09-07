@@ -17,6 +17,7 @@ const LOCAL = (name: string): boolean => name === 'godot.tools' || /^(transactio
     ['headless.status','headless.get_output'].includes(name) ||
     /^debug\.(output|errors|warnings)$/.test(name);
 const HEADLESS_PROCESS_TOOLS = new Set(['headless.validate_project','headless.import','headless.run','headless.run_scene','headless.run_tests','headless.stop']);
+const DEBUG_RUNTIME_MUTATIONS = new Set(['debug.continue','debug.step_into','debug.step_over','debug.step_out']);
 const NON_FILESYSTEM_PATH_TOOLS = new Set(['animation.add_track']);
 const filesystemPathKeys = (name: string): string[] => {
     const keys = NON_FILESYSTEM_PATH_TOOLS.has(name)
@@ -74,7 +75,7 @@ export class ToolPolicy {
                 permissions.push('runtime.modify', 'process.godot', 'filesystem.project');
             else if (name === 'workflow.snapshot' || LOCAL(name) || name.startsWith('visual.'))
                 permissions.push('filesystem.project');
-            else if (name.startsWith('runtime.') || name === 'project.run' || name === 'project.run_scene') {
+            else if (name.startsWith('runtime.') || name === 'project.run' || name === 'project.run_scene' || DEBUG_RUNTIME_MUTATIONS.has(name)) {
                 permissions.push('runtime.modify', 'process.godot', 'filesystem.project');
             }
             else

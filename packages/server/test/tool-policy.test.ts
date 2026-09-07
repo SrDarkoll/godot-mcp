@@ -326,3 +326,52 @@ it('binds headless.stop approval fingerprints and targets to the active executio
     expect(second.targets).toContain(`execution:${executionId}`);
     expect(second.fingerprint).not.toBe(first.fingerprint);
 });
+
+
+it('classifies advanced debugger reads and mutations with exact permissions and no elicitation risk',async()=>{
+  const {policy}=await setup();
+  for(const name of ['debug.breakpoint.list','debug.stack','debug.variables','debug.expand']){
+    const args=name==='debug.variables'?{frame_id:'11111111-1111-4111-8111-111111111111'}:name==='debug.expand'?{variable_ref:'22222222-2222-4222-8222-222222222222',start:0,limit:100}:{};
+    const assessment=await policy.assess(name,args);
+    expect(assessment.risk,name).toBe('normal');
+    expect(assessment.permissions,name).not.toContain('runtime.modify');
+    expect(assessment.permissions,name).not.toContain('editor.modify');
+  }
+  for(const name of ['debug.breakpoint.set','debug.breakpoint.remove']){
+    const assessment=await policy.assess(name,{script_path:'res://player.gd',line:7});
+    expect(assessment.risk,name).toBe('normal');
+    expect(assessment.permissions,name).toEqual(expect.arrayContaining(['network.local','filesystem.project','editor.modify']));
+    expect(assessment.permissions,name).not.toContain('runtime.modify');
+  }
+  for(const name of ['debug.continue','debug.step_into','debug.step_over','debug.step_out']){
+    const assessment=await policy.assess(name,{});
+    expect(assessment.risk,name).toBe('normal');
+    expect(assessment.permissions,name).toEqual(expect.arrayContaining(['network.local','filesystem.project','runtime.modify','process.godot']));
+    expect(assessment.permissions,name).not.toContain('editor.modify');
+  }
+});
+
+it('blocks debugger mutations on their exact permissions before handler execution',async()=>{
+  {
+    const {policy}=await setup();await policy.setPermission('runtime.modify',false);const operation=vi.fn(async()=>({accepted:true}));
+    for(const name of ['debug.continue','debug.step_into','debug.step_over','debug.step_out']){
+      await expect(policy.execute(name,{},operation)).rejects.toMatchObject({code:'PERMISSION_DENIED'});
+    }
+    expect(operation).not.toHaveBeenCalled();
+  }
+  {
+    const {policy}=await setup();await policy.setPermission('editor.modify',false);const operation=vi.fn(async()=>({ok:true}));
+    await expect(policy.execute('debug.breakpoint.set',{script_path:'res://x.gd',line:1},operation)).rejects.toMatchObject({code:'PERMISSION_DENIED'});
+    await expect(policy.execute('debug.breakpoint.remove',{script_path:'res://x.gd',line:1},operation)).rejects.toMatchObject({code:'PERMISSION_DENIED'});
+    expect(operation).not.toHaveBeenCalled();
+  }
+});
+
+it('does not grant debugger stepping shutdown-control privileges',async()=>{
+  const source=await fs.readFile(new URL('../src/security/tool-policy.generated.ts',import.meta.url),'utf8');
+  for(const name of ['debug.continue','debug.step_into','debug.step_over','debug.step_out'])expect(source).not.toMatch(new RegExp(`CONTROL_TOOL_NAMES=.*${name.replace('.','\\.')}`));
+  const {policy}=await setup();await policy.close();
+  for(const name of ['debug.continue','debug.step_into','debug.step_over','debug.step_out']){
+    await expect(policy.execute(name,{},async()=>({accepted:true}))).rejects.toMatchObject({code:'SESSION_CLOSED'});
+  }
+});
