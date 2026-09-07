@@ -1,4 +1,4 @@
-import {mkdir,mkdtemp,writeFile} from 'node:fs/promises';
+import {mkdir,mkdtemp,realpath,writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {afterEach,expect,it,vi} from 'vitest';
@@ -7,7 +7,7 @@ import {runCli} from '../src/cli-runner.js';
 afterEach(()=>vi.restoreAllMocks());
 
 async function corruptConfigFixture():Promise<string>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'godot-mcp-cli-status-'));
+  const root=await realpath(await mkdtemp(path.join(os.tmpdir(),'godot-mcp-cli-status-')));
   await writeFile(path.join(root,'project.godot'),'config_version=5\n[application]\nconfig/name="CLI status fixture"\n');
   await mkdir(path.join(root,'.godot-mcp'),{recursive:true});
   await writeFile(path.join(root,'.godot-mcp','config.json'),'{"bridgePort":"invalid"}');
