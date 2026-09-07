@@ -16,6 +16,7 @@
     "test:integration": "npm run build && node scripts/run-integration.mjs",
     "test:integration:visual": "npm run build && node scripts/run-integration.mjs --visual",
     "test:integration:runtime": "npm run build && node scripts/run-integration.mjs --runtime",
+    "test:integration:debugger": "npm run build && node scripts/run-integration.mjs --debugger",
     "check:godot": "node scripts/check-addon.mjs",
     "release:pack": "npm run build && node scripts/pack-release.mjs",
     "test:distribution": "npm run build && node scripts/smoke-release.mjs",
