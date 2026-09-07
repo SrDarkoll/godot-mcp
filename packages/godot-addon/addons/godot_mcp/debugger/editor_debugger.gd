@@ -14,14 +14,23 @@ var _pending: Dictionary = {}
 var _next_id := 0
 var _launching := false
 var _stopping := false
+var _mcp_breakpoints: Dictionary = {}
+var _mcp_breakpoint_session := ""
+var _mcp_origin_depth := 0
 
 func configure(editor_interface) -> void:
     _editor = editor_interface
 func bind_session(session_id: String) -> void:
     if _mcp_session != session_id:
         _cancel_pending("RUNTIME_NOT_CONNECTED","MCP session changed")
+    if not _mcp_breakpoint_session.is_empty() and _mcp_breakpoint_session != session_id:
+        # A previous MCP process may have died before graceful cleanup. Forget
+        # ownership proof, but never adopt or remove the physical editor entries.
+        _mcp_breakpoints.clear()
+    _mcp_breakpoint_session = session_id
     _mcp_session = session_id
     _publish()
+    _publish_breakpoints()
 func unbind_session() -> void:
     _mcp_session = ""
     _cancel_pending("EDITOR_NOT_CONNECTED","Editor bridge disconnected")
@@ -33,6 +42,10 @@ func _setup_session(session_id: int) -> void:
     session.stopped.connect(_on_stopped.bind(session_id))
     session.breaked.connect(_on_breaked.bind(session_id))
     session.continued.connect(_on_continued.bind(session_id))
+    _mcp_origin_depth += 1
+    for breakpoint in _mcp_breakpoints.values():
+        session.set_breakpoint(str(breakpoint.scriptPath), int(breakpoint.line), true)
+    _mcp_origin_depth -= 1
 func _active_sessions() -> Array:
     return get_sessions().filter(func(session): return session.is_active())
 func _on_started(id: int) -> void:
@@ -90,6 +103,123 @@ func _safe_scene(path: String) -> bool:
         if directory.is_link(partial):
             return false
     return true
+func _breakpoint_key(path: String, line: int) -> String:
+    return "%s:%d" % [path, line]
+func _safe_debug_script(path: String) -> bool:
+    if not path.begins_with("res://") or not path.ends_with(".gd") or path.contains("..") or path.contains("\\") or path.contains("\u0000"):
+        return false
+    var relative := path.trim_prefix("res://")
+    if relative.is_empty():
+        return false
+    var directory := DirAccess.open("res://")
+    if directory == null:
+        return false
+    var partial := ""
+    for part in relative.split("/"):
+        if part.is_empty() or part.contains(":"):
+            return false
+        partial = part if partial.is_empty() else partial + "/" + part
+        if directory.is_link(partial):
+            return false
+    return true
+func _breakpoint_inventory() -> Array:
+    var result: Array = []
+    var script_editor = _editor.get_script_editor()
+    for item in script_editor.get_breakpoints():
+        var text := str(item)
+        var split := text.rfind(":")
+        if split <= 5:
+            continue
+        var path := text.substr(0, split)
+        var line := int(text.substr(split + 1))
+        if path.begins_with("res://") and path.ends_with(".gd") and line >= 1:
+            result.append({"scriptPath":path,"line":line})
+    result.sort_custom(func(a,b): return a.scriptPath < b.scriptPath or (a.scriptPath == b.scriptPath and a.line < b.line))
+    return result
+func _owned_breakpoint_inventory() -> Array:
+    var result: Array = []
+    for value in _mcp_breakpoints.values():
+        result.append(value.duplicate(true))
+    result.sort_custom(func(a,b): return a.scriptPath < b.scriptPath or (a.scriptPath == b.scriptPath and a.line < b.line))
+    return result
+func _cmdline_value(flag: String) -> String:
+    var args := OS.get_cmdline_args()
+    for i in range(args.size()):
+        var current := str(args[i])
+        if current == flag and i + 1 < args.size():
+            return str(args[i + 1])
+        if current.begins_with(flag + "="):
+            return current.substr(flag.length() + 1)
+    return ""
+func debugger_info() -> Dictionary:
+    var settings = _editor.get_editor_settings()
+    var dap_port := int(_cmdline_value("--dap-port"))
+    if dap_port <= 0:
+        dap_port = int(settings.get_setting("network/debug_adapter/remote_port"))
+    var debug_host := str(settings.get_setting("network/debug/remote_host"))
+    var debug_port := int(settings.get_setting("network/debug/remote_port"))
+    var debug_server := _cmdline_value("--debug-server")
+    if debug_server.begins_with("tcp://127.0.0.1:"):
+        debug_host = "127.0.0.1"
+        debug_port = int(debug_server.trim_prefix("tcp://127.0.0.1:"))
+    elif debug_server.begins_with("tcp://localhost:"):
+        debug_host = "127.0.0.1"
+        debug_port = int(debug_server.trim_prefix("tcp://localhost:"))
+    if debug_host not in ["127.0.0.1", "localhost"]:
+        return _error("DEBUGGER_UNAVAILABLE","Debugger endpoint is not loopback")
+    if dap_port < 1024 or dap_port > 65535 or debug_port < 1024 or debug_port > 65535:
+        return _error("DEBUGGER_UNAVAILABLE","Debugger endpoint port is invalid")
+    return {
+        "dapHost":"127.0.0.1","dapPort":dap_port,"debugHost":"127.0.0.1","debugPort":debug_port,
+        "breakpointOwnerSessionId":_mcp_breakpoint_session if not _mcp_breakpoint_session.is_empty() else null,
+        "breakpoints":_breakpoint_inventory(),"mcpBreakpoints":_owned_breakpoint_inventory()
+    }
+func set_mcp_breakpoint(params: Dictionary) -> Dictionary:
+    var path := str(params.get("script_path",""))
+    var line := int(params.get("line",0))
+    if not _safe_debug_script(path):
+        return _error("BREAKPOINT_INVALID_PATH","Breakpoint script is outside project GDScript scope")
+    if line < 1:
+        return _error("BREAKPOINT_INVALID_LINE","Breakpoint line must be 1-based")
+    var key := _breakpoint_key(path,line)
+    var already_owned := _mcp_breakpoints.has(key)
+    if not already_owned:
+        for item in _breakpoint_inventory():
+            if item.scriptPath == path and item.line == line:
+                return _error("BREAKPOINT_OWNERSHIP_CONFLICT","Breakpoint already exists outside MCP ownership")
+    _mcp_breakpoints[key] = {"scriptPath":path,"line":line}
+    var applied := false
+    _mcp_origin_depth += 1
+    for session in get_sessions():
+        session.set_breakpoint(path,line,true)
+        applied = true
+    _mcp_origin_depth -= 1
+    return {"scriptPath":path,"line":line,"applied":applied}
+func remove_mcp_breakpoint(params: Dictionary) -> Dictionary:
+    var path := str(params.get("script_path",""))
+    var line := int(params.get("line",0))
+    if not _safe_debug_script(path):
+        return _error("BREAKPOINT_INVALID_PATH","Breakpoint script is outside project GDScript scope")
+    if line < 1:
+        return _error("BREAKPOINT_INVALID_LINE","Breakpoint line must be 1-based")
+    var key := _breakpoint_key(path,line)
+    if not _mcp_breakpoints.has(key):
+        return _error("BREAKPOINT_NOT_OWNED","Breakpoint is not owned by this MCP session")
+    _mcp_origin_depth += 1
+    for session in get_sessions():
+        session.set_breakpoint(path,line,false)
+    _mcp_origin_depth -= 1
+    _mcp_breakpoints.erase(key)
+    return {"scriptPath":path,"line":line,"removed":true}
+func _publish_breakpoints() -> void:
+    if _mcp_session.is_empty():
+        return
+    runtime_event.emit("debugger.breakpoints", {"breakpoints":_breakpoint_inventory()})
+func _breakpoint_set_in_tree(_script: Script, _line: int, _enabled: bool) -> void:
+    if _mcp_origin_depth == 0:
+        _publish_breakpoints()
+func _breakpoints_cleared_in_tree() -> void:
+    _publish_breakpoints()
 func launch(params: Dictionary) -> Dictionary:
     if _launching or _editor.is_playing_scene() or not _active_sessions().is_empty():
         return _error("RUNTIME_ALREADY_RUNNING","A game is already active")

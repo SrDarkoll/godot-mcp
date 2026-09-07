@@ -85,6 +85,12 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _recovery.validate(params)
         "editor.close_scene":
             result = _recovery.close_scene()
+        "debugger.info":
+            result = _runtime.debugger_info()
+        "debugger.breakpoint.set":
+            result = _runtime.set_mcp_breakpoint(params)
+        "debugger.breakpoint.remove":
+            result = _runtime.remove_mcp_breakpoint(params)
         "runtime.status":
             result = _runtime.snapshot()
         "runtime.start":
