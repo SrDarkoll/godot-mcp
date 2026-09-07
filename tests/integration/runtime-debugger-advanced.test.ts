@@ -105,7 +105,15 @@ it('preserves a real manual editor breakpoint while session cleanup removes only
     await call(h.client,'project.run');await waitForDebuggerReady(h.client);
     await writeFile(path.join(h.root,'.godot-mcp','manual-breakpoint.json'),JSON.stringify({script_path:'res://debug_target.gd',line:lines.MCP_BP_ENTRY,enabled:true}));
     await rm(breakpointFile,{force:true});await writeFile(path.join(h.root,'.godot-mcp','dump-breakpoints'),'dump');
-    await waitFor(async()=>{try{return (await readFile(breakpointFile,'utf8')).includes(`res://debug_target.gd:${lines.MCP_BP_ENTRY}`);}catch{return false;}});
+    try{
+      await waitFor(async()=>{try{return (await readFile(breakpointFile,'utf8')).includes(`res://debug_target.gd:${lines.MCP_BP_ENTRY}`);}catch{return false;}});
+    }catch(error){
+      const stateFile=path.join(h.root,'.godot-mcp','manual-breakpoint-state.json');
+      let state='missing';let inventory='missing';
+      try{state=await readFile(stateFile,'utf8');}catch{}
+      try{inventory=await readFile(breakpointFile,'utf8');}catch{}
+      throw new Error(`Manual breakpoint fixture deadline exceeded; state=${state}; inventory=${inventory}`,{cause:error});
+    }
     await trigger(h.root);
     const manual=await waitForStack(h.client,stack=>stack.frames?.[0]?.line===lines.MCP_BP_ENTRY);
     const vars=await call(h.client,'debug.variables',{frame_id:manual.frames[0].frameId});expect(vars.scopes.length).toBeGreaterThan(0);

@@ -79,17 +79,34 @@ func _process(_delta: float) -> void:
         if out != null:
             out.store_string(JSON.stringify(EditorInterface.get_script_editor().get_breakpoints()))
 
+func _write_manual_breakpoint_state(state: Dictionary) -> void:
+    var out := FileAccess.open("res://.godot-mcp/manual-breakpoint-state.json", FileAccess.WRITE)
+    if out != null:
+        out.store_string(JSON.stringify(state))
+
 func _test_set_manual_breakpoint(breakpoint_path: String, line: int, enabled: bool) -> void:
+    var state := {"path":breakpoint_path,"line":line,"enabled":enabled}
     var script = load(breakpoint_path)
+    state["scriptLoaded"] = script != null
     if script == null or line < 1:
+        _write_manual_breakpoint_state(state)
         return
-    EditorInterface.edit_script(script, line - 1, 0, false)
+    # EditorInterface.edit_script is 1-based and converts to the ScriptEditor
+    # internal zero-based location itself.
+    EditorInterface.edit_script(script, line, 1, false)
     var current = EditorInterface.get_script_editor().get_current_editor()
+    state["currentClass"] = current.get_class() if current != null else null
     if current == null:
+        _write_manual_breakpoint_state(state)
         return
     var code_editor = current.get_base_editor()
+    state["baseClass"] = code_editor.get_class() if code_editor != null else null
+    state["isCodeEdit"] = code_editor is CodeEdit
     if code_editor is CodeEdit:
         code_editor.set_line_as_breakpoint(line - 1, enabled)
+        state["lineBreakpointed"] = code_editor.is_line_breakpointed(line - 1)
+    state["inventory"] = EditorInterface.get_script_editor().get_breakpoints()
+    _write_manual_breakpoint_state(state)
 `;
     await writeFile(plugin,source);
   }
