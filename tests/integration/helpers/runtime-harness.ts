@@ -69,8 +69,8 @@ func _process(_delta: float) -> void:
             var breakpoint_path := str(payload.get("script_path", ""))
             var line := int(payload.get("line", 0))
             var enabled := bool(payload.get("enabled", true))
-            for debugger_session in _debugger.get_sessions():
-                debugger_session.set_breakpoint(breakpoint_path, line, enabled)
+            _test_set_manual_breakpoint.call_deferred(breakpoint_path, line, enabled)
+            return
 
     var dump_marker := "res://.godot-mcp/dump-breakpoints"
     if FileAccess.file_exists(dump_marker):
@@ -78,6 +78,18 @@ func _process(_delta: float) -> void:
         var out := FileAccess.open("res://.godot-mcp/breakpoints.json", FileAccess.WRITE)
         if out != null:
             out.store_string(JSON.stringify(EditorInterface.get_script_editor().get_breakpoints()))
+
+func _test_set_manual_breakpoint(breakpoint_path: String, line: int, enabled: bool) -> void:
+    var script = load(breakpoint_path)
+    if script == null or line < 1:
+        return
+    EditorInterface.edit_script(script, line - 1, 0, false)
+    var current = EditorInterface.get_script_editor().get_current_editor()
+    if current == null:
+        return
+    var code_editor = current.get_base_editor()
+    if code_editor is CodeEdit:
+        code_editor.set_line_as_breakpoint(line - 1, enabled)
 `;
     await writeFile(plugin,source);
   }

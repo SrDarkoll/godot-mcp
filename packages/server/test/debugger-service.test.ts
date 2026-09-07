@@ -41,6 +41,8 @@ function setup(status:RuntimeStatus=stopped(),infoOverrides:Record<string,unknow
     if(method==='debugger.breakpoint.set')return {scriptPath:params.script_path,line:params.line,applied:true};
     if(method==='debugger.breakpoint.remove')return {scriptPath:params.script_path,line:params.line,removed:true};
     if(method==='debugger.step_out')return {accepted:true,runId:runtime.peek().runId,action:'step_out'};
+    if(method==='debugger.dap_sync.begin')return {active:true};
+    if(method==='debugger.dap_sync.end')return {active:false};
     throw new Error(method);
   });
   const bridge={connected:true,rpc:{call}};
@@ -61,6 +63,31 @@ describe('DebuggerService',()=>{
     expect(dap.requests.map(value=>value.command)).toEqual(['initialize','attach','configurationDone']);
     expect(dap.requests[0]?.args).toMatchObject({clientID:'godot-mcp',adapterID:'godot',linesStartAt1:true,columnsStartAt1:true});
     expect(dap.requests.some(value=>['launch','setBreakpoints','evaluate','setVariable'].includes(value.command))).toBe(false);
+    await service.close();
+  });
+
+  it('brackets Godot DAP initialize and restores only pre-existing manual editor breakpoints',async()=>{
+    const run=running();const {service,dap,call}=setup(run,{
+      breakpoints:[{scriptPath:'res://debug_target.gd',line:4},{scriptPath:'res://debug_target.gd',line:8}],
+      mcpBreakpoints:[{scriptPath:'res://debug_target.gd',line:8}]
+    });
+    await service.editorConnected();
+    expect(dap.requests.map(value=>value.command)).toEqual(['initialize','setBreakpoints','attach','configurationDone']);
+    const sync=dap.requests.find(value=>value.command==='setBreakpoints');
+    expect(sync?.args).toMatchObject({breakpoints:[{line:4}]});
+    expect(String((sync?.args.source as any)?.path).replaceAll('\\','/')).toBe(`${process.cwd().replaceAll('\\','/')}/debug_target.gd`);
+    const methods=call.mock.calls.map(([method])=>method);
+    expect(methods.indexOf('debugger.dap_sync.begin')).toBeGreaterThanOrEqual(0);
+    expect(methods.indexOf('debugger.dap_sync.end')).toBeGreaterThan(methods.indexOf('debugger.dap_sync.begin'));
+    await service.close();
+  });
+
+  it('uses Godot main-thread fallback when an owned session breakpoint breaks without a DAP stopped event',async()=>{
+    const run=running();const {service,runtime,dap}=setup(run);await service.editorConnected();
+    dap.handler=async command=>command==='stackTrace'?{stackFrames:[{id:41,name:'session_only',source:{path:`${process.cwd()}/debug_target.gd`},line:17,column:1}]}:{};
+    runtime.set({...run,state:'breaked'});
+    await expect(service.stack()).resolves.toMatchObject({frames:[{name:'session_only',scriptPath:'res://debug_target.gd',line:17}]});
+    expect(dap.requests.findLast(value=>value.command==='stackTrace')?.args).toMatchObject({threadId:1});
     await service.close();
   });
 
