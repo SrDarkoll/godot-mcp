@@ -32,3 +32,15 @@ it('reports manifest publication failure rather than claiming a durable ready st
  const service=new RuntimeService(session,store,bridge);
  try{await expect(service.run({target:'main'})).rejects.toMatchObject({code:'MANIFEST_WRITE_FAILED'});}finally{spy?.mockRestore();}
 });
+
+it('ignores debugger breakpoint inventory events in RuntimeService',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-debug-event-'));const session=createSession(root);const store=new SessionStore(root);await store.create(session);
+ const status:any={state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:NO_RUNTIME_FEATURES,errorCode:null};
+ const append=vi.fn();
+ const bridge={connected:true,rpc:{call:async(method:string)=>{if(method==='runtime.status')return status;throw new Error(method);}}};
+ const service=new RuntimeService(session,store,bridge);
+ vi.spyOn(service.diagnostics,'append').mockImplementation(append as any);
+ service.acceptEvent({type:'event',protocol:1,sessionId:session.id,sequence:1,event:'debugger.breakpoints',data:{breakpoints:[{scriptPath:'res://player.gd',line:7}]}} as any);
+ expect(await service.status()).toEqual(status);
+ expect(append).not.toHaveBeenCalled();
+});

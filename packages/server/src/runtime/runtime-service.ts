@@ -32,7 +32,7 @@ export class RuntimeService {
     if(event.event==='runtime.state') {
       if(event.data.runId!==this.current.runId)return;
       this.apply(event.data);
-    } else if(this.known.has(event.data.runId)) {void this.diagnostics.append(event.data).catch(()=>{});}
+    } else if(event.event==='runtime.diagnostics' && this.known.has(event.data.runId)) {void this.diagnostics.append(event.data).catch(()=>{});}
   }
   disconnect():void {if(['stopped','failed'].includes(this.current.state)){this.session.runtimeConnected=false;return;}this.apply({...this.current,state:'disconnected',connected:false,features:{...NO_RUNTIME_FEATURES}});}
   async status():Promise<RuntimeStatus> {

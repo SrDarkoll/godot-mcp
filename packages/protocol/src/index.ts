@@ -29,3 +29,5 @@ export * from './navigation.js';
 export * from './tooling.js';
 
 export * from './headless.js';
+
+export * from './debugger.js';
