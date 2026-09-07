@@ -21,5 +21,5 @@ func _level_one(value: int, nested: Dictionary) -> void:
     _level_two(doubled, nested) # MCP_STEP_INTO
 
 func _level_two(value: int, nested: Dictionary) -> void:
-    var final_value := value + nested.numbers[0] # MCP_STEP_OUT
+    var final_value: int = value + int(nested["numbers"][0]) # MCP_STEP_OUT
     print("DEBUG_FLOW:%d" % final_value)
