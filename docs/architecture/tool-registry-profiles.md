@@ -124,7 +124,7 @@ Results are alphabetically sorted and contain only:
 - whether the tool is active in the current session;
 - profile membership.
 
-No input schemas, handlers, arbitrary reflection data or permission state are exposed.
+No input schemas, handlers, arbitrary reflection data or permission state are exposed. This is intentional: `godot.tools` is compact metadata discovery, not a replacement for the standard MCP tool descriptor surface. MCP clients that need argument names/types must use `tools/list`, whose `inputSchema` is authoritative for every exposed tool. Client-specific caches may use different fields such as `parameters`; when diagnosing missing argument metadata, inspect the client's raw `tools/list` result before attributing the loss to the server.
 
 ## Profile intent
 

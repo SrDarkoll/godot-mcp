@@ -22,7 +22,17 @@ function approvalMessage(name: string, args: Record<string, unknown>, assessment
     return `Approve risky Godot MCP operation '${name}'? Targets: ${targets}. Arguments: ${approvalArgumentSummary(args)}`;
 }
 function declineError(action: 'decline' | 'cancel' | 'invalid'): BridgeRpcError {
-    return new BridgeRpcError('APPROVAL_DECLINED', `Risky operation was ${action === 'invalid' ? 'not explicitly approved' : action + 'd'}`);
+    const reason = action === 'decline' ? 'declined' : action === 'cancel' ? 'cancelled' : 'not explicitly approved';
+    return new BridgeRpcError(
+        'APPROVAL_DECLINED',
+        `Risky operation was ${reason}`,
+        {
+            executed: false,
+            requiresUserApproval: true,
+            approvalAction: action,
+            suggestedAction: 'Ask the user to approve the operation through the MCP host before retrying.'
+        }
+    );
 }
 
 const APPROVAL_REPLAY_WINDOW_MS = 5 * 60 * 1000;

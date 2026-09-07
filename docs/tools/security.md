@@ -23,7 +23,7 @@ For each approval request the server:
 
 If files or relevant editor state that the operation declares change while approval is pending, the old approval is stale and a new approval is required. Replaying a previously accepted approval fails with `APPROVAL_REPLAYED` and never re-executes the tool. Reflective `object.call` approvals bind the target, method and serialized arguments; they do not snapshot the implementation bytes of an attached user script, so project code remains inside the trusted project boundary.
 
-A client that does not support MCP elicitation cannot execute risky operations through this flow; it fails closed.
+A client that does not support MCP elicitation cannot execute risky operations through this flow; it fails closed. If the user declines or cancels an approval request, the tool does not execute and returns `APPROVAL_DECLINED` with structured details stating that execution did not occur, user approval is required, and the client should ask the user to approve through the MCP host before retrying.
 
 ## Reflective `object.call`
 
@@ -36,5 +36,7 @@ The MCP additionally blocks private methods and direct reflective/structural byp
 ## Trust boundary
 
 The local MCP host is part of the trusted computing base. Elicitation is intended to be surfaced to a human operator. A host configured to auto-approve elicitation removes that human-approval guarantee.
+
+The Risk Gate governs operations executed **through Godot MCP**. It is not a sandbox for other capabilities the host may give the agent. If the same agent can also edit files directly, launch processes, use a shell, or control Godot through another integration, those external capabilities can produce effects equivalent to a guarded MCP tool without passing through Godot MCP approval. Restrict those capabilities separately when the approval boundary matters.
 
 Node ↔ Godot communication remains authenticated and bound to `127.0.0.1`. Project paths are scoped to the active project, and recovery/session metadata rejects symbolic-link traversal where it writes artifacts.

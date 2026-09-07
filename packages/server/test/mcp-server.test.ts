@@ -55,6 +55,44 @@ describe('MCP server', () => {
         await client.close();
         await server.close();
     }, 15000);
+    it('publishes concrete input schemas for every exposed tool', async () => {
+        const session = disconnectedSession();
+        const bridge = new BridgeServer({ session, token: 'c'.repeat(64), port: 0 });
+        const server = createMcpServer({ session, bridge, sessions: new SessionStore(session.projectRoot) });
+        const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+        const client = new Client({ name: 'schema-interoperability-test', version: '1.0.0' });
+        await server.connect(serverTransport);
+        await client.connect(clientTransport);
+        try {
+            const tools = (await client.listTools()).tools;
+            expect(tools.map(tool => tool.name).sort()).toEqual(toolNamesForProfile('full'));
+            for (const tool of tools) {
+                expect(tool.inputSchema, `${tool.name} inputSchema`).toBeDefined();
+                expect(tool.inputSchema, `${tool.name} inputSchema`).not.toBeNull();
+                expect(tool.inputSchema, `${tool.name} inputSchema`).toMatchObject({ type: 'object' });
+            }
+            const schemaFor = (name: string) => tools.find(tool => tool.name === name)?.inputSchema;
+            expect(schemaFor('debug.breakpoint.set')).toMatchObject({
+                properties: { script_path: expect.any(Object), line: expect.any(Object) },
+                required: expect.arrayContaining(['script_path', 'line'])
+            });
+            expect(schemaFor('debug.variables')).toMatchObject({
+                properties: { frame_id: expect.any(Object) },
+                required: expect.arrayContaining(['frame_id'])
+            });
+            expect(schemaFor('debug.expand')).toMatchObject({
+                properties: { variable_ref: expect.any(Object) },
+                required: expect.arrayContaining(['variable_ref'])
+            });
+            expect(schemaFor('scene.open')).toMatchObject({
+                properties: { path: expect.any(Object) },
+                required: expect.arrayContaining(['path'])
+            });
+        } finally {
+            await client.close();
+            await server.close();
+        }
+    }, 15000);
     it('filters the registered MCP surface deterministically by profile', async () => {
         const list = async (toolProfile: 'minimal' | '3d' | 'runtime') => {
             const session = disconnectedSession();
@@ -128,7 +166,48 @@ describe('MCP server', () => {
             arguments: { permission: 'filesystem.external' }
         });
         expect(result.isError).toBe(true);
-        expect(result.structuredContent).toMatchObject({ error: { code: 'APPROVAL_DECLINED' } });
+        expect(result.structuredContent).toMatchObject({
+            error: {
+                code: 'APPROVAL_DECLINED',
+                details: {
+                    executed: false,
+                    requiresUserApproval: true,
+                    approvalAction: 'decline',
+                    suggestedAction: 'Ask the user to approve the operation through the MCP host before retrying.'
+                }
+            }
+        });
+        expect((await client.callTool({ name: 'permissions.status', arguments: {} })).structuredContent)
+            .toMatchObject({ permissions: { 'filesystem.external': false } });
+        await client.close();
+        await server.close();
+    });
+    it('returns actionable details when risky tool approval is cancelled', async () => {
+        const { session, sessions } = await persistedDisconnectedSession();
+        const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+        const server = createMcpServer({ session, bridge, sessions });
+        const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+        const client = new Client({ name: 'approval-cancel-test', version: '1.0.0' }, { capabilities: { elicitation: { form: {} } } });
+        client.setRequestHandler('elicitation/create', async () => ({ action: 'cancel' }));
+        await server.connect(serverTransport);
+        await client.connect(clientTransport);
+        const result = await client.callTool({
+            name: 'permissions.enable',
+            arguments: { permission: 'filesystem.external' }
+        });
+        expect(result.isError).toBe(true);
+        expect(result.structuredContent).toMatchObject({
+            error: {
+                code: 'APPROVAL_DECLINED',
+                message: 'Risky operation was cancelled',
+                details: {
+                    executed: false,
+                    requiresUserApproval: true,
+                    approvalAction: 'cancel',
+                    suggestedAction: 'Ask the user to approve the operation through the MCP host before retrying.'
+                }
+            }
+        });
         expect((await client.callTool({ name: 'permissions.status', arguments: {} })).structuredContent)
             .toMatchObject({ permissions: { 'filesystem.external': false } });
         await client.close();

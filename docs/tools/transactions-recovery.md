@@ -55,7 +55,7 @@ These checks coordinate this server's MCP requests and detect ordinary outside e
 
 ## Recoverable checkpoints
 
-`checkpoint.create({label,paths})` captures selected on-disk files. It does not include unsaved UI changes or automatically expand to the whole project. `checkpoint.list` and `checkpoint.inspect` accept an optional prior `session_id` from the same project.
+`checkpoint.create({label,paths})` captures selected on-disk files. It does not include unsaved UI changes or automatically expand to the whole project. Every path must use the explicit `res://` form: `"project.godot"` is rejected as an invalid recovery path, while `"res://main.tscn"` is valid. `res://project.godot` itself is not excluded from snapshot creation, but restoring a checkpoint that contains it requires the Godot editor bridge to be disconnected so project settings are not replaced underneath an open editor. `checkpoint.list` and `checkpoint.inspect` accept an optional prior `session_id` from the same project.
 
 `checkpoint.restore({checkpoint_id,session_id?})` requires confirmation, preflights the editor, snapshots the current files into a restore transaction and applies the checkpoint bytes. Unrelated files remain untouched. Restoration is exact-byte recovery, not a fresh compilation guarantee for every binary format.
 
