@@ -27,7 +27,7 @@ try {
     }
 } finally { $zip.Dispose() }
 $executable = Join-Path $target "Godot_v$version-stable_win64.exe"
-$reported = & $executable --version
+$reported = (cmd.exe /c "`"$executable`" --version").Trim()
 if ($LASTEXITCODE -ne 0 -or $reported -notmatch '^4\.6\.3\.') { throw 'Unexpected Godot executable version' }
 if ($env:GITHUB_ENV) { Add-Content -LiteralPath $env:GITHUB_ENV -Value "GODOT_BIN=$executable" -Encoding utf8 }
 Write-Output "Verified Godot $reported at $executable"
