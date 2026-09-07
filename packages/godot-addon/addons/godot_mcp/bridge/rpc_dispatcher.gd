@@ -91,6 +91,8 @@ func dispatch(raw_text: String) -> Dictionary:
             result = _runtime.set_mcp_breakpoint(params)
         "debugger.breakpoint.remove":
             result = _runtime.remove_mcp_breakpoint(params)
+        "debugger.step_out":
+            result = _runtime.step_out()
         "runtime.status":
             result = _runtime.snapshot()
         "runtime.start":

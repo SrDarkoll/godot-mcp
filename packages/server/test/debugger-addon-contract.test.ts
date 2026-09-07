@@ -14,6 +14,7 @@ it('exposes individual breakpoint mutation and local debugger discovery without 
   expect(source).toContain('debugger.breakpoints');
   expect(source).not.toContain('debug.send_dap_request');
   expect(source).not.toContain('setVariable');
+  expect(source).toContain('send_message("out",[])');
 });
 
 it('drops addon ownership when the user changes or clears an MCP-owned breakpoint',async()=>{
@@ -30,13 +31,14 @@ it('does not use reserved GDScript breakpoint keyword as an identifier',async()=
 
 it('routes only the approved private debugger bridge methods',async()=>{
   const source=await fs.readFile(new URL('../../godot-addon/addons/godot_mcp/bridge/rpc_dispatcher.gd',import.meta.url),'utf8');
-  for(const method of ['debugger.info','debugger.breakpoint.set','debugger.breakpoint.remove']) {
+  for(const method of ['debugger.info','debugger.breakpoint.set','debugger.breakpoint.remove','debugger.step_out']) {
     expect(source).toContain(`\"${method}\"`);
   }
   expect(source.match(/\"debugger\.[^\"]+\"/g)?.sort()).toEqual([
     '"debugger.breakpoint.remove"',
     '"debugger.breakpoint.set"',
-    '"debugger.info"'
+    '"debugger.info"',
+    '"debugger.step_out"'
   ]);
   expect(source).not.toContain('debug.send_dap_request');
 });

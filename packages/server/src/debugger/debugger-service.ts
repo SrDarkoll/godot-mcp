@@ -1,6 +1,6 @@
 import {
   DebugBreakpointPathSchema,DebugBreakpointSetSchema,DebugBreakpointRemoveSchema,
-  DebuggerInfoResultSchema,DebuggerBreakpointApplyResultSchema,DebuggerBreakpointRemoveBridgeResultSchema,DebuggerBreakpointSnapshotSchema,
+  DebuggerInfoResultSchema,DebuggerBreakpointApplyResultSchema,DebuggerBreakpointRemoveBridgeResultSchema,DebuggerBreakpointSnapshotSchema,DebugControlResultSchema,
   MAX_DEBUG_VALUE_CHARS,DEFAULT_DEBUG_VARIABLE_PAGE,
   type BridgeRuntimeEvent,type RuntimeStatus,type DebugBreakpoint,type DebugBreakpointSetParams,type DebugBreakpointRemoveParams,
   type DebugBreakpointSetResult,type DebugBreakpointRemoveResult,type DebugBreakpointListResult,type DebugStackResult,type DebugVariablesParams,type DebuggerInfoResult,
@@ -145,7 +145,7 @@ export class DebuggerService {
   continueExecution():Promise<DebugControlResult>{return this.control('continue','continue');}
   stepInto():Promise<DebugControlResult>{return this.control('step_into','stepIn');}
   stepOver():Promise<DebugControlResult>{return this.control('step_over','next');}
-  stepOut():Promise<DebugControlResult>{return this.control('step_out','stepOut');}
+  stepOut():Promise<DebugControlResult>{return this.controlViaBridge('step_out','debugger.step_out');}
 
   async close():Promise<void>{
     if(this.closed)return;this.closed=true;this.unsubscribeRuntime();
@@ -282,6 +282,19 @@ export class DebuggerService {
       const current=this.runtime.peek();if(current.runId!==runId||current.ownership!=='session')throw new BridgeRpcError('STALE_DEBUG_REFERENCE','Runtime changed during debugger control');
       if(this.state==='BREAKED'){this.invalidateBreakContext();this.state='RESUMING';}
       return {accepted:true,runId,action};
+    }finally{this.controlBusy=false;}
+  }
+
+  private async controlViaBridge(action:DebugControlAction,method:string):Promise<DebugControlResult>{
+    const context=this.requireBreakContext();if(this.controlBusy)throw new BridgeRpcError('DEBUG_CONTROL_BUSY','Another debugger control operation is in flight');
+    this.controlBusy=true;const runId=context.runId;
+    try{
+      const raw=await this.bridge.rpc.call(method,{run_id:runId});
+      const result=this.parseBridge(DebugControlResultSchema,raw,'debugger control');
+      if(result.runId!==runId||result.action!==action)throw new BridgeRpcError('DEBUG_PROTOCOL_ERROR','Private debugger control response does not match the active runtime');
+      const current=this.runtime.peek();if(current.runId!==runId||current.ownership!=='session')throw new BridgeRpcError('STALE_DEBUG_REFERENCE','Runtime changed during debugger control');
+      if(this.state==='BREAKED'){this.invalidateBreakContext();this.state='RESUMING';}
+      return result;
     }finally{this.controlBusy=false;}
   }
 

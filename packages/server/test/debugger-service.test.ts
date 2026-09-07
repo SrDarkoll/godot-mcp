@@ -40,6 +40,7 @@ function setup(status:RuntimeStatus=stopped(),infoOverrides:Record<string,unknow
     if(method==='debugger.info')return info(infoOverrides);
     if(method==='debugger.breakpoint.set')return {scriptPath:params.script_path,line:params.line,applied:true};
     if(method==='debugger.breakpoint.remove')return {scriptPath:params.script_path,line:params.line,removed:true};
+    if(method==='debugger.step_out')return {accepted:true,runId:runtime.peek().runId,action:'step_out'};
     throw new Error(method);
   });
   const bridge={connected:true,rpc:{call}};
@@ -92,6 +93,15 @@ describe('DebuggerService',()=>{
     const first=service.stepOver();await new Promise(resolve=>setTimeout(resolve,0));
     await expect(service.continueExecution()).rejects.toMatchObject({code:'DEBUG_CONTROL_BUSY'});
     release();await expect(first).resolves.toMatchObject({accepted:true,runId:run.runId,action:'step_over'});
+    await service.close();
+  });
+
+  it('routes step_out through the owned editor debugger bridge instead of unsupported Godot 4.6.3 DAP stepOut',async()=>{
+    const run=running();const {service,runtime,dap,call}=setup(run);await service.editorConnected();
+    runtime.set({...run,state:'breaked'});dap.emit({seq:9,type:'event',event:'stopped',body:{threadId:8}});
+    await expect(service.stepOut()).resolves.toMatchObject({accepted:true,runId:run.runId,action:'step_out'});
+    expect(call).toHaveBeenCalledWith('debugger.step_out',{run_id:run.runId});
+    expect(dap.requests.some(value=>value.command==='stepOut')).toBe(false);
     await service.close();
   });
 

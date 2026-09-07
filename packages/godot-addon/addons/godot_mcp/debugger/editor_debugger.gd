@@ -214,6 +214,24 @@ func remove_mcp_breakpoint(params: Dictionary) -> Dictionary:
     _mcp_origin_depth -= 1
     _mcp_breakpoints.erase(key)
     return {"scriptPath":path,"line":line,"removed":true}
+func step_out() -> Dictionary:
+    if _active_sessions().size() > 1:
+        return _error("MULTIPLE_RUNTIME_SESSIONS","More than one debugger session is active")
+    if _owner_session != _mcp_session or _owner_session.is_empty():
+        return _error("RUNTIME_NOT_OWNED","This MCP session does not own the game")
+    if _state != "breaked":
+        return _error("RUNTIME_NOT_BREAKED","Runtime is not interrupted in the debugger")
+    if _debug_id < 0:
+        return _error("RUNTIME_NOT_CONNECTED","Runtime debugger session is unavailable")
+    var debugger_session = get_session(_debug_id)
+    if debugger_session == null or not debugger_session.is_active():
+        return _error("RUNTIME_NOT_CONNECTED","Runtime debugger session is unavailable")
+    # Godot 4.6.3 DAP exposes next/stepIn but not stepOut. The editor debugger
+    # still supports the native remote-debugger `out` command through the
+    # public EditorDebuggerSession message lane.
+    debugger_session.send_message("out",[])
+    return {"accepted":true,"runId":_run_id,"action":"step_out"}
+
 func _publish_breakpoints() -> void:
     if _mcp_session.is_empty():
         return
