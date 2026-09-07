@@ -16,6 +16,14 @@ Instead of copying and pasting GDScript snippets, guessing node hierarchy paths,
 
 ---
 
+## Built with Godot MCP & Gemini 3.8 Flash
+
+![NEON SWARM - Built with Godot MCP](docs/assets/neon_swarm_demo.gif)
+
+*NEON SWARM* is a fast-paced 2D cyberpunk top-down survival game created 100% autonomously by **Gemini 3.8 Flash** using **Godot MCP**—covering scene assembly, GDScript authoring, procedural audio, original artwork, and live DAP interactive debugging.
+
+---
+
 ## Key Highlights & Superpowers
 
 - 🎮 **Complete Editor & Scene Control**: Programmatically inspect, create, reparent, modify, and delete nodes, scenes, resources, and script signals without breaking scene structure.
