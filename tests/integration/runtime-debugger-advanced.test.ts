@@ -6,7 +6,7 @@ import {runtimeHarness,waitFor} from './helpers/runtime-harness.js';
 async function markerLines(root:string):Promise<Record<string,number>>{
   const lines=(await readFile(path.join(root,'debug_target.gd'),'utf8')).split(/\r?\n/);
   const result:Record<string,number>={};
-  for(const marker of ['MCP_BP_ENTRY','MCP_STEP_OVER','MCP_STEP_INTO','MCP_STEP_OUT']){
+  for(const marker of ['MCP_BP_ENTRY','MCP_STEP_OVER','MCP_STEP_INTO','MCP_STEP_OUT','MCP_STEP_OUT_RETURN']){
     const index=lines.findIndex(line=>line.includes(marker));
     if(index<0)throw new Error(`Missing debugger fixture marker ${marker}`);
     result[marker]=index+1;
@@ -81,7 +81,7 @@ it('drives real Godot DAP stack, variables, lazy expansion, stepping, stale refs
     await call(h.client,'debug.step_into');
     await waitForStack(h.client,stack=>stack.frames?.[0]?.name==='_level_two');
     await call(h.client,'debug.step_out');
-    await waitForStack(h.client,stack=>stack.frames?.[0]?.name==='_level_one');
+    await waitForStack(h.client,stack=>stack.frames?.[0]?.name==='_level_one'&&stack.frames[0].line===lines.MCP_STEP_OUT_RETURN);
     await call(h.client,'debug.continue');
     await call(h.client,'debug.breakpoint.remove',{script_path:'res://debug_target.gd',line:lines.MCP_STEP_INTO});
 
