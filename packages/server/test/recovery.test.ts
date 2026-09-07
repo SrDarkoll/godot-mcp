@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';import path from 'node:path';import os from 'n
 import {expect,it,vi} from 'vitest';
 import {createSession} from '../src/session/session.js';import {SessionStore} from '../src/session/session-store.js';
 import {RecoveryService} from '../src/recovery/recovery-service.js';
-async function setup(valid=true){const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-recovery-'));const session=createSession(root);const sessions=new SessionStore(root);await sessions.create(session);
+async function setup(valid=true){const root=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-recovery-')));const session=createSession(root);const sessions=new SessionStore(root);await sessions.create(session);
  await fs.writeFile(path.join(root,'main.tscn'),'before scene\r\n');await fs.writeFile(path.join(root,'main.gd'),'extends Node\r\n');
  const bridge={connected:true,rpc:{call:async(method:string)=>method==='recovery.validate'?{valid,errors:valid?[]:['Invalid GDScript']}:{ready:true}}};
  return {root,session,sessions,bridge,service:new RecoveryService(session,sessions,bridge)};}
@@ -50,7 +50,7 @@ it('retains a crash journal across service restart and refuses recovery over a h
 it('compensates a second-file write failure and keeps all snapshot evidence',async()=>{
  const {root,service}=await setup();const tx=await service.begin({label:'disk failure',paths:['res://main.tscn','res://main.gd'],atomic:true});
  await service.write(tx.id,'res://main.tscn','after scene');await service.write(tx.id,'res://main.gd','after script');
- const real=fs.rename;const mocked=vi.spyOn(fs,'rename').mockImplementation(async(...args)=>{if(String(args[1])===path.join(root,'main.gd'))throw new Error('disk failure');return real(...args);});
+ const real=fs.rename;const mocked=vi.spyOn(fs,'rename').mockImplementation(async(...args)=>{if(path.basename(String(args[1]))==='main.gd')throw new Error('disk failure');return real(...args);});
  try{expect((await service.commit(tx.id)).state).toBe('rolled_back');}finally{mocked.mockRestore();}
  expect(await fs.readFile(path.join(root,'main.tscn'),'utf8')).toBe('before scene\r\n');expect(await service.barrier()).toBeNull();
 });
