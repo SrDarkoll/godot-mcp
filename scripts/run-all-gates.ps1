@@ -58,7 +58,7 @@ function Invoke-Gate {
     if ($exitCode -ne 0) {
         throw "$Name failed with exit code $exitCode. Check logs: $log.log"
     }
-    Write-Host "-> $Name: PASSED"
+    Write-Host "-> ${Name}: PASSED"
 }
 
 Invoke-Gate '01-contracts' { npm run check:tool-contracts }
