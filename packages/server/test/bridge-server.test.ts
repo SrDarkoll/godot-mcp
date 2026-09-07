@@ -62,7 +62,7 @@ describe('BridgeServer', () => {
     const bridge=new BridgeServer({session,token:'a'.repeat(64),port:0,onDisconnected:()=>{disconnected++;}});
     const ws=await connect(bridge);await bridge.waitUntilConnected(1000);
     const closed=new Promise<void>(resolve=>ws.once('close',()=>resolve()));ws.close();await closed;
-    await new Promise(resolve=>setTimeout(resolve,0));
+    for(let attempt=0;attempt<200 && disconnected===0;attempt++)await new Promise(resolve=>setTimeout(resolve,5));
     expect(session.editorConnected).toBe(false);expect(disconnected).toBe(1);
     await bridge.stop();expect(disconnected).toBe(1);
   });
