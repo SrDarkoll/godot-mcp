@@ -16,9 +16,11 @@ assert((await fs.realpath(entry)).startsWith(consumer+path.sep));
 const project=path.join(consumer,'Game With Spaces');await fs.mkdir(project);
 await fs.writeFile(path.join(project,'project.godot'),'config_version=5\n[application]\nconfig/name="Package consumer"\n');
 function cli(args){const result=spawnSync(process.execPath,[entry,...args],{cwd:consumer,encoding:'utf8',windowsHide:true,timeout:40000});assert.equal(result.status,0,result.stderr||result.stdout);return result.stdout;}
-assert(cli(['--help']).includes('sessions inspect'));
-const initialized=JSON.parse(cli(['init',project,'--json']));assert.equal(initialized.projectRoot,project);
+assert(cli(['--help']).includes('--client <antigravity|cursor|claude>'));
+const initialized=JSON.parse(cli(['init',project,'--client','cursor','--tool-profile','2d','--json']));assert.equal(initialized.projectRoot,project);assert.equal(initialized.client.client,'cursor');
 await fs.stat(path.join(project,'addons/godot_mcp/plugin.gd'));
+const projectConfig=JSON.parse(await fs.readFile(path.join(project,'.godot-mcp/config.json'),'utf8'));assert.equal(projectConfig.toolProfile,'2d');
+const clientConfig=JSON.parse(await fs.readFile(path.join(project,'.cursor/mcp.json'),'utf8'));assert.deepEqual(clientConfig.mcpServers['godot-mcp'],{command:'npx',args:['--yes','@godot-mcp/cli','start',project,'--tool-profile','2d']});
 const recipe=JSON.parse(cli(['setup','codex',project,'--json']));assert.equal(recipe.changedProfile,false);assert(recipe.command.some(arg=>arg.startsWith(consumer)&&arg.endsWith('server'+path.sep+'dist'+path.sep+'index.js')));
 const client=new Client({name:'package-consumer',version:'1'});
 const transport=new StdioClientTransport({command:process.execPath,args:[entry,'start',project,'--bridge-port','0'],cwd:consumer});
@@ -27,5 +29,5 @@ try{
  const live=JSON.parse(cli(['status',project,'--json']));assert.equal(live.state,'running');
  const stopped=JSON.parse(cli(['stop',project,'--json']));assert.equal(stopped.stopped,true);
 }finally{await client.close();}
-await fs.writeFile(path.join(packed.out,'consumer-validation.json'),JSON.stringify({passed:true,consumer,project,checks:['independent npm install','CLI help','addon init','Codex recipe','MCP session.status','authenticated status and stop']},null,2));
+await fs.writeFile(path.join(packed.out,'consumer-validation.json'),JSON.stringify({passed:true,consumer,project,checks:['independent npm install','CLI help','addon init','client bootstrap','tool profile persistence','Codex recipe','MCP session.status','authenticated status and stop']},null,2));
 console.log(JSON.stringify({passed:true,artifacts:packed.out,consumer}));

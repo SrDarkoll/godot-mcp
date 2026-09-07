@@ -9,6 +9,18 @@ import {parseCliArgs,usage} from './cli-args.js';
 import {initProject} from './init/init-project.js';
 import {doctor} from './doctor/doctor.js';
 import {codexRecipe} from './setup/codex-recipe.js';
+import {configureClient} from './setup/client-config.js';
+import {discoverGodotExecutable} from './setup/godot-discovery.js';
+
+async function resolveGodot(projectRoot:string,cliGodot:string|null):Promise<string|null>{
+ if(cliGodot)return cliGodot;
+ try{
+  const configured=(await readProjectConfig(projectRoot)).godotBin;
+  if(configured)return configured;
+ }catch{}
+ if(process.env.GODOT_BIN)return path.resolve(process.env.GODOT_BIN);
+ return await discoverGodotExecutable();
+}
 
 export async function runCli(argv=process.argv.slice(2)):Promise<number>{
  let args;
@@ -42,19 +54,19 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
     emit(recipe,'Codex configuration recipe (profile not modified):\n\n'+recipe.toml+'\nCommand arguments:\n'+JSON.stringify(recipe.command));return 0;
    }
    case 'doctor':{
-    let godot=cliGodot;
-    if(!godot){
-     try{godot=(await readProjectConfig(root)).godotBin??process.env.GODOT_BIN??null;}catch{godot=process.env.GODOT_BIN??null;}
-    }
+    const godot=await resolveGodot(root,cliGodot);
     const report=await doctor({projectRoot:root,godotBin:godot});
     emit(report,report.checks.map(c=>`${c.ok?'OK':c.required===false?'INFO':'FAIL'} ${c.id}: ${c.detail}`).join('\n'));
     return report.ok?0:1;
    }
    case 'init':case 'addon.install':case 'addon.update':{
-    const config=await readProjectConfig(root);
-    const godot=cliGodot??config.godotBin??process.env.GODOT_BIN??null;
+    const godot=await resolveGodot(root,cliGodot);
     const result=await initProject({projectRoot:root,godotBin:godot,enable:true});
-    emit(result,[`Initialized Godot MCP in ${root}`,...result.warnings.map(w=>`Warning: ${w}`),...(result.backupPath?[`Previous addon files: ${result.backupPath}`]:[])].join('\n'));
+    let config=await readProjectConfig(root);
+    if(args.command==='init'&&args.toolProfile)config=await writeProjectConfig(root,{toolProfile:args.toolProfile});
+    const client=args.command==='init'&&args.client?await configureClient({client:args.client,projectRoot:root,toolProfile:config.toolProfile}):null;
+    const output={...result,godotBin:godot,...(client?{client}:{})};
+    emit(output,[`Initialized Godot MCP in ${root}`,...(client?[`Configured ${client.client}: ${client.path}${client.backupPath?` (backup: ${client.backupPath})`:''}`]:[]),...result.warnings.map(w=>`Warning: ${w}`),...(result.backupPath?[`Previous addon files: ${result.backupPath}`]:[])].join('\n'));
     return 0;
    }
    case 'config':{
