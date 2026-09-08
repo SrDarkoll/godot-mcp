@@ -1,5 +1,5 @@
 {
-  "name": "godot-mcp",
+  "name": "godot-mcp-monorepo",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,9 +10,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "npm run check:tool-contracts && npm run build --workspace @godot-mcp/protocol && npm run build --workspace @godot-mcp/server && npm run build --workspace @godot-mcp/cli",
-    "test": "npm run build && npm run test --workspace @godot-mcp/protocol && npm run test --workspace @godot-mcp/server && npm run test --workspace @godot-mcp/cli",
-    "typecheck": "npm run build && npm run typecheck --workspace @godot-mcp/protocol && npm run typecheck --workspace @godot-mcp/server && npm run typecheck --workspace @godot-mcp/cli",
+    "build": "npm run check:tool-contracts && npm run build --workspace @godot-mcp/protocol && npm run build --workspace @godot-mcp/server && npm run build --workspace @srdarkx/godot-mcp",
+    "test": "npm run build && npm run test --workspace @godot-mcp/protocol && npm run test --workspace @godot-mcp/server && npm run test --workspace @srdarkx/godot-mcp",
+    "typecheck": "npm run build && npm run typecheck --workspace @godot-mcp/protocol && npm run typecheck --workspace @godot-mcp/server && npm run typecheck --workspace @srdarkx/godot-mcp",
     "test:integration": "npm run build && node scripts/run-integration.mjs",
     "test:integration:visual": "npm run build && node scripts/run-integration.mjs --visual",
     "test:integration:runtime": "npm run build && node scripts/run-integration.mjs --runtime",
@@ -21,7 +21,8 @@
     "release:pack": "npm run build && node scripts/pack-release.mjs",
     "test:distribution": "npm run build && node scripts/smoke-release.mjs",
     "generate:tool-contracts": "node scripts/generate-tool-contracts.mjs",
-    "check:tool-contracts": "node scripts/generate-tool-contracts.mjs --check"
+    "check:tool-contracts": "node scripts/generate-tool-contracts.mjs --check",
+    "check:public-package": "node scripts/check-public-package.mjs"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.0.0",

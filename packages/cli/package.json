@@ -1,7 +1,7 @@
 {
-  "name": "@godot-mcp/cli",
+  "name": "@srdarkx/godot-mcp",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,5 +27,10 @@
   ],
   "engines": {
     "node": ">=22"
-  }
+  },
+  "bundleDependencies": [
+    "@godot-mcp/protocol",
+    "@godot-mcp/server",
+    "@godot-mcp/godot-addon"
+  ]
 }

@@ -1,0 +1,20 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+
+const root=JSON.parse(await fs.readFile(new URL('../package.json',import.meta.url),'utf8'));
+const cli=JSON.parse(await fs.readFile(new URL('../packages/cli/package.json',import.meta.url),'utf8'));
+const internal=['@godot-mcp/protocol','@godot-mcp/server','@godot-mcp/godot-addon'];
+
+assert.equal(root.name,'godot-mcp-monorepo');
+assert.equal(root.private,true);
+assert.equal(cli.name,'@srdarkx/godot-mcp');
+assert.equal(cli.private,false);
+assert.equal(cli.version,root.version);
+assert.deepEqual(cli.bin,{'godot-mcp':'dist/index.js'});
+for(const name of internal){
+ assert.equal(cli.dependencies?.[name],root.version,`${name} must be an exact runtime dependency`);
+ assert(cli.bundleDependencies?.includes(name),`${name} must be bundled`);
+}
+assert.deepEqual(new Set(cli.bundleDependencies??[]),new Set(internal));
+assert.equal(cli.bundleDependencies?.length,internal.length);
+console.log(`Public package metadata valid: ${cli.name}@${cli.version}`);
