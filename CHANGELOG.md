@@ -2,7 +2,7 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
-## [0.3.0] - 2026-09-08
+## [0.3.1] - 2026-09-08
 
 ### Added
 
@@ -17,7 +17,7 @@ All notable release-level changes to Godot MCP are documented here.
 
 ### Changed
 
-- Coordinated monorepo, server, protocol, addon, and public CLI versions to `0.3.0`.
+- Coordinated monorepo, server, protocol, addon, and public CLI versions to `0.3.1`.
 - Expanded monorepo automated test suite to 349 passing tests across 93 test suites.
 - Preserved all 183 canonical MCP tool contracts.
 

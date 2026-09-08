@@ -1,7 +1,8 @@
 {
   "name": "@srdarkx/godot-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": false,
+  "description": "Hardened CLI launcher and companion bridge for Godot MCP",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,20 +10,19 @@
     "godot-mcp": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests --testTimeout 20000"
+    "build": "tsc -b",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.3.0",
-    "@godot-mcp/server": "0.3.0",
-    "@godot-mcp/godot-addon": "0.3.0",
+    "@godot-mcp/protocol": "0.3.1",
+    "@godot-mcp/server": "0.3.1",
+    "@godot-mcp/godot-addon": "0.3.1",
     "@modelcontextprotocol/server": "^2.0.0",
     "ws": "^8.18.0",
     "zod": "^4.0.0"
   },
   "license": "MIT",
-  "description": "Godot MCP cli package (Windows-first Developer Preview)",
   "files": [
     "dist",
     "LICENSE",
