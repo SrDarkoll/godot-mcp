@@ -16,7 +16,10 @@
   "dependencies": {
     "@godot-mcp/protocol": "0.1.0",
     "@godot-mcp/server": "0.1.0",
-    "@godot-mcp/godot-addon": "0.1.0"
+    "@godot-mcp/godot-addon": "0.1.0",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "ws": "^8.18.0",
+    "zod": "^4.0.0"
   },
   "license": "MIT",
   "description": "Godot MCP cli package (Windows-first Developer Preview)",
