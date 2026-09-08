@@ -120,3 +120,47 @@ test('publish dry-run uses scoped public command and cleans managed links on npm
   await fs.rm(root,{recursive:true,force:true});
  }
 });
+
+test('publish dry-run accepts npm 11 workspace-keyed JSON metadata',async()=>{
+ const fs=await import('node:fs/promises');
+ const os=await import('node:os');
+ const path=await import('node:path');
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-dry-run-json-test-'));
+ const previousCwd=process.cwd();
+ const previousExec=process.env.npm_execpath;
+ try{
+  await fs.writeFile(path.join(root,'package.json'),JSON.stringify({name:'godot-mcp-monorepo',version:'0.1.0',private:true,workspaces:['packages/*']}));
+  await fs.mkdir(path.join(root,'packages','cli'),{recursive:true});
+  await fs.writeFile(path.join(root,'packages','cli','package.json'),JSON.stringify({name:'@srdarkx/godot-mcp',version:'0.1.0',private:false}));
+  for(const folder of ['protocol','server','godot-addon']){
+   const dir=path.join(root,'packages',folder);
+   await fs.mkdir(dir,{recursive:true});
+   await fs.writeFile(path.join(dir,'package.json'),JSON.stringify({name:`@godot-mcp/${folder}`,version:'0.1.0'}));
+  }
+  const metadata={
+   id:'@srdarkx/godot-mcp@0.1.0',
+   name:'@srdarkx/godot-mcp',
+   version:'0.1.0',
+   filename:'srdarkx-godot-mcp-0.1.0.tgz',
+   bundled:exact,
+   files:requiredFiles.map(path=>({path,size:1,mode:420}))
+  };
+  const fake=path.join(root,'fake-npm.mjs');
+  await fs.writeFile(fake,"process.stdout.write(process.env.FAKE_NPM_OUTPUT);\n");
+  process.chdir(root);
+  process.env.npm_execpath=fake;
+  process.env.FAKE_NPM_OUTPUT=JSON.stringify({'@srdarkx/godot-mcp':metadata});
+  const result=await publishDryRun();
+  assert.equal(result.name,'@srdarkx/godot-mcp');
+  assert.equal(result.version,'0.1.0');
+  assertExactBundled(result.bundled);
+  for(const folder of ['protocol','server','godot-addon']){
+   await assert.rejects(fs.lstat(path.join(root,'packages/cli/node_modules/@godot-mcp',folder)),error=>error?.code==='ENOENT');
+  }
+ }finally{
+  process.chdir(previousCwd);
+  if(previousExec===undefined)delete process.env.npm_execpath;else process.env.npm_execpath=previousExec;
+  delete process.env.FAKE_NPM_OUTPUT;
+  await fs.rm(root,{recursive:true,force:true});
+ }
+});

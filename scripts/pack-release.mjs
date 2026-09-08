@@ -51,7 +51,8 @@ export function assertPackedFiles(files){
 
 function parsePackJson(stdout){
  const parsed=JSON.parse(stdout);
- const result=Array.isArray(parsed)?parsed[0]:parsed;
+ const candidate=Array.isArray(parsed)?parsed[0]:parsed;
+ const result=candidate?.name?candidate:candidate?.[PUBLIC_PACKAGE];
  if(!result||typeof result!=='object')throw new Error('npm packaging command returned no package metadata');
  return result;
 }
