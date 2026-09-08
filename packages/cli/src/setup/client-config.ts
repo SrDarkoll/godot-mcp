@@ -5,7 +5,7 @@ import type {ToolProfile} from '@godot-mcp/protocol';
 
 export const CLIENT_NAMES=['antigravity','cursor','claude'] as const;
 export type ClientName=typeof CLIENT_NAMES[number];
-export const DEFAULT_NPX_PACKAGE='@godot-mcp/cli';
+export const DEFAULT_NPX_PACKAGE='@srdarkx/godot-mcp';
 
 export interface ClientLaunchEntry {command:string;args:string[];}
 export interface ClientConfigResult {

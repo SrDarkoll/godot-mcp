@@ -17,7 +17,7 @@ it('creates project-local Cursor config and preserves unrelated MCP state with o
  const parsed=JSON.parse(await readFile(file,'utf8'));
  expect(parsed.theme).toBe('dark');
  expect(parsed.mcpServers.other).toEqual({command:'other'});
- expect(parsed.mcpServers['godot-mcp']).toEqual({command:'npx',args:['--yes','@godot-mcp/cli','start',path.resolve(root),'--tool-profile','2d']});
+ expect(parsed.mcpServers['godot-mcp']).toEqual({command:'npx',args:['--yes','@srdarkx/godot-mcp','start',path.resolve(root),'--tool-profile','2d']});
  const second=await configureClient({client:'cursor',projectRoot:root,toolProfile:'2d',now:()=>new Date('2026-09-07T12:00:01.000Z')});
  expect(second.changed).toBe(false);
  const backups=(await readdir(path.dirname(file))).filter(name=>name.includes('.godot-mcp-')&&name.endsWith('.bak'));
