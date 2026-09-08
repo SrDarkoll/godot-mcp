@@ -13,19 +13,41 @@ Connect modern AI assistants (**Cursor**, **Claude Desktop**, **Antigravity**, *
 
 ---
 
-## 🚀 Quickstart (Zero-Friction Bootstrap)
+## 🚀 Quickstart: Connect Godot to your AI Assistant in 3 Steps
 
-Initialize any Godot 4.x project in seconds with a single command:
+### Step 1: Create or Open Your Godot Project
+Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing project containing `project.godot`.
+
+### Step 2: Run the Setup Command (Single Step)
+Open a terminal in your project directory and run the command for your AI editor:
 
 ```bash
-npx @srdarkx/godot-mcp init path/to/your/godot-project
-```
+# For Google Antigravity / Gemini
+npx @srdarkx/godot-mcp init . --client antigravity
 
-### What `init` does automatically:
-1. **Discovers Godot**: Detects your installed Godot 4.x binary across standard Windows and system paths.
-2. **Installs the Bridge Plugin**: Copies the hardened `addons/godot_mcp` EditorPlugin into your project.
-3. **Enables the Plugin**: Activates the plugin automatically in headless mode without manual editor clicks.
-4. **Configures Your AI Client**: Automatically creates or updates your client configuration (`.cursor/mcp.json`, Claude Desktop config, or Antigravity).
+# For Cursor
+npx @srdarkx/godot-mcp init . --client cursor
+
+# For Claude Desktop
+npx @srdarkx/godot-mcp init . --client claude
+```
+*(Tip: You can also pass a full path instead of `.`, e.g. `npx @srdarkx/godot-mcp init C:\Projects\MyGame --client antigravity`)*
+
+#### What happens automatically in 3 seconds:
+1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x binary across standard Windows and system paths.
+2. 📦 **Installs Bridge Plugin**: Copies the hardened `addons/godot_mcp` EditorPlugin directly into your game folder.
+3. ⚡ **Activates Plugin**: Enables the plugin automatically in `project.godot` (via Godot's headless CLI, no manual editor clicks needed).
+4. 🤖 **Configures Your AI Client**: Automatically creates or updates your client configuration file (`.agents/mcp_config.json`, `.cursor/mcp.json`, or Claude Desktop config).
+
+### Step 3: Open Your AI Editor and Godot
+1. **Open your project in your AI editor** (**Antigravity**, **Cursor**, or **Claude Desktop**). It will detect the configuration and launch the Godot MCP server automatically. (If already open, simply reload the window).
+2. **Open your project in Godot Engine**. The editor plugin connects to the bridge over local WebSocket in ~1 second.
+
+🎉 **You're all set!** You can now prompt your AI directly:
+- *"Inspect the active scene tree and add a `CharacterBody2D` with a `Sprite2D`."*
+- *"Capture the 2D viewport to verify layout and shaders."*
+- *"Attach the DAP debugger, set a breakpoint in `player.gd`, and step through execution."*
+- *"Run headless project checks and verify zero GDScript errors."*
 
 ---
 

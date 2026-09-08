@@ -1,6 +1,6 @@
 {
   "name": "@godot-mcp/server",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -14,7 +14,7 @@
     "test": "vitest run --passWithNoTests --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.3.2",
+    "@godot-mcp/protocol": "0.3.3",
     "ws": "^8.18.0",
     "zod": "^4.0.0",
     "@modelcontextprotocol/server": "^2.0.0"

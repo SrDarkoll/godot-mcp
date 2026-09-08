@@ -2,7 +2,7 @@
 extends Node
 
 const DESCRIPTOR_PATH := "res://.godot-mcp/runtime/bridge.json"
-const ADDON_VERSION := "0.3.2"
+const ADDON_VERSION := "0.3.3"
 const PROTOCOL_VERSION := 1
 const DESCRIPTOR_POLL_SECONDS := 1.0
 

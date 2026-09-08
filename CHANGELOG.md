@@ -2,6 +2,14 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.3.3] - 2026-09-08
+
+### Changed
+
+- Enhanced Quickstart with a comprehensive, beginner-friendly 3-step setup guide for Antigravity, Cursor, and Claude Desktop.
+- Added support for `run` command alias and `--project` option in the CLI launcher.
+- Bumped package versions to `0.3.3` across the monorepo.
+
 ## [0.3.2] - 2026-09-08
 
 ### Changed
