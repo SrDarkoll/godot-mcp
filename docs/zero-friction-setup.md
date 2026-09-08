@@ -4,16 +4,16 @@ This document describes the bootstrap foundation for Godot MCP 0.2.
 
 ## Target flow
 
-After the CLI package is published to its final npm namespace, the intended setup is:
+After the public package `@srdarkx/godot-mcp` is explicitly released to npm, the intended setup is:
 
 ```powershell
-npx @godot-mcp/cli init . --client antigravity
+npx -y @srdarkx/godot-mcp init . --client antigravity
 ```
 
 Optional focused profile:
 
 ```powershell
-npx @godot-mcp/cli init . --client cursor --tool-profile 2d
+npx -y @srdarkx/godot-mcp init . --client cursor --tool-profile 2d
 ```
 
 `init` keeps its existing addon/config behavior and additionally:
@@ -54,4 +54,4 @@ macOS checks `PATH` plus the standard `Godot.app` locations. Linux checks `PATH`
 
 ## Publication boundary
 
-This change makes the bootstrap flow testable from packed workspace tarballs, but it does **not** publish anything to npm. The final public npm namespace, credentials, provenance, and release action remain a separate explicit release step.
+The sole public package is `@srdarkx/godot-mcp`. The internal `@godot-mcp/protocol`, `@godot-mcp/server`, and `@godot-mcp/godot-addon` workspaces are bundled implementation details and are not installed separately by users. This implementation does **not** publish anything to npm; scope ownership, credentials, provenance, and the real release action remain a separate explicit release step.

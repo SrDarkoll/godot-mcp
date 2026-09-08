@@ -75,7 +75,7 @@ Godot MCP is verified against **live Godot 4.6.3 on Windows** through 10 strict 
 | **Tool Surface** | 183 canonical MCP tools across 8 profiles (`minimal`, `core`, `2d`, `3d`, `navigation`, `ui`, `runtime`, `full`) | ✅ PASS |
 | **Protocol Unit Tests** | 52/52 tests passed (`@godot-mcp/protocol`) | ✅ PASS |
 | **Server Unit Tests** | 250/250 tests passed (`@godot-mcp/server`) | ✅ PASS |
-| **CLI Unit Tests** | 11/11 tests passed (`@godot-mcp/cli`) | ✅ PASS |
+| **CLI Unit Tests** | 11/11 tests passed (CLI workspace) | ✅ PASS |
 | **General Integration** | 15 test files (16 tests) driving live Godot 4.x EditorPlugin mutation lifecycle | ✅ PASS |
 | **Runtime Integration** | 3 test files (10 tests) controlling live game execution, inspection & native diagnostics | ✅ PASS |
 | **Visual Integration** | 1 test file (2 tests) capturing real 2D & 3D viewport pixels with checksum validation | ✅ PASS |
@@ -114,6 +114,14 @@ To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 
 ---
 
 ## Quickstart
+
+> **Public release target:** `@srdarkx/godot-mcp` is the sole public npm package. It is not published by this implementation step; until an explicit release is authorized, use the source-checkout flow below. The internal `@godot-mcp/*` packages remain bundled implementation details.
+
+After a future authorized npm release, the zero-friction entry point is:
+
+```powershell
+npx -y @srdarkx/godot-mcp init . --client antigravity
+```
 
 ### 1. Clone and Build
 

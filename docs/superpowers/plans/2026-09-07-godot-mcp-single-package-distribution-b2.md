@@ -549,7 +549,7 @@ git commit -m "test(distribution): prove one-tarball install"
 Run:
 
 ```bash
-grep -R "@godot-mcp/cli\|npx .*godot-mcp" -n README.md docs --exclude-dir=superpowers/plans --exclude='*design*.md'
+grep -R "@godot-mcp/cli\|npx .*godot-mcp" -n README.md docs --exclude-dir=plans --exclude='*design*.md'
 ```
 
 Record only current user-facing docs; do not rewrite old historical plans.
@@ -570,7 +570,7 @@ Document that `@srdarkx/godot-mcp` is the sole public package and internal `@god
 Run:
 
 ```bash
-if grep -R "npx .*@godot-mcp/cli" -n README.md docs --exclude-dir=superpowers/plans --exclude='*design*.md'; then exit 1; else echo 'active docs use scoped public package'; fi
+if grep -R "npx .*@godot-mcp/cli" -n README.md docs --exclude-dir=plans --exclude='*design*.md'; then exit 1; else echo 'active docs use scoped public package'; fi
 ```
 
 Expected: exit 0.
