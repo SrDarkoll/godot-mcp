@@ -44,7 +44,7 @@ export function assertPackedFiles(files){
   if(!set.has(required))throw new Error(`Missing packaged runtime file: ${required}`);
  }
  for(const file of files){
-  const allowed=/^(?:package\.json|LICENSE|README\.md|dist\/|node_modules\/@godot-mcp\/(?:protocol|server)\/(?:package\.json|LICENSE|README\.md|dist\/)|node_modules\/@godot-mcp\/godot-addon\/(?:package\.json|LICENSE|README\.md|addons\/godot_mcp\/))/.test(file);
+  const allowed=/^(?:package\.json|LICENSE|README\.md|dist\/.+|node_modules\/@godot-mcp\/(?:protocol|server)\/(?:package\.json|LICENSE|README\.md|dist\/.+)|node_modules\/@godot-mcp\/godot-addon\/(?:package\.json|LICENSE|README\.md|addons\/godot_mcp\/.+))$/.test(file);
   if(!allowed||file.includes('..')||file.includes('.godot-mcp'))throw new Error(`Unexpected packaged file: ${file}`);
  }
 }
