@@ -23,7 +23,8 @@
     "generate:tool-contracts": "node scripts/generate-tool-contracts.mjs",
     "check:tool-contracts": "node scripts/generate-tool-contracts.mjs --check",
     "check:public-package": "node scripts/check-public-package.mjs",
-    "test:release-scripts": "node --test scripts/*.test.mjs"
+    "test:release-scripts": "node --test scripts/*.test.mjs",
+    "release:dry-run": "npm run build && node scripts/pack-release.mjs --publish-dry-run"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.0.0",
