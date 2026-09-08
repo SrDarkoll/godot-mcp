@@ -3,6 +3,7 @@ import {parseCliArgs} from '../src/index.js';
 it('parses help, foreground start, zero-friction init and scoped session inspection',()=>{
  expect(parseCliArgs(['--help']).command).toBe('help');
  expect(parseCliArgs(['start','C:/Game With Spaces','--bridge-port','0','--tool-profile','runtime'])).toMatchObject({command:'start',projectRoot:'C:/Game With Spaces',bridgePort:0,toolProfile:'runtime'});
+ expect(parseCliArgs(['run','--project','C:/Game','--tool-profile','core'])).toMatchObject({command:'start',projectRoot:'C:/Game',toolProfile:'core'});
  expect(parseCliArgs(['init','C:/Game','--client','antigravity','--tool-profile','2d'])).toMatchObject({command:'init',projectRoot:'C:/Game',client:'antigravity',toolProfile:'2d'});
  expect(parseCliArgs(['config','C:/Game','--tool-profile','navigation'])).toMatchObject({command:'config',toolProfile:'navigation'});
  expect(parseCliArgs(['sessions','inspect','2026-09-05T12-00-00-000Z_1234abcd','C:/Game','--json'])).toMatchObject({command:'sessions.inspect',json:true,sessionId:'2026-09-05T12-00-00-000Z_1234abcd'});

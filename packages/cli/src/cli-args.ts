@@ -21,6 +21,7 @@ export function parseCliArgs(argv:string[]):ParsedCommand{
  if(!argv.length||argv.includes('--help')||argv.includes('-h'))return base;
  if(argv.includes('--version')||argv.includes('-v'))return {...base,command:'version'};
  let index=1;let name=argv[0]!;
+ if(name==='run')name='start';
  if(['sessions','addon','setup'].includes(name)){name+='.'+(argv[index++]??'');}
  const commands:Command[]=['init','doctor','start','stop','status','config','permissions','sessions.list','sessions.inspect','addon.install','addon.update','setup.codex'];
  if(!commands.includes(name as Command))throw new Error(`Unknown command: ${name}`);
@@ -34,6 +35,7 @@ export function parseCliArgs(argv:string[]):ParsedCommand{
   if(arg==='--json'){if(name==='start')throw new Error('start uses MCP stdio and cannot use --json');parsed.json=true;continue;}
   if(arg==='--repair'&&name==='config'){parsed.repair=true;continue;}
   const value=argv[++index];if(!value||value.startsWith('--'))throw new Error(`${arg} requires a value`);
+  if((arg==='--project'||arg==='-p')&&name==='start'){parsed.projectRoot=value;continue;}
   if(arg==='--godot'&&['init','doctor','config','addon.install','addon.update'].includes(name)){parsed.godotBin=value;continue;}
   if(arg==='--bridge-port'&&['config','start'].includes(name)){if(!/^\d+$/.test(value)||Number(value)>65535)throw new Error('Invalid bridge port');parsed.bridgePort=Number(value);continue;}
   if(arg==='--tool-profile'&&['init','config','start'].includes(name)){const profile=ToolProfileSchema.safeParse(value);if(!profile.success)throw new Error('Invalid tool profile');parsed.toolProfile=profile.data;continue;}
