@@ -1,6 +1,6 @@
 {
   "name": "@srdarkx/godot-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "main": "dist/index.js",
@@ -14,9 +14,9 @@
     "test": "vitest run --passWithNoTests --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.1.0",
-    "@godot-mcp/server": "0.1.0",
-    "@godot-mcp/godot-addon": "0.1.0",
+    "@godot-mcp/protocol": "0.2.0",
+    "@godot-mcp/server": "0.2.0",
+    "@godot-mcp/godot-addon": "0.2.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "ws": "^8.18.0",
     "zod": "^4.0.0"
