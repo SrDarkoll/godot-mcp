@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs/promises';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { expect, it, vi } from 'vitest';
@@ -9,8 +9,8 @@ import { once } from 'node:events';
 import { pathToFileURL } from 'node:url';
 
 it('restores already replaced files when a later addon file cannot be published', async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'addon-update-'));
-  const template = await fs.mkdtemp(path.join(os.tmpdir(), 'addon-template-'));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'addon-update-')));
+  const template = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'addon-template-')));
   const target = path.join(root, 'addons/godot_mcp');
   await fs.mkdir(target, { recursive: true });
   await fs.writeFile(path.join(target, 'a.gd'), 'old a');
@@ -21,7 +21,7 @@ it('restores already replaced files when a later addon file cannot be published'
   const rename = fs.rename;
   let failed = false;
   const spy = vi.spyOn(fs, 'rename').mockImplementation(async (...args) => {
-    if (String(args[1]) === path.join(target, 'b.gd') && !failed) {
+    if (path.basename(String(args[1])) === 'b.gd' && !failed) {
       failed = true;
       throw new Error('Injected disk failure');
     }
@@ -40,7 +40,7 @@ it('restores already replaced files when a later addon file cannot be published'
 });
 
 it('resumes compensation from a retained journal including files created by the interrupted update', async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'addon-resume-'));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'addon-resume-')));
   const target = path.join(root, 'addons/godot_mcp');
   await fs.mkdir(target, { recursive: true });
   await fs.writeFile(path.join(target, 'a.gd'), 'old a');
@@ -67,7 +67,7 @@ it('resumes compensation from a retained journal including files created by the 
 });
 
 it('retains journal and all backups when an external edit conflicts with addon compensation', async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'addon-conflict-'));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'addon-conflict-')));
   const target = path.join(root, 'addons/godot_mcp');
   await fs.mkdir(target, { recursive: true });
   await fs.writeFile(path.join(target, 'a.gd'), 'old');
@@ -85,7 +85,7 @@ it('retains journal and all backups when an external edit conflicts with addon c
 });
 
 it('recovers after the updater process is killed after publishing a newly created file', async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'addon-killed-'));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'addon-killed-')));
   const target = path.join(root, 'addons/godot_mcp');
   await fs.mkdir(target, { recursive: true });
   await fs.writeFile(path.join(target, 'a.gd'), 'old');
