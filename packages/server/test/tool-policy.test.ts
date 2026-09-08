@@ -375,3 +375,17 @@ it('does not grant debugger stepping shutdown-control privileges',async()=>{
     await expect(policy.execute(name,{},async()=>({accepted:true}))).rejects.toMatchObject({code:'SESSION_CLOSED'});
   }
 });
+
+it('rejects cyclic and deep inputs before fingerprinting or execution', async () => {
+  const { policy } = await setup();
+  const cycle: any = {};
+  cycle.self = cycle;
+  await expect(policy.execute('node.create', { value: cycle }, async () => ({}))).rejects.toMatchObject({ code: 'ARGUMENT_TOO_LARGE' });
+  await expect(policy.assess('node.create', { value: cycle })).rejects.toMatchObject({ code: 'ARGUMENT_TOO_LARGE' });
+
+  let deep: any = 0;
+  for (let i = 0; i < 80; i++) deep = [deep];
+  await expect(policy.execute('node.create', { value: deep }, async () => ({}))).rejects.toMatchObject({ code: 'ARGUMENT_TOO_LARGE' });
+  await expect(policy.assess('node.create', { value: deep })).rejects.toMatchObject({ code: 'ARGUMENT_TOO_LARGE' });
+});
+

@@ -2,25 +2,14 @@ extends RefCounted
 var tree: SceneTree
 var agent: Node
 var serializer = preload("res://addons/godot_mcp/serialization/variant_serializer.gd")
+const SerializationBudget = preload("res://addons/godot_mcp/serialization/serialization_budget.gd")
 func _init(scene_tree: SceneTree, runtime_agent: Node) -> void:
     tree = scene_tree
     agent = runtime_agent
 func _error(code: String, message: String) -> Dictionary:
     return {"__error":{"code":code,"message":message}}
 func _allowed(value, depth: int = 0) -> bool:
-    if depth > 8:
-        return false
-    if value is String or value is StringName:
-        return str(value).length() <= 4096
-    if value is Array or value is Dictionary:
-        if value.size() > 256:
-            return false
-        for item in value:
-            if not _allowed(item,depth+1) or (value is Dictionary and not _allowed(value[item],depth+1)):
-                return false
-    elif typeof(value) >= TYPE_PACKED_BYTE_ARRAY and value.size() > 256:
-        return false
-    return true
+    return SerializationBudget.check(value, {"depth":8-depth, "string":4096, "container":256}).is_empty()
 func _resolve(raw: String) -> Node:
     if not raw.begins_with("/root/") or raw.contains("..") or raw.contains("\\") or raw.begins_with("/root/GodotMcpRuntime"):
         return null
@@ -75,6 +64,8 @@ func run(method: String, params: Dictionary) -> Dictionary:
         if not _allowed(value):
             return _error("RESULT_TOO_LARGE","Runtime value exceeds inspection limits")
         values[str(property)] = serializer.serialize(value)
+        if not SerializationBudget.check(values, {"depth":40, "container":10000}).is_empty():
+            return _error("RESULT_TOO_LARGE","Combined runtime properties exceed serialization limits")
     var result := {"property":str(requested[0]),"value":values[str(requested[0])]} if method == "runtime.get_property" else {"node":_info(node),"properties":values}
     if JSON.stringify(result).to_utf8_buffer().size() > 256*1024:
         return _error("RESULT_TOO_LARGE","Runtime result exceeds 256 KiB")

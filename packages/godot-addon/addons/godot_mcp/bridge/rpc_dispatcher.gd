@@ -48,18 +48,22 @@ func _init(editor_interface, runtime = null) -> void:
     _material3d_handlers = preload("res://addons/godot_mcp/bridge/handlers/material3d_handlers.gd").new(editor_interface)
     _navigation_handlers = preload("res://addons/godot_mcp/bridge/handlers/navigation_handlers.gd").new(editor_interface, _compatibility)
 
+const SerializationBudget = preload("res://addons/godot_mcp/serialization/serialization_budget.gd")
+
 func compatibility_manifest() -> Dictionary:
     return _compatibility.manifest()
 
 func compatibility_core():
     return _compatibility
 
-func _failure(request_id: String, code: String, message: String) -> Dictionary:
-    return {
+func _failure(request_id: String, code: String, message: String, details: Dictionary = {}) -> Dictionary:
+    var response = {
         "id": request_id if not request_id.is_empty() else "invalid-request",
         "ok": false,
         "error": { "code": code, "message": message }
     }
+    if not details.is_empty(): response.error["details"] = details
+    return response
 
 func dispatch(raw_text: String) -> Dictionary:
     var parsed = JSON.parse_string(raw_text)
@@ -75,6 +79,15 @@ func dispatch(raw_text: String) -> Dictionary:
 
     var method: String = request.method
     var params: Dictionary = request.get("params", {})
+    var input_issue = SerializationBudget.check(params, {"bytes":8*1024*1024, "string":1024*1024})
+    if not input_issue.is_empty():
+        return _failure(request_id, "ARGUMENT_TOO_LARGE", input_issue)
+    # Validate fields that handlers will decode before any editor mutation.
+    for field in ["value", "args", "properties", "binds"]:
+        if params.has(field):
+            var value_issue = SerializationBudget.check(params[field])
+            if not value_issue.is_empty():
+                return _failure(request_id, "ARGUMENT_TOO_LARGE", value_issue)
     var result
     match method:
         "recovery.prepare":
@@ -358,6 +371,12 @@ func dispatch(raw_text: String) -> Dictionary:
 
     if typeof(result) == TYPE_DICTIONARY and result.has("__error"):
         var err: Dictionary = result["__error"]
-        return _failure(request_id, str(err.get("code", "INTERNAL_ERROR")), str(err.get("message", "Error occurred")))
+        return _failure(request_id, str(err.get("code", "INTERNAL_ERROR")), str(err.get("message", "Error occurred")), err.get("details",{}))
+
+    # PNG/base64 responses have separate pixel, byte and checksum bounds.
+    if not method.begins_with("visual.capture_"):
+        var issue = SerializationBudget.check(result, {"depth":80, "items":30000, "bytes":4*1024*1024, "container":10000})
+        if not issue.is_empty():
+            return _failure(request_id, "RESULT_TOO_LARGE", issue)
 
     return { "id": request_id, "ok": true, "result": result }

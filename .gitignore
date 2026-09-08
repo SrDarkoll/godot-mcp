@@ -14,3 +14,4 @@ coverage/
 .godot-mcp/addon-backups/
 .godot-mcp/cli-test-runs/
 .godot-mcp/distribution/
+.tgrep/

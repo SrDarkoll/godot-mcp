@@ -4,10 +4,13 @@ import path from 'node:path';
 import { DEFAULT_PERMISSIONS, PermissionSchema, type Permission, type Risk } from '@godot-mcp/protocol';
 import { BridgeRpcError } from '../bridge/rpc-router.js';
 import type { RecoveryService } from '../recovery/recovery-service.js';
-import type { SessionStore } from '../session/session-store.js';
+import { SessionStore } from '../session/session-store.js';
 import type { Session } from '../session/session.js';
+import { SessionTelemetry } from '../session/telemetry.js';
+import { scanSessionStorage } from '../session/session-storage.js';
 import { OperationGate } from './operation-gate.js';
 import { isBlockedReflectiveMethod } from './reflection-safety.js';
+import { validateArgumentBudget } from './argument-budget.js';
 import { CONTROL_TOOL_NAMES, NORMAL_MUTATION_TOOL_NAMES, READ_TOOL_NAMES } from './tool-policy.generated.js';
 const READS = new Set(READ_TOOL_NAMES);
 const CONTROLS = new Set(CONTROL_TOOL_NAMES);
@@ -54,8 +57,32 @@ export class ToolPolicy {
     private closing = false;
     private readonly flags = { ...DEFAULT_PERMISSIONS };
     private readonly gate = new OperationGate();
+    private readonly telemetry = new SessionTelemetry();
     private auditQueue: Promise<void> = Promise.resolve();
     constructor(private readonly session: Session, private readonly sessions: SessionStore, private readonly recovery: RecoveryService, private readonly headlessStatus?: HeadlessStatusResolver) { }
+    connectionChanged(connected: boolean): void {
+        this.telemetry.connectionChanged(connected);
+    }
+    async metrics(quotaBytes = 1024 ** 3) {
+        const { files: _, ...storage } = await scanSessionStorage(
+            this.sessions,
+            this.session.id,
+            quotaBytes,
+        );
+        const advisories = [
+            ...(storage.quotaExceeded ? ['SESSION_STORAGE_QUOTA_EXCEEDED'] : []),
+            ...(storage.truncated ? ['SESSION_STORAGE_SCAN_TRUNCATED'] : []),
+            ...(storage.skippedLinks ? ['SESSION_STORAGE_LINKS_SKIPPED'] : []),
+        ];
+        return {
+            sessionId: this.session.id,
+            sampledAt: new Date().toISOString(),
+            ...this.telemetry.snapshot(),
+            queue: this.gate.snapshot(),
+            storage,
+            advisories,
+        };
+    }
     permissions(): Record<Permission, boolean> {
         return { ...this.flags };
     }
@@ -143,6 +170,7 @@ export class ToolPolicy {
         await this.audit(name, args, 'risky', outcome, assessment.targets);
     }
     async assess(name: string, args: Record<string, unknown>): Promise<ToolAssessment> {
+        validateArgumentBudget(args);
         const permissions = this.required(name, args);
         if (permissions.some(permission => !this.flags[permission])) {
             return {
@@ -256,7 +284,11 @@ export class ToolPolicy {
         };
     }
     async execute<T>(name: string, args: Record<string, unknown>, operation: (cleanArgs: Record<string, unknown>) => T | Promise<T>, authorization: ToolAuthorization = {}): Promise<T> {
+        validateArgumentBudget(args);
+        const started = performance.now();
+        let queueMs = 0;
         const execute = async (): Promise<T> => {
+            queueMs = performance.now() - started;
             if (this.closing && !CONTROLS.has(name)) {
                 throw new BridgeRpcError('SESSION_CLOSED', 'Session is closing');
             }
@@ -306,7 +338,20 @@ export class ToolPolicy {
                 throw error;
             }
         };
-        return CONTROLS.has(name) ? execute() : this.gate.run(!READS.has(name), execute);
+        try {
+            const result = await (CONTROLS.has(name) ? execute() : this.gate.run(!READS.has(name), execute));
+            this.telemetry.record(
+                name,
+                performance.now() - started,
+                queueMs,
+                !(result && typeof result === 'object' && 'isError' in result && (result as { isError?: boolean }).isError),
+            );
+            return result;
+        }
+        catch (error) {
+            this.telemetry.record(name, performance.now() - started, queueMs, false);
+            throw error;
+        }
     }
     async flush(): Promise<void> {
         await this.auditQueue;

@@ -4,6 +4,10 @@ export class OperationGate {
   private queue: Array<{ write: boolean; resolve: () => void }> = [];
   private idleWaiters: Array<() => void> = [];
 
+  snapshot() {
+    return { writer: this.writer, readers: this.readers, queued: this.queue.length };
+  }
+
   private drain(): void {
     if (this.writer) return;
 

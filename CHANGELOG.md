@@ -2,6 +2,25 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.3.0] - 2026-09-08
+
+### Added
+
+- **Project Lease (`project-lease.ts`)**: Kernel-level multi-process mutual exclusion via Windows Named Pipes (`\\.\pipe\godot-mcp-project-<hash>`) with immediate OS cleanup on abnormal process termination.
+- **Addon Journal (`addon-journal.ts`)**: Atomic addon staging and rollback mechanism with SHA-256 verification, persistent journal markers (`addon-update.json`), and automatic startup recovery (`recoverPending`).
+- **Serialization Budgets (`argument-budget.ts`, `serialization_budget.gd`)**: Deep defensive serialization bounds (64 depth, 50,000 items, 8 MB text, and cyclic structure detection via `WeakSet` and GDScript ancestor sets).
+- **Reflection Safety (`reflection-safety.ts`, `safety_policy.gd`)**: Blocked 31 dangerous reflective methods (`call_thread_safe`, `emit_signal`, `notification`, etc.), enforced method name syntax `/^[A-Za-z][A-Za-z0-9_]*$/`, and restricted target nodes to the edited scene tree (`_owned_target`).
+- **Recovery Modularization (`recovery-journal.ts`, `recovery-state.ts`, `recovery-validator.ts`)**: Decoupled crash recovery journal with `fsync`, formal state machine transitions, and preflight editor validation.
+- **Unified Diff Engine (`transaction-diff.ts`)**: Context diffing with line-ending analysis (CRLF/LF), credential redaction, and bounded hunk budgets.
+- **Config Repair (`project-config.ts`, CLI `--repair`)**: Safe recovery of damaged `.godot-mcp/config.json` with backups in `.godot-mcp/config-backups/` and symlink attack prevention.
+- **Internal Observability & Session Metrics (`telemetry.ts`, `session-storage.ts`, `session-export.ts`)**: High-resolution latency percentiles (p50, p95), storage quotas, and SHA-256 indexed export bundles.
+
+### Changed
+
+- Coordinated monorepo, server, protocol, addon, and public CLI versions to `0.3.0`.
+- Expanded monorepo automated test suite to 349 passing tests across 93 test suites.
+- Preserved all 183 canonical MCP tool contracts.
+
 ## [0.2.0] - 2026-09-07
 
 ### Added

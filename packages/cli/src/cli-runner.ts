@@ -2,7 +2,7 @@ import path from 'node:path';
 import {SERVER_VERSION,DEFAULT_PERMISSIONS} from '@godot-mcp/protocol';
 import {runServer} from '@godot-mcp/server';
 import {resolveProjectRoot} from '@godot-mcp/server/project-root';
-import {readProjectConfig,writeProjectConfig} from '@godot-mcp/server/project-config';
+import {readProjectConfig,writeProjectConfig,repairProjectConfig} from '@godot-mcp/server/project-config';
 import {serverStatus,stopServer} from '@godot-mcp/server/management';
 import {listSessions,readSessionManifest} from '@godot-mcp/server/sessions';
 import {parseCliArgs,usage} from './cli-args.js';
@@ -70,11 +70,12 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
     return 0;
    }
    case 'config':{
-    const config=await readProjectConfig(root);
     const changes={...(args.godotBin?{godotBin:path.resolve(args.godotBin)}:{}),...(args.bridgePort===undefined?{}:{bridgePort:args.bridgePort}),...(args.toolProfile===undefined?{}:{toolProfile:args.toolProfile})};
-    const saved=Object.keys(changes).length>0;
-    const value=saved?await writeProjectConfig(root,changes):config;
-    emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,toolProfile:value.toolProfile,saved,restartRequired:saved});return 0;
+    const repaired=args.repair?await repairProjectConfig(root,changes):null;
+    const config=repaired?repaired.config:await readProjectConfig(root);
+    const saved=repaired!==null||Object.keys(changes).length>0;
+    const value=repaired?repaired.config:(saved?await writeProjectConfig(root,changes):config);
+    emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,toolProfile:value.toolProfile,saved,restartRequired:saved,...(repaired?.backupPath?{backupPath:repaired.backupPath}:{})});return 0;
    }
   }
  }catch(error){

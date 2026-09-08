@@ -2,7 +2,25 @@
 class_name VariantSerializer
 extends RefCounted
 
-static func serialize(val) -> Dictionary:
+const Budget = preload("res://addons/godot_mcp/serialization/serialization_budget.gd")
+
+static func serialize(value) -> Dictionary:
+    var issue = Budget.check(value)
+    return Budget.failure(issue) if not issue.is_empty() else _unchecked_serialize(value)
+
+static func deserialize(value):
+    var issue = Budget.check(value)
+    return Budget.failure(issue) if not issue.is_empty() else _unchecked_deserialize(value)
+
+static func encode(value):
+    var issue = Budget.check(value)
+    return Budget.failure(issue) if not issue.is_empty() else _unchecked_encode(value)
+
+static func decode(value):
+    var issue = Budget.check(value)
+    return Budget.failure(issue) if not issue.is_empty() else _unchecked_decode(value)
+
+static func _unchecked_serialize(val) -> Dictionary:
     match typeof(val):
         TYPE_NIL:
             return {"type": "null", "value": null}
@@ -71,12 +89,12 @@ static func serialize(val) -> Dictionary:
         TYPE_ARRAY:
             var arr: Array = []
             for item in val:
-                arr.append(serialize(item))
+                arr.append(_unchecked_serialize(item))
             return {"type": "Array", "value": arr}
         TYPE_DICTIONARY:
             var entries: Array = []
             for k in val.keys():
-                entries.append({"key": serialize(k), "value": serialize(val[k])})
+                entries.append({"key": _unchecked_serialize(k), "value": _unchecked_serialize(val[k])})
             return {"type": "Dictionary", "value": entries}
         TYPE_PACKED_BYTE_ARRAY:
             return {"type": "PackedByteArray", "value": Array(val)}
@@ -116,7 +134,7 @@ static func serialize(val) -> Dictionary:
         _:
             return {"type": "String", "value": str(val)}
 
-static func deserialize(data):
+static func _unchecked_deserialize(data):
     if typeof(data) != TYPE_DICTIONARY:
         return data
     var type_str: String = str(data.get("type", ""))
@@ -174,19 +192,19 @@ static func deserialize(data):
             var arr: Array = []
             if typeof(val) == TYPE_ARRAY:
                 for item in val:
-                    arr.append(deserialize(item))
+                    arr.append(_unchecked_deserialize(item))
             return arr
         "Dictionary":
             var dict: Dictionary = {}
             if typeof(val) == TYPE_ARRAY:
                 for entry in val:
                     if typeof(entry) == TYPE_DICTIONARY:
-                        var k = deserialize(entry.get("key"))
-                        var v = deserialize(entry.get("value"))
+                        var k = _unchecked_deserialize(entry.get("key"))
+                        var v = _unchecked_deserialize(entry.get("value"))
                         dict[k] = v
             elif typeof(val) == TYPE_DICTIONARY:
                 for k in val.keys():
-                    dict[k] = deserialize(val[k])
+                    dict[k] = _unchecked_deserialize(val[k])
             return dict
         "PackedByteArray": return PackedByteArray(val if typeof(val) == TYPE_ARRAY else [])
         "PackedInt32Array": return PackedInt32Array(val if typeof(val) == TYPE_ARRAY else [])
@@ -220,7 +238,7 @@ static func deserialize(data):
         _:
             return val
 
-static func encode(val):
+static func _unchecked_encode(val):
     match typeof(val):
         TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING:
             return val
@@ -262,12 +280,12 @@ static func encode(val):
         TYPE_ARRAY:
             var arr: Array = []
             for item in val:
-                arr.append(encode(item))
+                arr.append(_unchecked_encode(item))
             return arr
         TYPE_DICTIONARY:
             var d: Dictionary = {}
             for k in val.keys():
-                d[str(k)] = encode(val[k])
+                d[str(k)] = _unchecked_encode(val[k])
             return d
         TYPE_PACKED_BYTE_ARRAY, TYPE_PACKED_INT32_ARRAY, TYPE_PACKED_INT64_ARRAY, \
         TYPE_PACKED_FLOAT32_ARRAY, TYPE_PACKED_FLOAT64_ARRAY, TYPE_PACKED_STRING_ARRAY:
@@ -300,17 +318,17 @@ static func encode(val):
         _:
             return str(val)
 
-static func decode(data):
+static func _unchecked_decode(data):
     if typeof(data) != TYPE_DICTIONARY:
         if typeof(data) == TYPE_ARRAY:
             var arr: Array = []
             for item in data:
-                arr.append(decode(item))
+                arr.append(_unchecked_decode(item))
             return arr
         return data
 
     if data.has("type") and data.has("value"):
-        return deserialize(data)
+        return _unchecked_deserialize(data)
 
     if data.has("x") and data.has("y"):
         if data.has("z"):
@@ -326,5 +344,5 @@ static func decode(data):
 
     var dict: Dictionary = {}
     for k in data.keys():
-        dict[k] = decode(data[k])
+        dict[k] = _unchecked_decode(data[k])
     return dict

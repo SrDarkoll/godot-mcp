@@ -1,6 +1,6 @@
 {
   "name": "@godot-mcp/server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -14,12 +14,16 @@
     "test": "vitest run --passWithNoTests --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.2.0",
+    "@godot-mcp/protocol": "0.3.0",
     "ws": "^8.18.0",
     "zod": "^4.0.0",
     "@modelcontextprotocol/server": "^2.0.0"
   },
   "exports": {
+    "./project-lease": {
+      "types": "./dist/project/project-lease.d.ts",
+      "import": "./dist/project/project-lease.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"

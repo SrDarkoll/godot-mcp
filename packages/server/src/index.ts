@@ -16,6 +16,7 @@ import {HeadlessProcessManager} from './headless/headless-process-manager.js';
 import {RecoveryService} from './recovery/recovery-service.js';
 import {ToolPolicy} from './security/tool-policy.js';
 import {readProjectConfig} from './project/project-config.js';
+import {ProjectLease, requireNoAddonJournal} from './project/project-lease.js';
 
 interface ServerArgs {
   project?: string;
@@ -57,36 +58,48 @@ export function parseServerArgs(argv: string[]): ServerArgs {
 export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const args = parseServerArgs(argv);
   const projectRoot = await resolveProjectRoot(args.project ?? process.cwd());
-  const config=await readProjectConfig(projectRoot);
-  const toolProfile=args.toolProfile??config.toolProfile;
+  const lease = await ProjectLease.acquire(projectRoot);
+  try {
+    await startOwnedServer(projectRoot, args, lease);
+  } catch (error) {
+    await lease.release();
+    throw error;
+  }
+}
+
+async function startOwnedServer(projectRoot: string, args: ServerArgs, lease: ProjectLease): Promise<void> {
+  await requireNoAddonJournal(projectRoot);
+  const config = await readProjectConfig(projectRoot);
+  const toolProfile = args.toolProfile ?? config.toolProfile;
   const session = createSession(projectRoot);
   const sessions = new SessionStore(projectRoot);
   await sessions.create(session);
 
   const token = createBridgeToken();
-  let runtime:RuntimeService;
-  let debuggerService!:DebuggerService;
-  let requestShutdown:()=>Promise<void>=async()=>{throw new Error('Server is starting');};
+  let runtime: RuntimeService;
+  let debuggerService!: DebuggerService;
+  let policy!: ToolPolicy;
+  let requestShutdown: () => Promise<void> = async () => { throw new Error('Server is starting'); };
   const bridge = new BridgeServer({ session, token,
-    onManagementStatus:async()=>({permissions:policy.permissions(),activeTransactionId:recovery.activeId,recoveryRequired:await recovery.barrier().then(Boolean).catch(()=>true)}),
-    onShutdown:()=>requestShutdown(),
-    onRuntimeEvent:event=>{runtime?.acceptEvent(event);debuggerService?.acceptBridgeEvent(event);},
-    onDisconnected:()=>{runtime?.disconnect();debuggerService?.editorDisconnected();},
-    onConnected:()=>debuggerService?.editorConnected(),
-    onAuthenticated:hello => sessions.update(session.id,m=>({...m,godotVersion:hello.godotVersion,addonVersion:hello.addonVersion})),
-    port:args.bridgePort??config.bridgePort });
-  runtime=new RuntimeService(session,sessions,bridge);
-  debuggerService=new DebuggerService(session,runtime,bridge,()=>new TcpDapTransport());
-  const visual = new VisualTools(session,sessions,bridge,runtime);
-  const recovery=new RecoveryService(session,sessions,bridge);
-  const godotBin=config.godotBin ?? (process.env.GODOT_BIN?.trim() || null);
+    onManagementStatus: async () => ({ permissions: policy.permissions(), activeTransactionId: recovery.activeId, recoveryRequired: await recovery.barrier().then(Boolean).catch(() => true) }),
+    onShutdown: () => requestShutdown(),
+    onRuntimeEvent: event => { runtime?.acceptEvent(event); debuggerService?.acceptBridgeEvent(event); },
+    onDisconnected: () => { runtime?.disconnect(); debuggerService?.editorDisconnected(); policy?.connectionChanged(false); },
+    onConnected: () => debuggerService?.editorConnected(),
+    onAuthenticated: async hello => { await sessions.update(session.id, m => ({ ...m, godotVersion: hello.godotVersion, addonVersion: hello.addonVersion })); policy?.connectionChanged(true); },
+    port: args.bridgePort ?? config.bridgePort });
+  runtime = new RuntimeService(session, sessions, bridge);
+  debuggerService = new DebuggerService(session, runtime, bridge, () => new TcpDapTransport());
+  const visual = new VisualTools(session, sessions, bridge, runtime);
+  const recovery = new RecoveryService(session, sessions, bridge);
+  const godotBin = config.godotBin ?? (process.env.GODOT_BIN?.trim() || null);
   const headless=new HeadlessProcessManager(session,sessions,{godotBin});
-  const policy=new ToolPolicy(session,sessions,recovery,()=>headless.status());
+  policy = new ToolPolicy(session, sessions, recovery, () => headless.status());
   const descriptor = new BridgeDescriptorStore(projectRoot);
   const { port } = await bridge.start();
   await descriptor.write({ port, token, sessionId: session.id });
 
-  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, debugger:debuggerService, recovery, headless, policy, toolProfile }), {
+  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, debugger: debuggerService, recovery, headless, policy, toolProfile }), {
     onerror: error => console.error(`[godot-mcp] MCP error: ${error.message}`)
   });
 
@@ -94,18 +107,29 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const shutdown = async (exitCode = 0) => {
     if (shuttingDown) return;
     shuttingDown = true;
-    const steps = [async() => { await Promise.all([policy.close(),headless.close()]); },() => debuggerService.close(),() => recovery.close(),() => runtime.close(),() => visual.close(),() => policy.flush(),() => bridge.stop(),
-      () => sessions.finish(session.id,new Date().toISOString()),() => sessions.flush(),
-      () => descriptor.remove(),() => stdio.close()];
+    const steps = [
+      async () => { await Promise.all([policy.close(),headless.close()]); },
+      () => debuggerService.close(),
+      () => recovery.close(),
+      () => runtime.close(),
+      () => visual.close(),
+      () => policy.flush(),
+      () => bridge.stop(),
+      () => sessions.finish(session.id, new Date().toISOString()),
+      () => sessions.flush(),
+      () => descriptor.remove(),
+      () => stdio.close(),
+      () => lease.release()
+    ];
     for (const step of steps) {
       try { await step(); }
-      catch {console.error('[godot-mcp] Session shutdown step failed');exitCode=1;}
+      catch { console.error('[godot-mcp] Session shutdown step failed'); exitCode = 1; }
     }
     process.exitCode = exitCode;
   };
 
   process.once('SIGINT', () => { void shutdown(0); });
-  requestShutdown=()=>shutdown(0);
+  requestShutdown = () => shutdown(0);
   process.once('SIGTERM', () => { void shutdown(0); });
   process.stdin.once('end', () => { void shutdown(0); });
   process.stdin.once('close', () => { void shutdown(0); });

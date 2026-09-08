@@ -23,9 +23,19 @@ describe('reflective method safety', () => {
   });
 
   it('blocks private and structural escape methods without blocking ordinary user methods', () => {
-    for (const method of ['_process', 'free', 'call', 'callv', 'set', 'rpc', 'add_child', 'reparent']) {
+    for (const method of [
+      '_process', 'free', 'call', 'callv', 'set', 'rpc', 'add_child', 'reparent',
+      'call_thread_safe', 'set_thread_safe', 'emit_signal', 'notification', 'propagate_notification'
+    ]) {
       expect(isBlockedReflectiveMethod({ method })).toBe(true);
     }
     expect(isBlockedReflectiveMethod({ method: 'recalculate_damage' })).toBe(false);
+    expect(isBlockedReflectiveMethod({ method: 'jump' })).toBe(false);
+  });
+
+  it('rejects malformed or empty method names', () => {
+    for (const method of ['', '   ', '123start', 'has space', 'call;rm', '../escape', '$symbol']) {
+      expect(isBlockedReflectiveMethod({ method })).toBe(true);
+    }
   });
 });
