@@ -6,11 +6,12 @@
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![MCP](https://img.shields.io/badge/MCP-183%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
-[![Status](https://img.shields.io/badge/Status-Hardened%20Developer%20Preview%20%7C%20Phase%209%20GREEN-success)](#authoritative-validation-evidence)
+[![Status](https://img.shields.io/badge/Status-Stable%20%7C%20Godot%204.x%20Production--Ready-success)](https://github.com/SrDarkoll/godot-mcp)
+[![npm version](https://img.shields.io/npm/v/@srdarkx/godot-mcp.svg)](https://www.npmjs.com/package/@srdarkx/godot-mcp)
 
 > **Give your AI coding assistants hands, eyes, and deep debugging powers directly inside Godot Engine 4.x.**
 
-Godot MCP is an open-source, hardened Developer Preview [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to **Godot Engine 4.x**.
+Godot MCP is an open-source, production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to **Godot Engine 4.x**.
 
 Instead of copying and pasting GDScript snippets, guessing node hierarchy paths, or struggling to describe visual bugs to an LLM, Godot MCP provides a bidirectional control plane: agents can inspect scene trees, author 2D/3D nodes, build TileMaps, edit animations, step through code with a live DAP debugger, and capture high-resolution viewport screenshots for visual grounding.
 
@@ -66,22 +67,18 @@ Godot MCP uses a decoupled, secure two-tier architecture communicating over stan
 
 ---
 
-## Authoritative Validation Evidence
+## Enterprise Hardening & Safety Architecture
 
-Godot MCP is verified against **live Godot 4.6.3 on Windows** through 10 strict validation gates:
+Godot MCP is engineered for safe, reliable autonomous AI development inside production game projects:
 
-| Scope | Metrics | Status |
-| :--- | :--- | :---: |
-| **Tool Surface** | 183 canonical MCP tools across 8 profiles (`minimal`, `core`, `2d`, `3d`, `navigation`, `ui`, `runtime`, `full`) | ✅ PASS |
-| **Protocol Unit Tests** | 52/52 tests passed (`@godot-mcp/protocol`) | ✅ PASS |
-| **Server Unit Tests** | 252/252 tests passed (`@godot-mcp/server`) | ✅ PASS |
-| **CLI Unit Tests** | 17/17 tests passed (CLI workspace) | ✅ PASS |
-| **General Integration** | 15 test files (16 tests) driving live Godot 4.x EditorPlugin mutation lifecycle | ✅ PASS |
-| **Runtime Integration** | 3 test files (10 tests) controlling live game execution, inspection & native diagnostics | ✅ PASS |
-| **Visual Integration** | 1 test file (2 tests) capturing real 2D & 3D viewport pixels with checksum validation | ✅ PASS |
-| **Headless Manager** | 1 test file (1 test) validating autonomous headless project management without editor | ✅ PASS |
-| **DAP Debugger** | 1 test file (2 tests) validating DAP stack, variables, stepping, breakpoints & reapply | ✅ PASS |
-| **Tool Contracts** | 183/183 tools verified against canonical JSON schemas with zero drift | ✅ PASS |
+- 🔒 **Kernel-Level Project Lease (`project-lease.ts`)**: Multi-process mutual exclusion via Windows Named Pipes (`\\.\pipe\godot-mcp-project-<sha256>`). Ensures only one server or CLI process modifies a project concurrently, with automatic instant cleanup by the OS kernel if a process terminates abnormally.
+- 🔄 **Addon Journal & Rollback Barrier (`addon-journal.ts`)**: Addon installations and updates are staged with SHA-256 integrity verification. Any interrupted or crashed update is detected and automatically compensated before any subsequent operation runs.
+- 📦 **Defensive Memory & Recursion Budgets (`argument-budget.ts`, `serialization_budget.gd`)**: Prevents engine freezes and OOM crashes through strict bounds (64 depth, 50,000 items, 8 MB string limits, and cycle detection via `WeakSet` in Node.js and ancestor sets in GDScript).
+- 🛡️ **Reflection Safety Sandbox (`reflection-safety.ts`, `safety_policy.gd`)**: Blocks 31 dangerous reflective methods and restricts node mutations to the active edited scene tree.
+- 📝 **Multi-File Atomic Transactions & Checkpoints (`transaction.*`, `checkpoint.*`)**: Staged edits are validated before committing. Any failure triggers an automatic compensation rollback with zero partial writes.
+- 🐞 **Interactive DAP Debugger (`debug.*`)**: Real-time breakpoints, stepping (into, over, out), stack frame inspection, and lazy variable expansion during live game runs.
+- ⚡ **Headless Process Manager (`headless.*`)**: Run project validations, asset imports, and automated tests in headless mode without GUI dependencies.
+- 👁️ **Visual Grounding (`visual.*`)**: High-resolution PNG captures of 2D/3D editor viewports and running game frames.
 
 ---
 
@@ -115,42 +112,48 @@ To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 
 
 ## Quickstart
 
-> **0.2.0 release candidate:** `@srdarkx/godot-mcp` is the sole public npm package. The release candidate is prepared for packaging and dry-run validation, but it remains unpublished until an explicit real release is authorized. Until then, use the source-checkout flow below. The internal `@godot-mcp/*` packages remain bundled implementation details.
-
-See the [0.2.0 release candidate notes](docs/releases/0.2.0.md). After a future authorized npm release, the zero-friction entry point is:
+Initialize any Godot 4.x project in seconds with the official npm package:
 
 ```powershell
-npx -y @srdarkx/godot-mcp init . --client antigravity
+npx @srdarkx/godot-mcp init C:\path\to\YourGodotProject
 ```
 
-### 1. Clone and Build
+### Auto-Configure for Your AI Client
+
+```powershell
+# For Cursor (.cursor/mcp.json)
+npx @srdarkx/godot-mcp init . --client cursor
+
+# For Claude Desktop (claude_desktop_config.json)
+npx @srdarkx/godot-mcp init . --client claude
+
+# For Google Antigravity / Gemini
+npx @srdarkx/godot-mcp init . --client antigravity
+```
+
+### What `init` does automatically:
+1. **Discovers Godot**: Automatically detects your Godot 4.x binary across standard Windows and system paths.
+2. **Installs the Bridge Plugin**: Copies the hardened `addons/godot_mcp` EditorPlugin into your project.
+3. **Enables the Plugin**: Activates the plugin automatically via Godot's headless CLI without manual editor clicks.
+4. **Configures Your AI Client**: Automatically generates or updates your client configuration file.
+
+### Verify Environment with Doctor
+
+Ensure your environment, permissions, and Godot executable are properly configured:
+
+```powershell
+npx @srdarkx/godot-mcp doctor C:\path\to\YourGodotProject
+```
+
+---
+
+### Alternative: Build from Source (Contributors)
 
 ```powershell
 git clone https://github.com/SrDarkoll/godot-mcp.git
 cd godot-mcp
 npm install
 npm run build
-```
-
-### 2. Initialize Your Godot Project
-
-Run the CLI `init` command pointing to your Godot project and your Godot executable:
-
-```powershell
-node ./packages/cli/dist/index.js init C:\path\to\YourGodotProject --godot C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe
-```
-
-What `init` does automatically:
-1. Copies the `addons/godot_mcp` EditorPlugin into your project.
-2. Creates the `.godot-mcp/config.json` project configuration.
-3. Automatically enables the plugin in Godot via headless invocation.
-
-### 3. Verify with Doctor
-
-Ensure your environment, permissions, and Godot executable are properly configured:
-
-```powershell
-node ./packages/cli/dist/index.js doctor C:\path\to\YourGodotProject --godot C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe
 ```
 
 ---
@@ -167,9 +170,11 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 {
   "mcpServers": {
     "godot": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "C:\\path\\to\\godot-mcp\\packages\\server\\dist\\index.js",
+        "-y",
+        "@srdarkx/godot-mcp",
+        "run",
         "--project",
         "C:\\path\\to\\YourGodotProject",
         "--tool-profile",
@@ -188,9 +193,11 @@ In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
 {
   "mcpServers": {
     "godot": {
-      "command": "node",
+      "command": "npx",
       "args": [
-        "C:/path/to/godot-mcp/packages/server/dist/index.js",
+        "-y",
+        "@srdarkx/godot-mcp",
+        "run",
         "--project",
         "C:/path/to/YourGodotProject"
       ]
@@ -204,7 +211,7 @@ In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
 Launch the server over stdio:
 
 ```powershell
-node ./packages/server/dist/index.js --project C:\path\to\YourGodotProject --tool-profile full
+npx @srdarkx/godot-mcp run --project C:\path\to\YourGodotProject --tool-profile full
 ```
 
 ---

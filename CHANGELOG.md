@@ -2,6 +2,15 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.3.2] - 2026-09-08
+
+### Changed
+
+- Transitioned status from Developer Preview to **Stable / Production-Ready** for Godot Engine 4.x.
+- Expanded and modernized documentation across GitHub and npm (`@srdarkx/godot-mcp`).
+- Streamlined Quickstart with direct zero-friction `npx @srdarkx/godot-mcp init` and AI client bootstrap commands for Cursor, Claude Desktop, and Antigravity.
+- Bumped package versions to `0.3.2` across the monorepo.
+
 ## [0.3.1] - 2026-09-08
 
 ### Added
