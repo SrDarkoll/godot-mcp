@@ -1,104 +1,70 @@
 # Godot MCP
 
-**Status: Pre-alpha / foundation milestone**
+Godot MCP connects an MCP client to the Godot editor through a project-local addon. It uses standard MCP over stdio and an authenticated localhost bridge. Editing and captures use Godot APIs, without simulated keyboard or mouse input.
 
-Godot MCP is an open-source MCP bridge for controlling Godot 4.x from agentic clients such as Codex. The foundation milestone establishes a standard MCP stdio server, a localhost-only Node.js ↔ Godot EditorPlugin bridge, per-project addon installation, persistent session manifests, and read-only project/scene inspection.
+**Status: advanced pre-alpha, under stabilization.** The supported validation target is Windows, Node 22 and Godot 4.6.3. This is not an OS sandbox for project scripts. The [audit execution plan](docs/superpowers/plans/2026-09-07-audit-remediation.md) distinguishes completed work from pending enhancements.
 
-> This is not yet the full autonomous Godot agent described by the project design. Runtime mutation, screenshots, transactions/rollback, risk permissions, debugger control, resource/scene mutation, and release automation are planned for later milestones.
+## Implemented
 
-## Current foundation capabilities
+- Inspect and edit scenes, nodes, resources, scripts, signals, settings and input actions; use editor undo/redo where supported.
+- Capture editor 2D/3D viewports and the owned running game's viewport; retain PNGs and session manifests.
+- Start/stop/restart an owned game, pause/resume its SceneTree, inspect runtime nodes and query bounded native diagnostics/performance.
+- Stage declared file transactions, preview hashes, validate publication, compensate failures and recover retained snapshots after crashes.
+- Preview bounded, optionally redacted transaction diffs and validate retained project copies with headless Godot.
+- Apply prevalidated scene/resource batches as one Undo action, consume bounded project events, inspect dependencies/imports, and compare retained visuals/performance.
+- Enforce session permissions, exact single-use confirmations, scoped reflection and explicit trust for custom script methods.
+- Diagnose/configure projects, inspect retained sessions, safely update the addon, and build installable tarballs.
+- Query bounded tool latency, failures, queue/memory/storage metrics and export hashed session evidence with explicit artifact inclusion.
 
-- Windows-first architecture for Godot 4.x.
-- Node.js 22+ TypeScript monorepo.
-- Standard MCP server over stdio.
-- One active Godot project/editor connection per server session.
-- Authenticated WebSocket bridge bound only to `127.0.0.1`.
-- Per-project `addons/godot_mcp` installation.
-- Persistent `.godot-mcp/sessions/<session-id>/manifest.json`.
-- Ephemeral `.godot-mcp/runtime/bridge.json` descriptor.
-- MCP tools:
-  - `session.status`
-  - `project.info`
-  - `scene.get_tree`
-- CLI commands:
-  - `godot-mcp init`
-  - `godot-mcp doctor`
+The generated [tool catalog](docs/tools/catalog.md) and [actual input schemas](docs/tools/catalog.json) are authoritative. `risk.preview` evaluates exact arguments; baseline risk can escalate for overwrites and other sensitive operations.
 
-## Requirements
-
-- Windows for the first supported development target.
-- Node.js 22 or newer.
-- npm.
-- Godot 4.x for editor integration tests and automatic plugin enabling.
-
-## Quick start from an existing checkout
+## From a checkout
 
 ```powershell
-cd godot-mcp
-npm install
+npm ci
 npm run build
-
-npm exec -- godot-mcp init C:\path\to\GodotProject --godot C:\path\to\Godot.exe
-npm exec -- godot-mcp doctor C:\path\to\GodotProject --godot C:\path\to\Godot.exe
+node packages/cli/dist/index.js init C:\Games\Example --godot C:\Tools\Godot_v4.6.3-stable_win64.exe
+node packages/cli/dist/index.js doctor C:\Games\Example --json
 ```
 
-If `godot-mcp` has been linked or its local npm bin directory is already on `PATH`, the shorter form is equivalent:
+Open that project in Godot. Configure your MCP client to launch:
 
 ```powershell
-godot-mcp init C:\path\to\GodotProject --godot C:\path\to\Godot.exe
-godot-mcp doctor C:\path\to\GodotProject --godot C:\path\to\Godot.exe
+node C:\path\to\godot-mcp\packages\cli\dist\index.js start C:\Games\Example
 ```
 
-`init` copies the addon into `<project>\addons\godot_mcp`, creates `.godot-mcp/config.json`, prepares runtime/session directories, and asks Godot to enable the plugin when a Godot executable is supplied.
+The start command owns stdout for MCP; do not wrap it in a script that prints status messages. For a Codex configuration recipe, run `node packages/cli/dist/index.js setup codex C:\Games\Example`. This prints configuration without changing the user's profile.
 
-## Start the MCP server
-
-After building, an MCP client should launch the server with the target Godot project:
+## Operation
 
 ```powershell
-node .\packages\server\dist\index.js --project C:\path\to\GodotProject
+node packages/cli/dist/index.js status C:\Games\Example --json
+node packages/cli/dist/index.js permissions C:\Games\Example --json
+node packages/cli/dist/index.js sessions list C:\Games\Example --json
+node packages/cli/dist/index.js stop C:\Games\Example --json
+node packages/cli/dist/index.js addon update C:\Games\Example --godot C:\Tools\Godot_v4.6.3-stable_win64.exe
 ```
 
-The server owns stdout for MCP stdio. Diagnostics are written to stderr. When it starts, it creates a session manifest and a short-lived loopback bridge descriptor that the installed Godot addon discovers.
+Stop the MCP server before addon maintenance. A project lease prevents concurrent cooperating servers/updaters. Pending recovery journals block conflicting operations. If config.json is damaged, status/stop remain available; [explicit repair](docs/tools/cli-config-repair.md) retains its original bytes.
 
-## Integration test
+## Guarantees and limits
 
-Without Godot configured, the integration command intentionally skips:
+Captures and recovery evidence are retained under `.godot-mcp/`; they are not automatically deleted. Do not publish bridge descriptors, local configuration, private project files or unreviewed session logs. The bridge token grants local session access.
+
+Transactions operate on declared on-disk files, not unsaved editor state. Close scene tabs and affected editors before file publication. Recovery is not atomically visible to arbitrary external writers; see [maintenance and isolation](docs/tools/project-maintenance.md). Custom scripts are trusted code and can have effects outside tool permission classifications; see [reflection safety](docs/tools/reflection-safety.md) and [SECURITY.md](SECURITY.md).
+
+Native diagnostics are bounded and can be incomplete; this is reported in results. A manually started game is not silently adopted or stopped. Graphical captures require a graphical session and usable renderer; headless jobs exercise different checks.
+
+## Development and delivery
 
 ```powershell
+npm test
+npm run typecheck
+npm run check:catalog
+$env:GODOT_BIN = 'C:\Tools\Godot_v4.6.3-stable_win64.exe'
+npm run check:godot
 npm run test:integration
-# SKIP integration: GODOT_BIN is not configured
+npm run test:distribution
 ```
 
-To make the real Godot handshake mandatory:
-
-```powershell
-$env:GODOT_BIN = "C:\Tools\Godot\Godot_v4.x-stable_win64.exe"
-$env:REQUIRE_GODOT_INTEGRATION = "1"
-npm run test:integration
-```
-
-The real integration test installs/enables the addon in a temporary deterministic project, opens `main.tscn` in a headless editor, waits for the authenticated bridge handshake, and verifies live `project.info` and `scene.get_tree` responses.
-
-## Repository layout
-
-```text
-packages/
-  protocol/       Shared wire schemas and result types
-  server/         MCP stdio server, sessions, bridge, read tools
-  cli/            init and doctor commands
-  godot-addon/    Per-project Godot 4 EditorPlugin
-tests/integration/
-fixtures/
-docs/
-```
-
-## Foundation documentation
-
-- [`docs/architecture/foundation.md`](docs/architecture/foundation.md)
-- [`docs/protocol/foundation-rpc.md`](docs/protocol/foundation-rpc.md)
-- [`docs/superpowers/specs/2026-09-05-godot-mcp-design.md`](docs/superpowers/specs/2026-09-05-godot-mcp-design.md)
-
-## License
-
-MIT. See [`LICENSE`](LICENSE).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [compatibility](docs/compatibility.md), [installation](docs/installation.md), [release procedure](docs/releasing.md) and [CHANGELOG.md](CHANGELOG.md). Local validation does not imply a remote CI run or a published release. Packages currently remain private npm workspaces; distribution uses reviewed tarballs.

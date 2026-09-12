@@ -1,0 +1,5072 @@
+{
+  "version": 1,
+  "tools": [
+    {
+      "name": "checkpoint.create",
+      "description": "checkpoint.create: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "paths": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 7,
+              "maxLength": 1024
+            }
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "label",
+          "paths"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "checkpoint.inspect",
+      "description": "checkpoint.inspect: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "checkpoint_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "session_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "checkpoint_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "checkpoint.list",
+      "description": "checkpoint.list: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "checkpoint.restore",
+      "description": "checkpoint.restore: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "checkpoint_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "session_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "checkpoint_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "debug.errors",
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "after": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "default": 100,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "debug.output",
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "after": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "default": 100,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "debug.performance",
+      "description": "Sample runtime FPS and object/node counts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "debug.warnings",
+      "description": "Read bounded native runtime diagnostics from this session. Messages are untrusted project content.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "after": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "default": 100,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.change_scene",
+      "description": "Switch active scene tab to a given scene path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.close_scene",
+      "description": "editor.close_scene: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.get_active_scene",
+      "description": "Get information about the currently active edited scene tab.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.get_filesystem",
+      "description": "Get filesystem directory and file structure under res://.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.get_open_scenes",
+      "description": "Get list of open scene paths in the editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.get_selected_nodes",
+      "description": "Get currently selected nodes in the editor scene tree.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.import_resources",
+      "description": "Wait for the editor filesystem, then synchronously reimport declared project files. Importers/project code are trusted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 7,
+              "maxLength": 1024
+            }
+          },
+          "timeout_ms": {
+            "default": 15000,
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 60000
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "paths"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.redo",
+      "description": "Trigger Redo in the Godot editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor",
+            "undoRedo"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.scan_filesystem",
+      "description": "Request a rescan of the project filesystem in the editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.select_node",
+      "description": "Select a node in the editor scene tree.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "additive": {
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "editor.undo",
+      "description": "Trigger Undo in the Godot editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor",
+            "undoRedo"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.create",
+      "description": "Create a new node as a child of a parent node in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "parent_path": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.delete",
+      "description": "Delete a node from the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.duplicate",
+      "description": "Duplicate a node in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "new_name": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.get_properties",
+      "description": "Get multiple or all exported property values of a node.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.get_property",
+      "description": "Get a single property value of a node.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "property"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.inspect",
+      "description": "Inspect full details of a node (class, script, groups, children count, exported properties).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.list_children",
+      "description": "List immediate children of a node.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.move",
+      "description": "Move a node to a specific child index with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "index": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "index"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.rename",
+      "description": "Rename a node in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "new_name": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "new_name"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.reparent",
+      "description": "Reparent a node to a new parent in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "new_parent_path": {
+            "type": "string"
+          },
+          "keep_global_transform": {
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "new_parent_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "node.set_property",
+      "description": "Set a property value on a node with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "value": {},
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "property",
+          "value"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.call",
+      "description": "Call a class-allowlisted native method within the edited scene/project. Custom scripts require trusted_script, editor.script_methods permission and confirmation; trusted code is not sandboxed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "method": {
+            "type": "string"
+          },
+          "trusted_script": {
+            "type": "boolean"
+          },
+          "args": {
+            "type": "array",
+            "items": {}
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.get",
+      "description": "Get a property value on an object.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "property": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "property"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.get_class",
+      "description": "Get the Godot class name of an object (node, resource, or instance id).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.get_method_list",
+      "description": "Get the list of methods for an object.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.get_property_list",
+      "description": "Get the list of properties for an object.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.get_signal_list",
+      "description": "Get the list of signals for an object.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "object.set",
+      "description": "Set a property value on an object.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "resource_path": {
+            "type": "string"
+          },
+          "object_id": {
+            "type": "number"
+          },
+          "property": {
+            "type": "string"
+          },
+          "value": {},
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "property",
+          "value"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "performance.compare",
+      "description": "Compare two retained performance snapshots using caller-provided relative regression budgets.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "baselineId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "budgets": {
+            "default": {
+              "maxFpsDropRatio": 0.1,
+              "maxFrameTimeIncreaseRatio": 0.2,
+              "maxNodeIncreaseRatio": 0.2,
+              "maxObjectIncreaseRatio": 0.2
+            },
+            "type": "object",
+            "properties": {
+              "maxFpsDropRatio": {
+                "default": 0.1,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "maxFrameTimeIncreaseRatio": {
+                "default": 0.2,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "maxNodeIncreaseRatio": {
+                "default": 0.2,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "maxObjectIncreaseRatio": {
+                "default": 0.2,
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              }
+            },
+            "additionalProperties": false
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "baselineId",
+          "candidateId"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "performance.snapshot",
+      "description": "Sample relative runtime performance counters and retain the bounded evidence. Values depend on hardware/workload.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "samples": {
+            "default": 10,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          },
+          "intervalMs": {
+            "default": 100,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "label": {
+            "default": "Performance snapshot",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "permissions.disable",
+      "description": "Change a session-only permission.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "permission": {
+            "type": "string",
+            "enum": [
+              "filesystem.project",
+              "filesystem.external",
+              "process.godot",
+              "process.shell",
+              "process.external",
+              "network.local",
+              "network.external",
+              "editor.modify",
+              "runtime.modify",
+              "editor.script_methods"
+            ]
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "permission"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "permissions.enable",
+      "description": "Change a session-only permission.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "permission": {
+            "type": "string",
+            "enum": [
+              "filesystem.project",
+              "filesystem.external",
+              "process.godot",
+              "process.shell",
+              "process.external",
+              "network.local",
+              "network.external",
+              "editor.modify",
+              "runtime.modify",
+              "editor.script_methods"
+            ]
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "permission"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "permissions.set",
+      "description": "Change a permission for this MCP session only.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "permission": {
+            "type": "string",
+            "enum": [
+              "filesystem.project",
+              "filesystem.external",
+              "process.godot",
+              "process.shell",
+              "process.external",
+              "network.local",
+              "network.external",
+              "editor.modify",
+              "runtime.modify",
+              "editor.script_methods"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "permission",
+          "enabled"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "permissions.status",
+      "description": "Session-only tool permissions. These do not sandbox project code or add missing capabilities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.events",
+      "description": "Read or long-poll session-scoped project events. Resume with nextCursor; gap reports lost retained history. Project event data is untrusted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "default": 100,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "wait_ms": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30000
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.info",
+      "description": "Inspect the active Godot project through the connected editor addon.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.input.add_action",
+      "description": "Add an action to the InputMap and persist in project settings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "deadzone": {
+            "type": "number"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.input.list",
+      "description": "List all input actions and their assigned events from InputMap.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.input.remove_action",
+      "description": "Remove an action from the InputMap and project settings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.run",
+      "description": "Structured Godot project.run operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "runtime.modify",
+            "process.godot"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.run_scene",
+      "description": "Structured Godot project.run_scene operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "maxLength": 1024,
+            "pattern": "^res:\\/\\/.+\\.(tscn|scn)$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "runtime.modify",
+            "process.godot"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.settings.get",
+      "description": "Get a project setting value from project.godot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "setting": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "setting"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.settings.set",
+      "description": "Set a project setting value and optionally save to project.godot.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "setting": {
+            "type": "string"
+          },
+          "value": {},
+          "save": {
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "setting",
+          "value"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.stop",
+      "description": "Structured Godot project.stop operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "project.validate",
+      "description": "Import and validate a retained project copy with headless Godot, without an editor connection. Source scripts are trusted, not sandboxed. Unsupported types and incomplete runs are explicit.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "paths": {
+            "default": [],
+            "maxItems": 512,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 7,
+              "maxLength": 1024
+            }
+          },
+          "timeout_ms": {
+            "default": 60000,
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 120000
+          },
+          "max_project_bytes": {
+            "default": 268435456,
+            "type": "integer",
+            "minimum": 1024,
+            "maximum": 1073741824
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "process.godot",
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.create",
+      "description": "Create and save a new resource of a specified type.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "type",
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.dependencies",
+      "description": "Return a bounded direct/transitive dependency graph and broken references for an imported Godot resource.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 1024
+          },
+          "recursive": {
+            "default": false,
+            "type": "boolean"
+          },
+          "max_nodes": {
+            "default": 200,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "max_depth": {
+            "default": 8,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.duplicate",
+      "description": "Duplicate a resource to a new path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_path": {
+            "type": "string"
+          },
+          "target_path": {
+            "type": "string"
+          },
+          "subresources": {
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "source_path",
+          "target_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.impact",
+      "description": "Preflight inbound references and target conflicts before a proposed resource move/delete. This read does not mutate files.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 1024
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "move",
+              "delete"
+            ]
+          },
+          "target_path": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 1024
+          },
+          "max_files": {
+            "default": 1000,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path",
+          "action"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.inspect",
+      "description": "Inspect properties of a resource file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.load",
+      "description": "Load a resource file and inspect its exported properties.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "type_hint": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.save",
+      "description": "Save a loaded resource.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "flags": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "resource.set_property",
+      "description": "Set a property on a resource file and save it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "value": {},
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path",
+          "property",
+          "value"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "risk.preview",
+      "description": "Read the risk, targets and required permissions of an operation without executing it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "arguments": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.get_property",
+      "description": "Structured Godot runtime.get_property operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "property": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "property"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.inspect_node",
+      "description": "Structured Godot runtime.inspect_node operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "properties": {
+            "default": [],
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.pause",
+      "description": "Structured Godot runtime.pause operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "runtime.modify",
+            "process.godot"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.restart",
+      "description": "Structured Godot runtime.restart operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "runtime.modify",
+            "process.godot"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.resume",
+      "description": "Structured Godot runtime.resume operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "runtime.modify",
+            "process.godot"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.scene_tree",
+      "description": "Structured Godot runtime.scene_tree operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "max_depth": {
+            "default": 16,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32
+          },
+          "max_nodes": {
+            "default": 500,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2000
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.status",
+      "description": "Structured Godot runtime.status operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "runtime.stop",
+      "description": "Structured Godot runtime.stop operation on the current runtime session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.batch",
+      "description": "Apply a prevalidated native batch as one editor Undo action. Requires the fingerprint from preview. Does not save files; arbitrary project-script side effects are outside native Undo.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "default": "MCP batch",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "operations": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "create"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "parent": {
+                      "default": ".",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "id",
+                    "type",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "set_property"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "property": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "property",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "resource_set_property"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 7,
+                      "maxLength": 1024
+                    },
+                    "property": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "property",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "rename"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "delete"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "reparent"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "parent": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "parent"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "move"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "index"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "expected": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "operations",
+          "expected"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor",
+            "undoRedo"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.batch.preview",
+      "description": "Prevalidate a bounded native scene/resource batch and obtain its exact state/operation fingerprint. Paths resolve against the initial scene; @id references nodes created in this batch.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "default": "MCP batch",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "operations": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "create"
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "parent": {
+                      "default": ".",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "id",
+                    "type",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "set_property"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "property": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "property",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "resource_set_property"
+                    },
+                    "path": {
+                      "type": "string",
+                      "minLength": 7,
+                      "maxLength": 1024
+                    },
+                    "property": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "value": {}
+                  },
+                  "required": [
+                    "op",
+                    "path",
+                    "property",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "rename"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "delete"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "reparent"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "parent": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "parent"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "const": "move"
+                    },
+                    "node": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "op",
+                    "node",
+                    "index"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "operations"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "undoRedo"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.create",
+      "description": "Create a new scene with specified root node type and optional path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "root_type": {
+            "default": "Node2D",
+            "type": "string"
+          },
+          "root_name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.get_root",
+      "description": "Get the root node info of the currently edited scene.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.get_tree",
+      "description": "Return the active edited scene tree with node names, classes, paths, and scripts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.instantiate",
+      "description": "Instantiate a scene as a child of a node in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "parent_path": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.open",
+      "description": "Open a scene file in the Godot editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.reload",
+      "description": "Reload a scene from disk in the editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.save",
+      "description": "Save the currently edited scene.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "scene.save_as",
+      "description": "Save the currently edited scene to a new path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "script.attach",
+      "description": "Attach a script to a node in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "script_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path",
+          "script_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "script.create",
+      "description": "Create a new script file with an optional template.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "template": {
+            "type": "string"
+          },
+          "inherits": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "script.detach",
+      "description": "Detach a script from a node in the edited scene with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "script.inspect",
+      "description": "Inspect structure of a script (methods, properties, signals, base type).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "node_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "script.validate",
+      "description": "Validate GDScript syntax and compile checks without saving.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "session.export",
+      "description": "Retain a hashed metadata bundle. Logs, screenshots and raw snapshots require explicit inclusion; review private data before sharing. No files are deleted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include_logs": {
+            "default": false,
+            "type": "boolean"
+          },
+          "include_screenshots": {
+            "default": false,
+            "type": "boolean"
+          },
+          "include_snapshots": {
+            "default": false,
+            "type": "boolean"
+          },
+          "max_bytes": {
+            "default": 33554432,
+            "type": "integer",
+            "minimum": 1024,
+            "maximum": 134217728
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "session.manifest",
+      "description": "Read the persistent manifest of the current session, including screenshots and visual checkpoints.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "session.metrics",
+      "description": "Read bounded per-tool latency/failure samples, queue state, Node memory, disconnects and observed session bytes. Quota warnings never delete evidence.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "quota_bytes": {
+            "default": 1073741824,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1099511627776
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "session.status",
+      "description": "Return the active Godot MCP session and editor/runtime connection state.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "signal.connect",
+      "description": "Connect a signal from a source node to a target node method with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_node_path": {
+            "type": "string"
+          },
+          "signal_name": {
+            "type": "string"
+          },
+          "target_node_path": {
+            "type": "string"
+          },
+          "target_method": {
+            "type": "string"
+          },
+          "flags": {
+            "type": "number"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "source_node_path",
+          "signal_name",
+          "target_node_path",
+          "target_method"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "signal.connections",
+      "description": "List active signal connections on a node.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "signal_name": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "signal.disconnect",
+      "description": "Disconnect a signal between two nodes with Undo/Redo support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "source_node_path": {
+            "type": "string"
+          },
+          "signal_name": {
+            "type": "string"
+          },
+          "target_node_path": {
+            "type": "string"
+          },
+          "target_method": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "source_node_path",
+          "signal_name",
+          "target_node_path",
+          "target_method"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project",
+            "editor.modify"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "signal.list",
+      "description": "List all signals declared on a node and its script.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "node_path": {
+            "type": "string"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "node_path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.begin",
+      "description": "transaction.begin: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "paths": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 7,
+              "maxLength": 1024
+            }
+          },
+          "atomic": {
+            "default": true,
+            "type": "boolean",
+            "const": true
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "label",
+          "paths"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.commit",
+      "description": "Publish and validate staged files; failed validation triggers exact-byte compensation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.delete_file",
+      "description": "transaction.delete_file: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 1024
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id",
+          "path"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.diff",
+      "description": "transaction.diff: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "session_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+          },
+          "redact": {
+            "default": true,
+            "type": "boolean"
+          },
+          "context_lines": {
+            "default": 3,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "max_lines": {
+            "default": 200,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2000
+          },
+          "max_diff_bytes": {
+            "default": 65536,
+            "type": "integer",
+            "minimum": 256,
+            "maximum": 262144
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.preview",
+      "description": "transaction.preview: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.recover",
+      "description": "transaction.recover: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "session_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+          },
+          "force": {
+            "default": false,
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id",
+          "session_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "risky",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.rollback",
+      "description": "transaction.rollback: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.status",
+      "description": "transaction.status: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "session_id": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [],
+          "capabilities": [],
+          "control": true,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "transaction.write_file",
+      "description": "transaction.write_file: declared on-disk file recovery with retained snapshots.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 1024
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 4194304
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "transaction_id",
+          "path",
+          "content"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "visual.capture_game",
+      "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "default": "capture",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "reason": {
+            "default": "manual_request",
+            "type": "string",
+            "enum": [
+              "manual_request",
+              "after_visual_change",
+              "after_visual_fix",
+              "before_major_change",
+              "after_major_change",
+              "on_error"
+            ]
+          },
+          "checkpoint": {
+            "default": false,
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "runtime"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "visual.capture_viewport_2d",
+      "description": "Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "default": "capture",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "reason": {
+            "default": "manual_request",
+            "type": "string",
+            "enum": [
+              "manual_request",
+              "after_visual_change",
+              "after_visual_fix",
+              "before_major_change",
+              "after_major_change",
+              "on_error"
+            ]
+          },
+          "checkpoint": {
+            "default": false,
+            "type": "boolean"
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "viewport2d"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "visual.capture_viewport_3d",
+      "description": "Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "default": "capture",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "reason": {
+            "default": "manual_request",
+            "type": "string",
+            "enum": [
+              "manual_request",
+              "after_visual_change",
+              "after_visual_fix",
+              "before_major_change",
+              "after_major_change",
+              "on_error"
+            ]
+          },
+          "checkpoint": {
+            "default": false,
+            "type": "boolean"
+          },
+          "viewport_index": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "network.local",
+            "filesystem.project"
+          ],
+          "capabilities": [
+            "editor",
+            "viewport3d"
+          ],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    },
+    {
+      "name": "visual.compare",
+      "description": "Compare two retained screenshots pixel-for-pixel and retain a deterministic difference PNG/report. Requires identical dimensions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "baseline": {
+            "type": "object",
+            "properties": {
+              "sessionId": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+              },
+              "screenshotId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            },
+            "required": [
+              "sessionId",
+              "screenshotId"
+            ],
+            "additionalProperties": false
+          },
+          "candidate": {
+            "type": "object",
+            "properties": {
+              "sessionId": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d-\\d\\d-\\d\\d-\\d{3}Z_[a-f0-9]{8}$"
+              },
+              "screenshotId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            },
+            "required": [
+              "sessionId",
+              "screenshotId"
+            ],
+            "additionalProperties": false
+          },
+          "pixelThreshold": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "maxChangedPixelRatio": {
+            "default": 0,
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confirmation": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "baseline",
+          "candidate"
+        ],
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "_meta": {
+        "godot_mcp": {
+          "risk": "normal",
+          "permissions": [
+            "filesystem.project"
+          ],
+          "capabilities": [],
+          "control": false,
+          "conditionalPermissions": true
+        }
+      }
+    }
+  ]
+}
