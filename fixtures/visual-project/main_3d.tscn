@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Red"]
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="Box"]
+material = SubResource("Red")
+size = Vector3(1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="Green"]
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="PlaneMesh" id="Ground"]
+material = SubResource("Green")
+size = Vector2(6, 6)
+
+[node name="Main3D" type="Node3D"]
+
+[node name="Box" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("Ground")

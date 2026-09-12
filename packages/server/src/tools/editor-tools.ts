@@ -6,7 +6,7 @@ import type {
   EditorScanFilesystemResult,
   EditorSelectedNodesResult,
   EditorSelectNodeResult,
-  EditorUndoRedoResult
+  EditorUndoRedoResult,
 } from '@godot-mcp/protocol';
 import type { RpcRouter } from '../bridge/rpc-router.js';
 
@@ -35,63 +35,90 @@ export interface EditorScanFilesystemParams {}
 
 export async function getActiveScene(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorGetActiveSceneParams = {}
+  params: EditorGetActiveSceneParams = {},
 ): Promise<EditorActiveSceneResult> {
-  return await rpc.call('editor.get_active_scene', params as unknown as Record<string, unknown>) as EditorActiveSceneResult;
+  return (await rpc.call(
+    'editor.get_active_scene',
+    params as unknown as Record<string, unknown>,
+  )) as EditorActiveSceneResult;
 }
 
 export async function getOpenScenes(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorGetOpenScenesParams = {}
+  params: EditorGetOpenScenesParams = {},
 ): Promise<EditorOpenScenesResult> {
-  return await rpc.call('editor.get_open_scenes', params as unknown as Record<string, unknown>) as EditorOpenScenesResult;
+  return (await rpc.call(
+    'editor.get_open_scenes',
+    params as unknown as Record<string, unknown>,
+  )) as EditorOpenScenesResult;
 }
 
 export async function getSelectedNodes(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorGetSelectedNodesParams = {}
+  params: EditorGetSelectedNodesParams = {},
 ): Promise<EditorSelectedNodesResult> {
-  return await rpc.call('editor.get_selected_nodes', params as unknown as Record<string, unknown>) as EditorSelectedNodesResult;
+  return (await rpc.call(
+    'editor.get_selected_nodes',
+    params as unknown as Record<string, unknown>,
+  )) as EditorSelectedNodesResult;
 }
 
 export async function selectNode(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorSelectNodeParams
+  params: EditorSelectNodeParams,
 ): Promise<EditorSelectNodeResult> {
-  return await rpc.call('editor.select_node', params as unknown as Record<string, unknown>) as EditorSelectNodeResult;
+  return (await rpc.call(
+    'editor.select_node',
+    params as unknown as Record<string, unknown>,
+  )) as EditorSelectNodeResult;
 }
 
 export async function changeScene(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorChangeSceneParams
+  params: EditorChangeSceneParams,
 ): Promise<EditorChangeSceneResult> {
-  return await rpc.call('editor.change_scene', params as unknown as Record<string, unknown>) as EditorChangeSceneResult;
+  return (await rpc.call(
+    'editor.change_scene',
+    params as unknown as Record<string, unknown>,
+  )) as EditorChangeSceneResult;
 }
 
 export async function editorUndo(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorUndoParams = {}
+  params: EditorUndoParams = {},
 ): Promise<EditorUndoRedoResult> {
-  return await rpc.call('editor.undo', params as unknown as Record<string, unknown>) as EditorUndoRedoResult;
+  return (await rpc.call(
+    'editor.undo',
+    params as unknown as Record<string, unknown>,
+  )) as EditorUndoRedoResult;
 }
 
 export async function editorRedo(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorRedoParams = {}
+  params: EditorRedoParams = {},
 ): Promise<EditorUndoRedoResult> {
-  return await rpc.call('editor.redo', params as unknown as Record<string, unknown>) as EditorUndoRedoResult;
+  return (await rpc.call(
+    'editor.redo',
+    params as unknown as Record<string, unknown>,
+  )) as EditorUndoRedoResult;
 }
 
 export async function getFilesystem(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorGetFilesystemParams = {}
+  params: EditorGetFilesystemParams = {},
 ): Promise<EditorFilesystemResult> {
-  return await rpc.call('editor.get_filesystem', params as unknown as Record<string, unknown>) as EditorFilesystemResult;
+  return (await rpc.call(
+    'editor.get_filesystem',
+    params as unknown as Record<string, unknown>,
+  )) as EditorFilesystemResult;
 }
 
 export async function scanFilesystem(
   rpc: Pick<RpcRouter, 'call'>,
-  params: EditorScanFilesystemParams = {}
+  params: EditorScanFilesystemParams = {},
 ): Promise<EditorScanFilesystemResult> {
-  return await rpc.call('editor.scan_filesystem', params as unknown as Record<string, unknown>) as EditorScanFilesystemResult;
+  return (await rpc.call(
+    'editor.scan_filesystem',
+    params as unknown as Record<string, unknown>,
+  )) as EditorScanFilesystemResult;
 }

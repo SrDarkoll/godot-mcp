@@ -1,6 +1,8 @@
 @tool
 extends RefCounted
 
+const SceneScope = preload("res://addons/godot_mcp/bridge/scene_scope.gd")
+
 var _editor_interface
 var _variant_serializer = preload("res://addons/godot_mcp/serialization/variant_serializer.gd")
 
@@ -23,18 +25,7 @@ func _get_logical_path(scene_root: Node, node: Node) -> String:
 	return logical_path
 
 func _resolve_node(scene_root: Node, path_str: String) -> Node:
-	if path_str.is_empty() or path_str == "." or path_str == "/%s" % scene_root.name:
-		return scene_root
-	var target := scene_root.get_node_or_null(path_str)
-	if target:
-		return target
-	if path_str.begins_with("/%s/" % scene_root.name):
-		var rel := path_str.substr(len(scene_root.name) + 2)
-		return scene_root.get_node_or_null(rel)
-	if path_str.begins_with("/"):
-		var rel := path_str.substr(1)
-		return scene_root.get_node_or_null(rel)
-	return null
+	return SceneScope.resolve(scene_root,path_str)
 
 func create(params: Dictionary) -> Dictionary:
 	var root: Node = _editor_interface.get_edited_scene_root()

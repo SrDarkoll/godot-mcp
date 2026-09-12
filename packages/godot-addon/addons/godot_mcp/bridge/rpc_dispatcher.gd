@@ -1,6 +1,8 @@
 @tool
 extends RefCounted
 
+const SerializationBudget = preload("res://addons/godot_mcp/serialization/serialization_budget.gd")
+
 var _project_info
 var _scene_tree
 var _object_handlers
@@ -11,8 +13,17 @@ var _script_handlers
 var _signal_handlers
 var _project_handlers
 var _editor_handlers
+var _visual_handlers
+var _runtime
+var _recovery
+var _batch
+var _dependencies
 
-func _init(editor_interface) -> void:
+func _init(editor_interface, runtime = null) -> void:
+    _batch = preload("res://addons/godot_mcp/bridge/handlers/batch_handlers.gd").new(editor_interface)
+    _dependencies = preload("res://addons/godot_mcp/bridge/handlers/dependency_handlers.gd").new(editor_interface)
+    _runtime = runtime
+    _recovery = preload("res://addons/godot_mcp/bridge/handlers/recovery_handlers.gd").new(editor_interface)
     _project_info = preload("res://addons/godot_mcp/bridge/handlers/project_info.gd").new(editor_interface)
     _scene_tree = preload("res://addons/godot_mcp/bridge/handlers/scene_tree.gd").new(editor_interface)
     _object_handlers = preload("res://addons/godot_mcp/bridge/handlers/object_handlers.gd").new(editor_interface)
@@ -23,13 +34,16 @@ func _init(editor_interface) -> void:
     _signal_handlers = preload("res://addons/godot_mcp/bridge/handlers/signal_handlers.gd").new(editor_interface)
     _project_handlers = preload("res://addons/godot_mcp/bridge/handlers/project_handlers.gd").new(editor_interface)
     _editor_handlers = preload("res://addons/godot_mcp/bridge/handlers/editor_handlers.gd").new(editor_interface)
+    _visual_handlers = preload("res://addons/godot_mcp/bridge/handlers/visual_handlers.gd").new(editor_interface)
 
-func _failure(request_id: String, code: String, message: String) -> Dictionary:
-    return {
+func _failure(request_id: String, code: String, message: String, details: Dictionary = {}) -> Dictionary:
+    var response = {
         "id": request_id if not request_id.is_empty() else "invalid-request",
         "ok": false,
         "error": { "code": code, "message": message }
     }
+    if not details.is_empty(): response.error["details"] = details
+    return response
 
 func dispatch(raw_text: String) -> Dictionary:
     var parsed = JSON.parse_string(raw_text)
@@ -45,8 +59,44 @@ func dispatch(raw_text: String) -> Dictionary:
 
     var method: String = request.method
     var params: Dictionary = request.get("params", {})
+    var input_issue = SerializationBudget.check(params, {"bytes":8*1024*1024, "string":1024*1024})
+    if not input_issue.is_empty():
+        return _failure(request_id, "ARGUMENT_TOO_LARGE", input_issue)
+    # Validate fields that handlers will decode before any editor mutation.
+    for field in ["value", "args", "properties", "binds"]:
+        if params.has(field):
+            var value_issue = SerializationBudget.check(params[field])
+            if not value_issue.is_empty():
+                return _failure(request_id, "ARGUMENT_TOO_LARGE", value_issue)
     var result
     match method:
+        "resource.dependencies": result=_dependencies.dependencies(params)
+        "resource.impact": result=_dependencies.impact(params)
+        "editor.import_resources": result=await _dependencies.import_resources(params)
+        "scene.batch.preview":
+            result = _batch.preview(params)
+        "scene.batch":
+            result = _batch.apply(params)
+        "recovery.prepare":
+            result = _recovery.prepare(params)
+        "recovery.editor_state":
+            result = _recovery.editor_state()
+        "recovery.validate":
+            result = _recovery.validate(params)
+        "editor.close_scene":
+            result = _recovery.close_scene()
+        "runtime.status":
+            result = _runtime.snapshot()
+        "runtime.start":
+            result = await _runtime.launch(params)
+        "runtime.stop", "project.stop":
+            result = await _runtime.stop_run()
+        "runtime.scene_tree", "runtime.inspect_node", "runtime.get_property", "runtime.pause", "runtime.resume", "debug.performance", "visual.capture_game":
+            result = await _runtime.forward(method,params)
+        "visual.capture_viewport_2d":
+            result = await _visual_handlers.handle_capture_viewport_2d(params)
+        "visual.capture_viewport_3d":
+            result = await _visual_handlers.handle_capture_viewport_3d(params)
         "project.info":
             result = _project_info.run(params)
         "scene.get_tree":
@@ -164,6 +214,11 @@ func dispatch(raw_text: String) -> Dictionary:
 
     if typeof(result) == TYPE_DICTIONARY and result.has("__error"):
         var err: Dictionary = result["__error"]
-        return _failure(request_id, str(err.get("code", "INTERNAL_ERROR")), str(err.get("message", "Error occurred")))
+        return _failure(request_id, str(err.get("code", "INTERNAL_ERROR")), str(err.get("message", "Error occurred")), err.get("details",{}))
 
+    # PNG/base64 responses have separate pixel, byte and checksum bounds.
+    if not method.begins_with("visual.capture_"):
+        var issue = SerializationBudget.check(result, {"depth":80, "items":30000, "bytes":4*1024*1024, "container":10000})
+        if not issue.is_empty():
+            return _failure(request_id, "RESULT_TOO_LARGE", issue)
     return { "id": request_id, "ok": true, "result": result }

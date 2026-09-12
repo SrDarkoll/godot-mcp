@@ -9,6 +9,6 @@ export function getSessionStatus(session: Session): SessionStatusResult {
     runtimeConnected: session.runtimeConnected,
     godotVersion: session.godotVersion,
     addonVersion: session.addonVersion,
-    protocolVersion: 1
+    protocolVersion: 1,
   };
 }

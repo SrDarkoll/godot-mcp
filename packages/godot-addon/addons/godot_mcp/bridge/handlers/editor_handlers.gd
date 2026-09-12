@@ -1,6 +1,8 @@
 @tool
 extends RefCounted
 
+const SceneScope = preload("res://addons/godot_mcp/bridge/scene_scope.gd")
+
 var _editor_interface
 
 func _init(editor_interface) -> void:
@@ -22,18 +24,7 @@ func _get_logical_path(scene_root: Node, node: Node) -> String:
 	return logical_path
 
 func _resolve_node(scene_root: Node, path_str: String) -> Node:
-	if path_str.is_empty() or path_str == "." or path_str == "/%s" % scene_root.name:
-		return scene_root
-	var target := scene_root.get_node_or_null(path_str)
-	if target:
-		return target
-	if path_str.begins_with("/%s/" % scene_root.name):
-		var rel := path_str.substr(len(scene_root.name) + 2)
-		return scene_root.get_node_or_null(rel)
-	if path_str.begins_with("/"):
-		var rel := path_str.substr(1)
-		return scene_root.get_node_or_null(rel)
-	return null
+	return SceneScope.resolve(scene_root,path_str)
 
 func get_active_scene(_params: Dictionary) -> Dictionary:
 	var root: Node = _editor_interface.get_edited_scene_root()
@@ -141,32 +132,52 @@ func redo(_params: Dictionary) -> Dictionary:
 
 	return { "performed": false }
 
-func _serialize_dir(dir: EditorFileSystemDirectory) -> Dictionary:
+func _serialize_dir(dir, depth: int = 0, budget: Dictionary = {}) -> Dictionary:
+	if budget.is_empty():
+		budget = {"left":4096, "bytes":1024*1024}
+	budget.left -= 1
+	if depth > 32 or budget.left < 0 or dir.get_subdir_count() + dir.get_file_count() > budget.left:
+		return _error("RESULT_TOO_LARGE", "Filesystem listing exceeds depth/entry limits")
 	var subdirs: Array = []
 	for i in range(dir.get_subdir_count()):
-		subdirs.append(_serialize_dir(dir.get_subdir(i)))
+		var child = _serialize_dir(dir.get_subdir(i), depth + 1, budget)
+		if child.has("__error"):
+			return child
+		subdirs.append(child)
 	var files: Array = []
 	for i in range(dir.get_file_count()):
-		files.append({
+		budget.left -= 1
+		if budget.left < 0:
+			return _error("RESULT_TOO_LARGE", "Filesystem listing exceeds entry limits")
+		var entry = {
 			"name": dir.get_file(i),
 			"path": dir.get_file_path(i),
 			"type": dir.get_file_type(i),
 			"is_dir": false
-		})
-	return {
+		}
+		budget.bytes -= JSON.stringify(entry).to_utf8_buffer().size()
+		if budget.bytes < 0:
+			return _error("RESULT_TOO_LARGE", "Filesystem listing exceeds byte limits")
+		files.append(entry)
+	var result = {
 		"name": dir.get_name(),
 		"path": dir.get_path(),
 		"is_dir": true,
 		"files": files,
 		"subdirectories": subdirs
 	}
+	budget.bytes -= str(dir.get_name()).to_utf8_buffer().size()*6 + str(dir.get_path()).to_utf8_buffer().size()*6 + 128
+	if budget.bytes < 0:
+		return _error("RESULT_TOO_LARGE", "Filesystem listing exceeds byte limits")
+	return result
 
 func get_filesystem(_params: Dictionary) -> Dictionary:
 	var efs = _editor_interface.get_resource_filesystem()
 	if efs:
 		var root_dir = efs.get_filesystem()
 		if root_dir:
-			return { "root": _serialize_dir(root_dir) }
+			var result = _serialize_dir(root_dir)
+			return result if result.has("__error") else {"root":result}
 
 	return {
 		"root": {

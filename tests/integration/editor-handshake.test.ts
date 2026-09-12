@@ -1,10 +1,9 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { cp, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
-import os from 'node:os';
+import { cp, mkdir, mkdtemp, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
-import { afterEach, describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { initProject } from '../../packages/cli/src/init/init-project.js';
 import { BridgeServer } from '../../packages/server/src/bridge/bridge-server.js';
 import {
@@ -17,7 +16,7 @@ import { getProjectInfo } from '../../packages/server/src/tools/project-info.js'
 import { getSceneTree } from '../../packages/server/src/tools/scene-tree.js';
 
 const fixtureRoot = path.resolve('fixtures/empty-project');
-const tempRoots: string[] = [];
+async function retainedRoot(prefix:string){const parent=path.resolve('.godot-mcp/editor-test-runs');await mkdir(parent,{recursive:true});return mkdtemp(path.join(parent,prefix));}
 
 async function waitFor(predicate: () => boolean | Promise<boolean>, timeoutMs: number): Promise<boolean> {
   const started = Date.now();
@@ -38,17 +37,12 @@ async function stopProcess(child: ChildProcess | null): Promise<void> {
   if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
 }
 
-afterEach(async () => {
-  await Promise.all(tempRoots.splice(0).map(root => rm(root, { recursive: true, force: true })));
-});
-
 describe('Godot editor handshake', () => {
   test('connects the installed addon and serves project and scene reads', async () => {
     const godotBin = process.env.GODOT_BIN;
     if (!godotBin) throw new Error('GODOT_BIN must be set by scripts/run-integration.mjs');
 
-    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'godot-mcp-integration-'));
-    tempRoots.push(tempRoot);
+    const tempRoot = await retainedRoot('handshake-');
     await cp(fixtureRoot, tempRoot, { recursive: true });
     await initProject({ projectRoot: tempRoot, godotBin, enable: true });
 
@@ -105,8 +99,7 @@ describe('Godot editor handshake', () => {
     const godotBin = process.env.GODOT_BIN;
     if (!godotBin) throw new Error('GODOT_BIN must be set by scripts/run-integration.mjs');
 
-    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'godot-mcp-e2e-'));
-    tempRoots.push(tempRoot);
+    const tempRoot = await retainedRoot('stdio-');
     await cp(fixtureRoot, tempRoot, { recursive: true });
     await initProject({ projectRoot: tempRoot, godotBin, enable: true });
 

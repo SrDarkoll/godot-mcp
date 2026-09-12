@@ -9,6 +9,27 @@ var _editor_interface
 func _init(editor_interface) -> void:
     _editor_interface = editor_interface
 
+func _project_resource(path_value: String) -> bool:
+    if not path_value.begins_with("res://") or path_value.contains("\\"):
+        return false
+    var relative = path_value.substr(6)
+    if relative.is_empty() or relative.contains(":"):
+        return false
+    for segment in relative.split("/"):
+        if segment in ["", ".", "..", ".godot", ".godot-mcp", ".git"]:
+            return false
+    return not relative.begins_with("addons/godot_mcp/")
+
+func _owned_target(target: Object) -> bool:
+    if not is_instance_valid(target):
+        return false
+    if target is Node:
+        var scene_root = _editor_interface.get_edited_scene_root()
+        return scene_root != null and (target == scene_root or scene_root.is_ancestor_of(target))
+    if target is Resource:
+        return _project_resource(target.resource_path.get_slice("::", 0))
+    return false
+
 func resolve_target(params: Dictionary) -> Object:
     if params.has("node_path"):
         var path_str: String = str(params["node_path"])
@@ -22,15 +43,19 @@ func resolve_target(params: Dictionary) -> Object:
         elif path_str.begins_with(scene_root.name + "/"):
             path_str = path_str.substr(scene_root.name.length() + 1)
         elif path_str.begins_with("/"):
-            path_str = path_str.substr(1)
-        return scene_root.get_node_or_null(NodePath(path_str))
+            return null
+        if path_str.contains(":") or path_str.contains("\\") or path_str.split("/").has(".."):
+            return null
+        var target = scene_root.get_node_or_null(NodePath(path_str))
+        return target if _owned_target(target) else null
     elif params.has("resource_path"):
         var res_path: String = str(params["resource_path"])
-        if ResourceLoader.exists(res_path):
+        if _project_resource(res_path) and ResourceLoader.exists(res_path):
             return ResourceLoader.load(res_path)
     elif params.has("object_id"):
         var obj_id := int(params["object_id"])
-        return instance_from_id(obj_id)
+        var target = instance_from_id(obj_id)
+        return target if _owned_target(target) else null
     return null
 
 func handle_get_class(params: Dictionary) -> Dictionary:
@@ -120,7 +145,7 @@ func call_method(params: Dictionary) -> Dictionary:
     if target == null:
         return {"__error": {"code": "OBJECT_NOT_FOUND", "message": "Target object could not be resolved"}}
     var method_name := str(params.get("method", ""))
-    if not SafetyPolicy.is_method_allowed(target, method_name):
+    if not SafetyPolicy.is_method_allowed(target, method_name, params.get("trusted_script", false) == true):
         return {
             "__error": {
                 "code": "SAFETY_VIOLATION",

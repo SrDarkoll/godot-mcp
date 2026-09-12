@@ -2,7 +2,7 @@ import type {
   SignalConnectResult,
   SignalConnectionsResult,
   SignalDisconnectResult,
-  SignalListResult
+  SignalListResult,
 } from '@godot-mcp/protocol';
 import type { RpcRouter } from '../bridge/rpc-router.js';
 
@@ -32,28 +32,40 @@ export interface SignalDisconnectParams {
 
 export async function listSignals(
   rpc: Pick<RpcRouter, 'call'>,
-  params: SignalListParams
+  params: SignalListParams,
 ): Promise<SignalListResult> {
-  return await rpc.call('signal.list', params as unknown as Record<string, unknown>) as SignalListResult;
+  return (await rpc.call(
+    'signal.list',
+    params as unknown as Record<string, unknown>,
+  )) as SignalListResult;
 }
 
 export async function getSignalConnections(
   rpc: Pick<RpcRouter, 'call'>,
-  params: SignalConnectionsParams
+  params: SignalConnectionsParams,
 ): Promise<SignalConnectionsResult> {
-  return await rpc.call('signal.connections', params as unknown as Record<string, unknown>) as SignalConnectionsResult;
+  return (await rpc.call(
+    'signal.connections',
+    params as unknown as Record<string, unknown>,
+  )) as SignalConnectionsResult;
 }
 
 export async function connectSignal(
   rpc: Pick<RpcRouter, 'call'>,
-  params: SignalConnectParams
+  params: SignalConnectParams,
 ): Promise<SignalConnectResult> {
-  return await rpc.call('signal.connect', params as unknown as Record<string, unknown>) as SignalConnectResult;
+  return (await rpc.call(
+    'signal.connect',
+    params as unknown as Record<string, unknown>,
+  )) as SignalConnectResult;
 }
 
 export async function disconnectSignal(
   rpc: Pick<RpcRouter, 'call'>,
-  params: SignalDisconnectParams
+  params: SignalDisconnectParams,
 ): Promise<SignalDisconnectResult> {
-  return await rpc.call('signal.disconnect', params as unknown as Record<string, unknown>) as SignalDisconnectResult;
+  return (await rpc.call(
+    'signal.disconnect',
+    params as unknown as Record<string, unknown>,
+  )) as SignalDisconnectResult;
 }

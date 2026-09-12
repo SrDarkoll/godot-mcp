@@ -4,7 +4,7 @@ import type {
   ResourceInspectResult,
   ResourceLoadResult,
   ResourceSaveResult,
-  ResourceSetPropertyResult
+  ResourceSetPropertyResult,
 } from '@godot-mcp/protocol';
 import type { RpcRouter } from '../bridge/rpc-router.js';
 
@@ -42,42 +42,60 @@ export interface ResourceDuplicateParams {
 
 export async function loadResource(
   rpc: Pick<RpcRouter, 'call'>,
-  params: ResourceLoadParams
+  params: ResourceLoadParams,
 ): Promise<ResourceLoadResult> {
-  return await rpc.call('resource.load', params as unknown as Record<string, unknown>) as ResourceLoadResult;
+  return (await rpc.call(
+    'resource.load',
+    params as unknown as Record<string, unknown>,
+  )) as ResourceLoadResult;
 }
 
 export async function inspectResource(
   rpc: Pick<RpcRouter, 'call'>,
-  params: ResourceInspectParams
+  params: ResourceInspectParams,
 ): Promise<ResourceInspectResult> {
-  return await rpc.call('resource.inspect', params as unknown as Record<string, unknown>) as ResourceInspectResult;
+  return (await rpc.call(
+    'resource.inspect',
+    params as unknown as Record<string, unknown>,
+  )) as ResourceInspectResult;
 }
 
 export async function createResource(
   rpc: Pick<RpcRouter, 'call'>,
-  params: ResourceCreateParams
+  params: ResourceCreateParams,
 ): Promise<ResourceCreateResult> {
-  return await rpc.call('resource.create', params as unknown as Record<string, unknown>) as ResourceCreateResult;
+  return (await rpc.call(
+    'resource.create',
+    params as unknown as Record<string, unknown>,
+  )) as ResourceCreateResult;
 }
 
 export async function setResourceProperty(
   rpc: Pick<RpcRouter, 'call'>,
-  params: ResourceSetPropertyParams
+  params: ResourceSetPropertyParams,
 ): Promise<ResourceSetPropertyResult> {
-  return await rpc.call('resource.set_property', params as unknown as Record<string, unknown>) as ResourceSetPropertyResult;
+  return (await rpc.call(
+    'resource.set_property',
+    params as unknown as Record<string, unknown>,
+  )) as ResourceSetPropertyResult;
 }
 
 export async function saveResource(
   rpc: Pick<RpcRouter, 'call'>,
-  params: ResourceSaveParams
+  params: ResourceSaveParams,
 ): Promise<ResourceSaveResult> {
-  return await rpc.call('resource.save', params as unknown as Record<string, unknown>) as ResourceSaveResult;
+  return (await rpc.call(
+    'resource.save',
+    params as unknown as Record<string, unknown>,
+  )) as ResourceSaveResult;
 }
 
 export async function duplicateResource(
   rpc: Pick<RpcRouter, 'call'>,
-  params: ResourceDuplicateParams
+  params: ResourceDuplicateParams,
 ): Promise<ResourceDuplicateResult> {
-  return await rpc.call('resource.duplicate', params as unknown as Record<string, unknown>) as ResourceDuplicateResult;
+  return (await rpc.call(
+    'resource.duplicate',
+    params as unknown as Record<string, unknown>,
+  )) as ResourceDuplicateResult;
 }

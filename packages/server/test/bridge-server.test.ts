@@ -20,6 +20,43 @@ async function connect(bridge: BridgeServer, token = 'a'.repeat(64)) {
 }
 
 describe('BridgeServer', () => {
+  it('accepts only monotonic events for the authenticated MCP session',async()=>{
+    const session=createSession('C:/Games/Test');const seen:any[]=[];
+    const bridge=new BridgeServer({session,token:'a'.repeat(64),port:0,onRuntimeEvent:e=>seen.push(e)});
+    const ws=await connect(bridge);await bridge.waitUntilConnected(1000);
+    const message={type:'event',protocol:1,sessionId:session.id,sequence:1,event:'runtime.diagnostics',data:{runId:'123e4567-e89b-42d3-a456-426614174000',entries:[],dropped:0}};
+    ws.send(JSON.stringify({...message,sessionId:'wrong'}));ws.send(JSON.stringify(message));ws.send(JSON.stringify(message));
+    await new Promise(r=>setTimeout(r,30));expect(seen).toHaveLength(1);
+    ws.close();await bridge.stop();
+  });
+  it('does not expose a connection before authenticated metadata is durable', async () => {
+    let release!:()=>void;
+    const pending=new Promise<void>(resolve=>{release=resolve;});
+    let entered!:()=>void;
+    const started=new Promise<void>(resolve=>{entered=resolve;});
+    const bridge=new BridgeServer({session:createSession('C:/Games/Test'),token:'a'.repeat(64),port:0,
+      onAuthenticated:async()=>{entered();await pending;}});
+    const ws=await connect(bridge);
+    try {
+      await started;
+      expect(bridge.connected).toBe(false);
+      expect(bridge.capabilities).toBeNull();
+      await expect(bridge.rpc.call('project.info',{},25)).rejects.toMatchObject({code:'EDITOR_NOT_CONNECTED'});
+      release();await bridge.waitUntilConnected(1000);
+      expect(bridge.connected).toBe(true);
+    } finally {release();ws.close();await bridge.stop();}
+  });
+  it('publishes authenticated metadata and clears capabilities on disconnect', async () => {
+    const session = createSession('C:/Games/Test');
+    const versions:string[] = [];
+    const bridge = new BridgeServer({session,token:'a'.repeat(64),port:0,onAuthenticated:async hello => { versions.push(hello.godotVersion); }});
+    const ws = await connect(bridge);
+    await bridge.waitUntilConnected(1000);
+    expect(versions).toEqual(['4.7.2.stable.official']);
+    expect(bridge.capabilities?.viewport2d).toBe(true);
+    ws.close(); await bridge.stop();
+    expect(bridge.capabilities).toBeNull();
+  });
   it('accepts exactly one authenticated addon for the active project', async () => {
     const session = createSession('C:/Games/Test');
     const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
@@ -132,6 +169,7 @@ describe('BridgeServer', () => {
     });
     const closeEvent = await new Promise<{ code: number; reason: string }>(resolve => {
       ws2.once('close', (code, reason) => resolve({ code, reason: reason.toString() }));
+      ws2.send(JSON.stringify({type:'hello',token:'a'.repeat(64),protocol:1,addonVersion:'0.1.0',godotVersion:'4.6.3',projectRoot:session.projectRoot,capabilities:{editor:true,runtime:false,debugger:false,viewport2d:true,viewport3d:true,undoRedo:true}}));
     });
     expect(closeEvent.code).toBe(1008);
     expect(closeEvent.reason).toContain('Only one Godot addon connection is allowed');

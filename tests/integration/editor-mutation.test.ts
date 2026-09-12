@@ -1,14 +1,14 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { cp, mkdtemp, rm } from 'node:fs/promises';
-import os from 'node:os';
+import { cp, mkdir, mkdtemp } from 'node:fs/promises';
 import path from 'node:path';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
-import { afterEach, describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { initProject } from '../../packages/cli/src/init/init-project.js';
+import {confirmFixtureOperation} from './helpers/confirm-fixture-operation.js';
 
 const fixtureRoot = path.resolve('fixtures/empty-project');
-const tempRoots: string[] = [];
+async function retainedRoot(){const parent=path.resolve('.godot-mcp/editor-test-runs');await mkdir(parent,{recursive:true});return mkdtemp(path.join(parent,'mutation-'));}
 
 async function waitFor(predicate: () => boolean | Promise<boolean>, timeoutMs: number): Promise<boolean> {
   const started = Date.now();
@@ -29,17 +29,12 @@ async function stopProcess(child: ChildProcess | null): Promise<void> {
   if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
 }
 
-afterEach(async () => {
-  await Promise.all(tempRoots.splice(0).map(root => rm(root, { recursive: true, force: true })));
-});
-
 describe('Godot editor mutation surface', () => {
   test('executes complete 12-step mutation lifecycle and error suite against live Godot 4.x editor', async () => {
     const godotBin = process.env.GODOT_BIN;
     if (!godotBin) throw new Error('GODOT_BIN must be set by scripts/run-integration.mjs');
 
-    const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'godot-mcp-mutation-'));
-    tempRoots.push(tempRoot);
+    const tempRoot = await retainedRoot();
     await cp(fixtureRoot, tempRoot, { recursive: true });
     await initProject({ projectRoot: tempRoot, godotBin, enable: true });
 
@@ -140,12 +135,13 @@ describe('Godot editor mutation surface', () => {
       });
 
       // Step 6: Create and attach script
-      const scriptCode = `extends Node2D
+      const scriptCode = `@tool
+extends Node2D
 
 var custom_field: int = 42
 
-func test_method() -> void:
-\tpass
+func test_method() -> int:
+\treturn 42
 `;
       const createScriptRes = await client.callTool({
         name: 'script.create',
@@ -168,12 +164,23 @@ func test_method() -> void:
       });
       expect(attachRes.structuredContent).toMatchObject({ attached: true });
 
+      const scriptCall = {node_path:'/Main/TestContainer',method:'test_method',trusted_script:true};
+      const deniedScript = await client.callTool({name:'object.call',arguments:scriptCall});
+      expect(JSON.stringify(deniedScript)).toContain('PERMISSION_DENIED');
+      await confirmFixtureOperation(client,'permissions.enable',{permission:'editor.script_methods'});
+      const trustedResult = await confirmFixtureOperation(client,'object.call',scriptCall);
+      expect(trustedResult.structuredContent).toMatchObject({result:{type:'int',value:42}});
+      const indirect = await client.callTool({name:'object.call',arguments:{...scriptCall,method:'call',args:['queue_free']}});
+      expect(JSON.stringify(indirect)).toContain('SAFETY_VIOLATION');
+      const escaped = await client.callTool({name:'object.get_class',arguments:{node_path:'..'}});
+      expect(JSON.stringify(escaped)).toContain('OBJECT_NOT_FOUND');
+
       // Step 7: Save scene
       const saveRes = await client.callTool({ name: 'scene.save', arguments: {} });
       expect(saveRes.structuredContent).toMatchObject({ saved: true });
 
       // Step 8: Reload scene
-      const reloadRes = await client.callTool({ name: 'scene.reload', arguments: {} });
+      const reloadRes = await confirmFixtureOperation(client,'scene.reload',{});
       expect(reloadRes.structuredContent).toMatchObject({ reloaded: true });
 
       // Step 9: Verify values after reload

@@ -3,7 +3,16 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const godotBin = process.env.GODOT_BIN;
-const required = process.env.REQUIRE_GODOT_INTEGRATION === '1';
+const visual = process.argv.includes('--visual');
+const runtime = process.argv.includes('--runtime');
+const required = visual || runtime || process.env.REQUIRE_GODOT_INTEGRATION === '1';
+if(runtime && (process.platform!=='win32'||process.env.GODOT_RUNTIME_INTEGRATION!=='1')){
+  console.error('Runtime integration requires Windows and GODOT_RUNTIME_INTEGRATION=1');process.exit(1);
+}
+if (visual && (process.platform !== 'win32' || process.env.GODOT_VISUAL_INTEGRATION !== '1')) {
+  console.error('Visual integration requires Windows and GODOT_VISUAL_INTEGRATION=1');
+  process.exit(1);
+}
 
 if (!godotBin) {
   const message = 'SKIP integration: GODOT_BIN is not configured';
@@ -50,7 +59,9 @@ try {
   process.exit(1);
 }
 
-const result = spawnSync(process.execPath, [vitestEntry, 'run', 'tests/integration'], {
+const selection = runtime ? ['tests/integration/runtime-debugger.test.ts','tests/integration/runtime-game-capture.test.ts'] : visual ? ['tests/integration/visual-capture.test.ts'] :
+  ['tests/integration', '--exclude', 'tests/integration/visual-capture.test.ts','--exclude','tests/integration/runtime-debugger.test.ts','--exclude','tests/integration/runtime-game-capture.test.ts'];
+const result = spawnSync(process.execPath, [vitestEntry, 'run', ...selection, '--maxWorkers=1', '--no-file-parallelism'], {
   stdio: 'inherit',
   env: { ...process.env, GODOT_BIN: godotBin },
   windowsHide: true

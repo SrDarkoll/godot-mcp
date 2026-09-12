@@ -1,0 +1,40 @@
+name: Opt-in graphical validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: godot-graphical-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  graphical:
+    runs-on: [self-hosted, Windows, X64, godot-gui]
+    timeout-minutes: 20
+    env:
+      GODOT_BIN: ${{ vars.GODOT_BIN }}
+      GODOT_VISUAL_INTEGRATION: '1'
+      GODOT_RUNTIME_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          clean: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:integration:visual
+      - run: npm run test:integration:runtime
+      - name: Copy graphical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphical-evidence
+          include-hidden-files: true
+          if-no-files-found: warn
+          path: |
+            .godot-mcp/visual-test-runs/**
+            .godot-mcp/runtime-test-runs/**
+            !.godot-mcp/**/.godot-mcp/runtime/**
+            !.godot-mcp/**/.godot-mcp/config.json

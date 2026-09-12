@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
-import os from 'node:os';
+import { mkdir, mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
@@ -19,7 +18,8 @@ async function waitFor(predicate: () => Promise<boolean>, timeoutMs: number): Pr
 }
 
 it('removes the ephemeral bridge descriptor when MCP stdin closes', async () => {
-  const root = await mkdtemp(path.join(os.tmpdir(), 'godot-mcp-server-lifecycle-'));
+  const parent=path.resolve(import.meta.dirname,'../../../.godot-mcp/cli-test-runs');await mkdir(parent,{recursive:true});
+  const root = await mkdtemp(path.join(parent, 'server-lifecycle-'));
   await writeFile(path.join(root, 'project.godot'), '[application]\nconfig/name="Lifecycle"\n');
   const entry = fileURLToPath(new URL('../dist/index.js', import.meta.url));
   const descriptor = path.join(root, '.godot-mcp', 'runtime', 'bridge.json');
@@ -41,6 +41,5 @@ it('removes the ephemeral bridge descriptor when MCP stdin closes', async () => 
     expect(await exists(descriptor)).toBe(false);
   } finally {
     if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
-    await rm(root, { recursive: true, force: true });
   }
 }, 8_000);

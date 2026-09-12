@@ -1,4 +1,5 @@
 .worktrees/
+.tgrep/
 node_modules/
 dist/
 coverage/
@@ -6,3 +7,13 @@ coverage/
 .godot/
 .godot-mcp/runtime/
 .godot-mcp/sessions/
+.godot-mcp/visual-test-runs/
+.godot-mcp/runtime-test-runs/
+.godot-mcp/editor-test-runs/
+.godot-mcp/recovery-test-runs/
+.godot-mcp/generated/
+.godot-mcp/config.json
+.godot-mcp/config-backups/
+.godot-mcp/addon-backups/
+.godot-mcp/cli-test-runs/
+.godot-mcp/distribution/

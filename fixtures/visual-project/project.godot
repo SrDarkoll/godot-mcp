@@ -1,0 +1,8 @@
+config_version=5
+
+[application]
+config/name="Godot MCP Visual Fixture"
+run/main_scene="res://main_2d.tscn"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"

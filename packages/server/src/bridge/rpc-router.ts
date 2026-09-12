@@ -8,7 +8,7 @@ interface PendingCall {
 }
 
 export class BridgeRpcError extends Error {
-  constructor(public readonly code: BridgeErrorCode, message: string) {
+  constructor(public readonly code: BridgeErrorCode, message: string,public readonly details?:Record<string,unknown>) {
     super(message);
     this.name = 'BridgeRpcError';
   }
@@ -72,7 +72,7 @@ export class RpcRouter {
     if (response.ok) {
       pending.resolve(response.result);
     } else {
-      pending.reject(new BridgeRpcError(response.error.code, response.error.message));
+      pending.reject(new BridgeRpcError(response.error.code, response.error.message, response.error.details));
     }
   }
 

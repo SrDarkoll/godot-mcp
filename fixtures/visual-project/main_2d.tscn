@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://noise.png" id="Noise"]
+
+[node name="Main2D" type="Node2D"]
+
+[node name="Red" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(20, 20, 220, 20, 220, 180, 20, 180)
+color = Color(1, 0, 0, 1)
+
+[node name="Green" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(250, 20, 450, 20, 450, 180, 250, 180)
+color = Color(0, 1, 0, 1)
+
+[node name="Noise" type="Sprite2D" parent="."]
+position = Vector2(20, 220)
+texture = ExtResource("Noise")
+centered = false

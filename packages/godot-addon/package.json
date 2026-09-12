@@ -3,5 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "files": ["addons/godot_mcp"]
+  "files": [
+    "addons/godot_mcp",
+    "LICENSE",
+    "README.md"
+  ],
+  "license": "MIT",
+  "description": "Godot MCP godot-addon package (Windows-first pre-alpha)"
 }
