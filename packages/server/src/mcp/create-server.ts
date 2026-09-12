@@ -41,6 +41,11 @@ import { registerUiTools } from './register-ui-tools.js';
 import { registerVisualTools } from './register-visual-tools.js';
 import { registerWorkflowTools } from './register-workflow-tools.js';
 import { registerToolingTools } from './register-tooling-tools.js';
+import { registerBatchTools } from '../tools/batch-tools.js';
+import { registerProjectEventTools } from '../tools/project-event-tools.js';
+import { registerDependencyTools } from '../tools/dependency-tools.js';
+import { VisualComparisonService } from '../visual/visual-comparison.js';
+import { registerVisualComparisonTools } from '../tools/visual-comparison-tools.js';
 export interface McpServerContext {
     session: Session;
     bridge: BridgeServer;
@@ -82,6 +87,11 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerRecoveryTools(registrar, recovery, rpc);
     registerSecurityTools(registrar, policy);
     registerVisualTools(registrar, visual, ctx.sessions, ctx.session);
+    registerVisualComparisonTools(registrar, new VisualComparisonService(
+        ctx.session,
+        ctx.sessions,
+        async () => await runtime.request('debug.performance') as never
+    ));
     registerWorkflowTools(registrar, workflow);
     registerCoreTools(registrar, ctx.bridge, ctx.session);
     registerUiTools(registrar, rpc);
@@ -94,11 +104,14 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerNavigationTools(registrar, rpc);
     registerObjectTools(registrar, rpc);
     registerSceneTools(registrar, rpc);
+    registerBatchTools(registrar, recovery, rpc);
     registerNodeTools(registrar, rpc);
     registerResourceTools(registrar, rpc);
+    registerDependencyTools(registrar, rpc, recovery);
     registerScriptTools(registrar, rpc);
     registerSignalTools(registrar, rpc);
     registerProjectTools(registrar, rpc);
+    registerProjectEventTools(registrar, ctx.bridge.projectEvents);
     registerEditorTools(registrar, rpc);
     registerToolingTools(registrar, registry);
     registry.assertFullyObserved();

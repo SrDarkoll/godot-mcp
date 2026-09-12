@@ -5,7 +5,7 @@
 [![Godot Engine](https://img.shields.io/badge/Godot-v4.6.3--stable-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![MCP](https://img.shields.io/badge/MCP-183%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
+[![MCP](https://img.shields.io/badge/MCP-192%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
 [![Status](https://img.shields.io/badge/Status-Stable%20%7C%20Godot%204.x%20Production--Ready-success)](https://github.com/SrDarkoll/godot-mcp)
 [![npm version](https://img.shields.io/npm/v/@srdarkx/godot-mcp.svg)](https://www.npmjs.com/package/@srdarkx/godot-mcp)
 
@@ -32,6 +32,9 @@ Instead of copying and pasting GDScript snippets, guessing node hierarchy paths,
 - 👁️ **Visual Grounding & Viewport Capture**: Capture 2D and 3D editor viewports as well as running game frames as PNGs, enabling multimodal AI models to visually inspect level layouts, shaders, and lighting.
 - ⚡ **Headless Process Manager (Phase 8)**: Run project validation, asset importing, automated tests, and background game instances without GUI dependencies—ideal for autonomous CI/CD or agent self-testing.
 - 🛡️ **Transactional Safety & Reversibility**: Multi-file atomic write transactions (`transaction.*`), file checkpoints (`checkpoint.*`), and risk previews prevent unintended project corruption.
+- 🧩 **Structured Scene Batches**: Prevalidate up to 64 native scene/resource operations, reject stale state, then apply them as one Undo/Redo action.
+- 🔄 **Project Events & Dependency Impact**: Resume bounded project event streams and inspect direct, transitive, broken, and inbound resource references before changing assets.
+- 📊 **Deterministic Regression Evidence**: Compare retained viewport captures pixel by pixel and evaluate runtime snapshots against caller-defined performance budgets.
 - 🎯 **8 Bounded Tool Profiles**: Select focused toolsets (`minimal`, `core`, `2d`, `3d`, `navigation`, `ui`, `runtime`, `full`) to drastically reduce LLM context token usage and latency.
 
 ---
@@ -48,7 +51,7 @@ Godot MCP uses a decoupled, secure two-tier architecture communicating over stan
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  Godot MCP Server (Node.js 22+)             │
-│  ├─ Tool Registry (183 tools across 8 profiles)             │
+│  ├─ Tool Registry (192 tools across 8 profiles)             │
 │  ├─ Headless Process Manager (Godot CLI runner)             │
 │  ├─ DAP Client (Interactive debugger bridge)                │
 │  ├─ Transaction & Snapshot Recovery Engine                  │
@@ -84,18 +87,18 @@ Godot MCP is engineered for safe, reliable autonomous AI development inside prod
 
 ## Tool Profiles
 
-To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 183 tools into 8 specialized profiles:
+To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 192 tools into 8 specialized profiles:
 
 | Profile | Tools | Primary Focus | Included Capabilities |
 | :--- | :---: | :--- | :--- |
-| `minimal` | 3 | Liveness & Discovery | Session status, engine capabilities, tool registry |
-| `core` | 31 | Project & Scene CRUD | Project info, scene tree, nodes, resources, atomic transactions |
-| `2d` | 46 | 2D Game Development | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D, Parallax2D |
-| `3d` | 51 | 3D World Building | Core + Node3D, Mesh3D, Camera3D, Collision3D, Light3D, StandardMaterial3D, Shader3D |
-| `navigation` | 40 | Navigation & Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
-| `ui` | 44 | User Interface & Animation | Core + Control nodes, anchors, layout presets, AnimationPlayer & AnimationMixer |
-| `runtime` | 49 | QA, Headless & Debugging | Core + headless process runner, game control, live inspect, interactive DAP debugger |
-| `full` | 183 | Unrestricted Power-Agent | Complete tool surface across all domains (default) |
+| `minimal` | 5 | Liveness & Discovery | Session status, project info, scene tree, engine capabilities, tool registry |
+| `core` | 84 | Project & Scene CRUD | Project info, scene tree, nodes, resources, batches, dependencies, transactions |
+| `2d` | 128 | 2D Game Development | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D, Parallax2D |
+| `3d` | 114 | 3D World Building | Core + Node3D, Mesh3D, Camera3D, Collision3D, Light3D, StandardMaterial3D, Shader3D |
+| `navigation` | 73 | Navigation & Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
+| `ui` | 88 | User Interface & Animation | Core + Control nodes, anchors, layout presets, AnimationPlayer & AnimationMixer |
+| `runtime` | 52 | QA, Headless & Debugging | Headless runner, live game inspection, events, visual and performance comparison, DAP debugger |
+| `full` | 192 | Unrestricted Power-Agent | Complete tool surface across all domains (default) |
 
 > **Tip:** You can set a default profile in `.godot-mcp/config.json` via `godot-mcp config <project> --tool-profile 2d` or override it on server start with `--tool-profile <name>`.
 

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Godot Engine](https://img.shields.io/badge/Godot-v4.x-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![MCP](https://img.shields.io/badge/MCP-183%20Tools-8A2BE2)](https://github.com/SrDarkoll/godot-mcp)
+[![MCP](https://img.shields.io/badge/MCP-192%20Tools-8A2BE2)](https://github.com/SrDarkoll/godot-mcp)
 [![Status](https://img.shields.io/badge/Status-Stable%20%7C%20Production--Ready-success)](https://github.com/SrDarkoll/godot-mcp)
 
 The official CLI launcher and Model Context Protocol bridge for **Godot Engine 4.x**.
@@ -162,20 +162,20 @@ npx @srdarkx/godot-mcp config . --repair
 
 ---
 
-## 🎯 183 Tools Across 8 Profiles
+## 🎯 192 Tools Across 8 Profiles
 
-Godot MCP exposes **183 canonical tools** partitioned into 8 profiles to optimize AI context window tokens:
+Godot MCP exposes **192 MCP tools** partitioned into 8 profiles to optimize AI context window tokens:
 
 | Profile | Tools | Focus | Key Capabilities |
 | :--- | :---: | :--- | :--- |
-| `minimal` | 3 | Liveness | Status check, engine capabilities, tool registry |
-| `core` | 31 | Project & Scenes | Nodes, resources, scene tree, atomic transactions |
-| `2d` | 46 | 2D Games | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D |
-| `3d` | 51 | 3D Worlds | Core + Node3D, Mesh3D, Camera3D, Lights, Materials, Shaders |
-| `navigation` | 40 | Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
-| `ui` | 44 | UI & Animation | Core + Control nodes, anchors, layouts, AnimationPlayer & AnimationMixer |
-| `runtime` | 49 | QA & Debug | Core + Headless runner, live game inspection, interactive DAP debugger |
-| `full` | 183 | Unrestricted | All available Godot MCP tools (default) |
+| `minimal` | 5 | Liveness | Status, project info, scene tree, engine capabilities, tool registry |
+| `core` | 84 | Project & Scenes | Nodes, resources, scene batches, dependencies, events, transactions |
+| `2d` | 128 | 2D Games | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D |
+| `3d` | 114 | 3D Worlds | Core + Node3D, Mesh3D, Camera3D, Lights, Materials, Shaders |
+| `navigation` | 73 | Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
+| `ui` | 88 | UI & Animation | Core + Control nodes, anchors, layouts, AnimationPlayer & AnimationMixer |
+| `runtime` | 52 | QA & Debug | Headless runner, events, visual/performance comparison, live inspection, DAP debugger |
+| `full` | 192 | Unrestricted | All available Godot MCP tools (default) |
 
 ---
 

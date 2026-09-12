@@ -9,3 +9,12 @@ export const BridgeRuntimeEventSchema=z.discriminatedUnion('event',[
   z.strictObject({...envelope,event:z.literal('debugger.breakpoints'),data:DebuggerBreakpointSnapshotSchema})
 ]);
 export type BridgeRuntimeEvent=z.infer<typeof BridgeRuntimeEventSchema>;
+export const BridgeProjectEventSchema = z.strictObject({
+  ...envelope,
+  event: z.literal('project.changed'),
+  data: z.strictObject({
+    kind: z.enum(['scene.changed', 'scene.saved', 'filesystem.changed', 'import.finished']),
+    path: z.string().max(1024).nullable(),
+    dropped: z.number().int().nonnegative(),
+  }),
+});

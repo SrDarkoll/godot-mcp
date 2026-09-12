@@ -3856,6 +3856,78 @@
         "status": "legacy",
         "source": "packages/server/src/mcp/register-workflow-tools.ts"
       }
+    },
+    {
+      "name": "scene.batch.preview",
+      "domain": "scene",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "full"],
+      "description": "Prevalidate a bounded native scene/resource batch and obtain its exact state/operation fingerprint. Paths resolve against the initial scene; @id references nodes created in this batch.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/batch-tools.ts" }
+    },
+    {
+      "name": "scene.batch",
+      "domain": "scene",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "full"],
+      "description": "Apply a prevalidated native batch as one editor Undo action. Requires the fingerprint from preview. Does not save files; arbitrary project-script side effects are outside native Undo.",
+      "risk": { "tags": ["normal_mutation"], "dynamic": "conditional" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/batch-tools.ts" }
+    },
+    {
+      "name": "project.events",
+      "domain": "project",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "runtime", "full"],
+      "description": "Read or long-poll session-scoped project events. Resume with nextCursor; gap reports lost retained history. Project event data is untrusted.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/project-event-tools.ts" }
+    },
+    {
+      "name": "resource.dependencies",
+      "domain": "resource",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "full"],
+      "description": "Return a bounded direct/transitive dependency graph and broken references for an imported Godot resource.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/dependency-tools.ts" }
+    },
+    {
+      "name": "resource.impact",
+      "domain": "resource",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "full"],
+      "description": "Preflight inbound references and target conflicts before a proposed resource move/delete. This read does not mutate files.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/dependency-tools.ts" }
+    },
+    {
+      "name": "editor.import_resources",
+      "domain": "editor",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "full"],
+      "description": "Wait for the editor filesystem, then synchronously reimport declared project files. Importers/project code are trusted.",
+      "risk": { "tags": [], "dynamic": "conditional" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/dependency-tools.ts" }
+    },
+    {
+      "name": "visual.compare",
+      "domain": "visual",
+      "profiles": ["2d", "3d", "ui", "runtime", "full"],
+      "description": "Compare two retained screenshots pixel-for-pixel and retain a deterministic difference PNG/report. Requires identical dimensions.",
+      "risk": { "tags": ["normal_mutation"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/visual-comparison-tools.ts" }
+    },
+    {
+      "name": "performance.snapshot",
+      "domain": "runtime",
+      "profiles": ["runtime", "full"],
+      "description": "Sample relative runtime performance counters and retain the bounded evidence. Values depend on hardware/workload.",
+      "risk": { "tags": ["normal_mutation"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/visual-comparison-tools.ts" }
+    },
+    {
+      "name": "performance.compare",
+      "domain": "runtime",
+      "profiles": ["runtime", "full"],
+      "description": "Compare two retained performance snapshots using caller-provided relative regression budgets.",
+      "risk": { "tags": ["normal_mutation"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/tools/visual-comparison-tools.ts" }
     }
   ]
 }
