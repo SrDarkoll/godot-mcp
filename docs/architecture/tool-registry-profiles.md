@@ -13,13 +13,13 @@ The server supports exactly eight profiles:
 | Profile | Tools | Intended use |
 | --- | ---: | --- |
 | `minimal` | 5 | read-only orientation and discovery |
-| `core` | 78 | generic editor automation without specialized verticals |
-| `2d` | 121 | 2D, TileMap, UI/animation and navigation authoring |
-| `3d` | 107 | 3D, materials, animation and navigation authoring |
-| `navigation` | 67 | focused NavigationRegion/mesh/agent workflows |
-| `ui` | 81 | Control layout and AnimationPlayer workflows |
-| `runtime` | 38 | run/debug/capture/workflow verification plus headless Godot process control |
-| `full` | 173 | complete surface; backwards-compatible default |
+| `core` | 84 | generic editor automation, batches, dependencies and project events |
+| `2d` | 128 | 2D, TileMap, UI/animation, navigation and visual comparison |
+| `3d` | 114 | 3D, materials, animation, navigation and visual comparison |
+| `navigation` | 73 | focused NavigationRegion/mesh/agent workflows plus dependency preflight |
+| `ui` | 88 | Control layout, AnimationPlayer workflows and visual comparison |
+| `runtime` | 52 | run/debug/capture/workflow verification, events and performance comparison |
+| `full` | 192 | complete surface; backwards-compatible default |
 
 Counts include `godot.tools`, the Phase 6 discovery tool.
 
@@ -162,6 +162,6 @@ Profiles are a visibility reduction, not authorization. An active tool still pas
 
 `godot.tools` is classified as a local read-only operation and performs no filesystem, editor or network-local RPC work.
 
-## Relationship to future code generation
+## Generated contract inventory
 
-The catalog centralizes names/domains/profile membership now. It does **not** yet become the source for Zod schemas, registration boilerplate or documentation generation. That remains intentionally separate so Phase 6 can prove profile semantics before a later contract/codegen phase changes declaration ownership.
+`scripts/tool-contracts.json` is the authoritative public inventory. It generates profile membership, static risk tags and `docs/generated/tool-inventory.md`, while each registrar keeps the executable Zod schema and handler. The contract check rejects missing registrations, undocumented tools, description drift and stale generated output.

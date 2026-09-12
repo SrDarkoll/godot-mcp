@@ -34,8 +34,9 @@ it('captures real 2D and 3D pixels, checkpoints and persistent session closure t
       expect(createHash('sha256').update(bytes).digest('hex')).toBe(value.screenshot.sha256);
       expect(value.checkpoint?.screenshotId).toBe(value.screenshot.id);
       files.push(file);
+      return value;
     };
-    await capture('visual.capture_viewport_2d','initial_2d');
+    const initial2d=await capture('visual.capture_viewport_2d','initial_2d');
     const opened=await h.client.callTool({name:'scene.open',arguments:{path:'res://main_3d.tscn'}});
     expect(opened.isError).not.toBe(true);
     await capture('visual.capture_viewport_3d','initial_3d');
@@ -44,7 +45,17 @@ it('captures real 2D and 3D pixels, checkpoints and persistent session closure t
     await h.client.callTool({name:'scene.open',arguments:{path:'res://main_2d.tscn'}});
     const changed=await h.client.callTool({name:'node.set_property',arguments:{node_path:'/Main2D/Red',property:'color',value:{r:0,g:0,b:1,a:1}}});
     expect(changed.isError,JSON.stringify(changed.structuredContent)).not.toBe(true);
-    await capture('visual.capture_viewport_2d','changed_2d');
+    const changed2d=await capture('visual.capture_viewport_2d','changed_2d');
+    const comparison=await h.client.callTool({name:'visual.compare',arguments:{
+      baseline:{sessionId:initial2d.sessionId,screenshotId:initial2d.screenshot.id},
+      candidate:{sessionId:changed2d.sessionId,screenshotId:changed2d.screenshot.id},
+      pixelThreshold:5,
+      maxChangedPixelRatio:0
+    }});
+    expect(comparison.isError,JSON.stringify(comparison.structuredContent)).not.toBe(true);
+    expect(comparison.structuredContent).toMatchObject({complete:true,passed:false,width:initial2d.screenshot.width,height:initial2d.screenshot.height});
+    expect((comparison.structuredContent as {changedPixels:number}).changedPixels).toBeGreaterThan(0);
+    await expect(readFile(path.join(String(comparison.structuredContent?.artifactPath),'diff.png'))).resolves.toBeDefined();
     const response=await h.client.callTool({name:'session.manifest',arguments:{}});
     const manifest=SessionManifestSchema.parse(response.structuredContent?.manifest);
     expect(manifest.screenshots.map(s=>s.sequence)).toEqual([1,2,3]);

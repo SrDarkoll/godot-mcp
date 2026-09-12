@@ -100,7 +100,7 @@ export class ToolPolicy {
         if (!READS.has(name) && !CONTROLS.has(name) && !name.startsWith('permissions.')) {
             if (name === 'workflow.run_check')
                 permissions.push('runtime.modify', 'process.godot', 'filesystem.project');
-            else if (name === 'workflow.snapshot' || LOCAL(name) || name.startsWith('visual.'))
+            else if (name === 'workflow.snapshot' || LOCAL(name) || name.startsWith('visual.') || name.startsWith('performance.'))
                 permissions.push('filesystem.project');
             else if (name.startsWith('runtime.') || name === 'project.run' || name === 'project.run_scene' || DEBUG_RUNTIME_MUTATIONS.has(name)) {
                 permissions.push('runtime.modify', 'process.godot', 'filesystem.project');

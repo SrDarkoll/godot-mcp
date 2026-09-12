@@ -2,7 +2,8 @@ import { realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { AddonHelloSchema, MAX_BRIDGE_PAYLOAD, type AddonHello, type AddonCapabilities, type CompatibilityManifest } from '@godot-mcp/protocol';
 import WebSocket, { WebSocketServer } from 'ws';
-import {BridgeRuntimeEventSchema,type BridgeRuntimeEvent} from '@godot-mcp/protocol';
+import {BridgeProjectEventSchema,BridgeRuntimeEventSchema,type BridgeRuntimeEvent} from '@godot-mcp/protocol';
+import {ProjectEvents} from '../events/project-events.js';
 import type { Session } from '../session/session.js';
 import { BridgeClient } from './bridge-client.js';
 import { RpcRouter } from './rpc-router.js';
@@ -37,9 +38,11 @@ export class BridgeServer {
   private server: WebSocketServer | null = null;
   private client: BridgeClient | null = null;
   readonly rpc: RpcRouter;
+  readonly projectEvents: ProjectEvents;
   private closing=false;
 
   constructor(private readonly options: BridgeServerOptions) {
+    this.projectEvents = new ProjectEvents(options.session.id);
     this.rpc = new RpcRouter(() => this.connected ? this.client!.socket : null);
   }
 
@@ -76,6 +79,7 @@ export class BridgeServer {
   }
 
   async stop(): Promise<void> {
+    this.projectEvents.close();
     this.closing=true;
     const hadConnection=this.client!==null||this.options.session.editorConnected||this.options.session.runtimeConnected;
     this.client?.socket.close(1001, 'server shutdown');
@@ -212,6 +216,7 @@ export class BridgeServer {
     this.options.session.editorConnected = true;
     this.options.session.godotVersion = hello.godotVersion;
     this.options.session.addonVersion = hello.addonVersion;
+    this.projectEvents.append('editor.connected', { godotVersion: hello.godotVersion });
 
     let eventSequence=0;
     socket.on('message', message => {
@@ -219,10 +224,18 @@ export class BridgeServer {
       let value:unknown;
       try {value=JSON.parse(message.toString());}catch{return;}
       if(typeof value==='object' && value!==null && 'type' in value && value.type==='event') {
+        const projectEvent = BridgeProjectEventSchema.safeParse(value);
+        if (projectEvent.success) {
+          if (projectEvent.data.sessionId !== this.options.session.id || projectEvent.data.sequence <= eventSequence) return;
+          eventSequence = projectEvent.data.sequence;
+          this.projectEvents.append(projectEvent.data.data.kind, projectEvent.data.data);
+          return;
+        }
         const event=BridgeRuntimeEventSchema.safeParse(value);
         if(!event.success || event.data.sessionId!==this.options.session.id || event.data.sequence<=eventSequence)return;
         eventSequence=event.data.sequence;
         this.options.onRuntimeEvent?.(event.data);
+        if (event.data.event === 'runtime.state') this.projectEvents.append('runtime.state', event.data.data);
       }else this.rpc.handleMessage(message);
     });
     socket.once('close', () => {
@@ -230,6 +243,7 @@ export class BridgeServer {
         this.client = null;
         this.options.session.editorConnected = false;
         this.options.session.runtimeConnected = false;
+        this.projectEvents.append('editor.disconnected', {});
         this.options.onDisconnected?.();
         this.rpc.disconnect();
       }

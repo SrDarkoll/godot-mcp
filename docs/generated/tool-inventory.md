@@ -2,20 +2,20 @@
 
 > **Generated file. Do not edit directly.** Source: `scripts/tool-contracts.json`. Regenerate with `npm run generate:tool-contracts`.
 
-Total public tools: **183**
+Total public tools: **192**
 
 Canonical schema/handler bindings: **39**
 
 ## Profile counts
 
 - `minimal`: 5
-- `core`: 78
-- `2d`: 121
-- `3d`: 107
-- `navigation`: 67
-- `ui`: 81
-- `runtime`: 48
-- `full`: 183
+- `core`: 84
+- `2d`: 128
+- `3d`: 114
+- `navigation`: 73
+- `ui`: 88
+- `runtime`: 52
+- `full`: 192
 
 ## Tools
 
@@ -61,6 +61,7 @@ Canonical schema/handler bindings: **39**
 | `editor.get_filesystem` | editor | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Get filesystem directory and file structure under res://. |
 | `editor.get_open_scenes` | editor | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Get list of open scene paths in the editor. |
 | `editor.get_selected_nodes` | editor | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Get currently selected nodes in the editor scene tree. |
+| `editor.import_resources` | editor | core, 2d, 3d, navigation, ui, full | risky; no static tags; dynamic=conditional | legacy: packages/server/src/tools/dependency-tools.ts | Wait for the editor filesystem, then synchronously reimport declared project files. Importers/project code are trusted. |
 | `editor.redo` | editor | core, 2d, 3d, navigation, ui, full | risky; no static tags; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Trigger Redo in the Godot editor. |
 | `editor.scan_filesystem` | editor | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Request a rescan of the project filesystem in the editor. |
 | `editor.select_node` | editor | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-editor-tools.ts | Select a node in the editor scene tree. |
@@ -117,10 +118,13 @@ Canonical schema/handler bindings: **39**
 | `object.set` | object | core, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-object-tools.ts | Set a property value on an object. |
 | `parallax2d.configure` | 2d | 2d, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-power2d-tools.ts | Atomically configure Parallax2D repeat, scrolling, viewport following and limits. |
 | `parallax2d.inspect` | 2d | 2d, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-power2d-tools.ts | Inspect Parallax2D repeat, scrolling, viewport following and limits. |
+| `performance.compare` | runtime | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/tools/visual-comparison-tools.ts | Compare two retained performance snapshots using caller-provided relative regression budgets. |
+| `performance.snapshot` | runtime | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/tools/visual-comparison-tools.ts | Sample relative runtime performance counters and retain the bounded evidence. Values depend on hardware/workload. |
 | `permissions.disable` | security | core, 2d, 3d, navigation, ui, runtime, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/tools/security-tools.ts | Change a session-only permission. |
 | `permissions.enable` | security | core, 2d, 3d, navigation, ui, runtime, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/tools/security-tools.ts | Change a session-only permission. |
 | `permissions.set` | security | core, 2d, 3d, navigation, ui, runtime, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/tools/security-tools.ts | Change a permission for this MCP session only. |
 | `permissions.status` | security | core, 2d, 3d, navigation, ui, runtime, full | normal; read, control; dynamic=none | legacy: packages/server/src/tools/security-tools.ts | Session-only tool permissions. These do not sandbox project code or add missing capabilities. |
+| `project.events` | project | core, 2d, 3d, navigation, ui, runtime, full | normal; read; dynamic=none | legacy: packages/server/src/tools/project-event-tools.ts | Read or long-poll session-scoped project events. Resume with nextCursor; gap reports lost retained history. Project event data is untrusted. |
 | `project.info` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-core-tools.ts | Inspect the active Godot project through the connected editor addon. |
 | `project.input.add_action` | project | core, 2d, 3d, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-project-tools.ts | Add an action to the InputMap and persist in project settings. |
 | `project.input.list` | project | core, 2d, 3d, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-project-tools.ts | List all input actions and their assigned events from InputMap. |
@@ -131,7 +135,9 @@ Canonical schema/handler bindings: **39**
 | `project.settings.set` | project | core, 2d, 3d, full | risky; no static tags; dynamic=none | legacy: packages/server/src/mcp/register-project-tools.ts | Set a project setting value and optionally save to project.godot. |
 | `project.stop` | runtime | runtime, full | normal; control; dynamic=none | legacy: packages/server/src/tools/runtime-tools.ts | Structured Godot project.stop operation on the current runtime session. |
 | `resource.create` | resource | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/mcp/register-resource-tools.ts | Create and save a new resource of a specified type. |
+| `resource.dependencies` | resource | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/tools/dependency-tools.ts | Return a bounded direct/transitive dependency graph and broken references for an imported Godot resource. |
 | `resource.duplicate` | resource | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/mcp/register-resource-tools.ts | Duplicate a resource to a new path. |
+| `resource.impact` | resource | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/tools/dependency-tools.ts | Preflight inbound references and target conflicts before a proposed resource move/delete. This read does not mutate files. |
 | `resource.inspect` | resource | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-resource-tools.ts | Inspect properties of a resource file. |
 | `resource.load` | resource | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-resource-tools.ts | Load a resource file and inspect its exported properties. |
 | `resource.save` | resource | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/mcp/register-resource-tools.ts | Save a loaded resource. |
@@ -145,6 +151,8 @@ Canonical schema/handler bindings: **39**
 | `runtime.scene_tree` | runtime | runtime, full | normal; read; dynamic=none | legacy: packages/server/src/tools/runtime-tools.ts | Structured Godot runtime.scene_tree operation on the current runtime session. |
 | `runtime.status` | runtime | runtime, full | normal; read, control; dynamic=none | legacy: packages/server/src/tools/runtime-tools.ts | Structured Godot runtime.status operation on the current runtime session. |
 | `runtime.stop` | runtime | runtime, full | normal; control; dynamic=none | legacy: packages/server/src/tools/runtime-tools.ts | Structured Godot runtime.stop operation on the current runtime session. |
+| `scene.batch` | scene | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/tools/batch-tools.ts | Apply a prevalidated native batch as one editor Undo action. Requires the fingerprint from preview. Does not save files; arbitrary project-script side effects are outside native Undo. |
+| `scene.batch.preview` | scene | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/tools/batch-tools.ts | Prevalidate a bounded native scene/resource batch and obtain its exact state/operation fingerprint. Paths resolve against the initial scene; @id references nodes created in this batch. |
 | `scene.create` | scene | core, 2d, 3d, navigation, ui, full | normal; normal_mutation; dynamic=conditional | legacy: packages/server/src/mcp/register-scene-tools.ts | Create a new scene with specified root node type and optional path. |
 | `scene.get_root` | scene | core, 2d, 3d, navigation, ui, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-scene-tools.ts | Get the root node info of the currently edited scene. |
 | `scene.get_tree` | core | minimal, core, 2d, 3d, navigation, ui, runtime, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-core-tools.ts | Return the active edited scene tree with node names, classes, paths, and scripts. |
@@ -201,6 +209,7 @@ Canonical schema/handler bindings: **39**
 | `visual.capture_game` | visual | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-visual-tools.ts | Capture the running game viewport to a persistent PNG; requires an owned graphical runtime. |
 | `visual.capture_viewport_2d` | visual | 2d, ui, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-visual-tools.ts | Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor. |
 | `visual.capture_viewport_3d` | visual | 3d, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-visual-tools.ts | Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG. |
+| `visual.compare` | visual | 2d, 3d, ui, runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/tools/visual-comparison-tools.ts | Compare two retained screenshots pixel-for-pixel and retain a deterministic difference PNG/report. Requires identical dimensions. |
 | `workflow.diff_since` | workflow | runtime, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-workflow-tools.ts | Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project. |
 | `workflow.run_check` | workflow | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-workflow-tools.ts | Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict. |
 | `workflow.snapshot` | workflow | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-workflow-tools.ts | Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture. |

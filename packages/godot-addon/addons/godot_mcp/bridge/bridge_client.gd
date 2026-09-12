@@ -2,7 +2,7 @@
 extends Node
 
 const DESCRIPTOR_PATH := "res://.godot-mcp/runtime/bridge.json"
-const ADDON_VERSION := "0.3.3"
+const ADDON_VERSION := "0.4.0"
 const PROTOCOL_VERSION := 1
 const DESCRIPTOR_POLL_SECONDS := 1.0
 
@@ -20,6 +20,25 @@ var _connection_started_ms := 0
 var _runtime
 var _event_sequence := 0
 var _priority_count := 0
+var _project_pending: Dictionary = {}
+var _project_dropped := 0
+var _project_elapsed := 0.0
+
+func queue_project_event(kind: String, path_value = null) -> void:
+    if _project_pending.has(kind):
+        _project_dropped += 1
+    _project_pending[kind] = path_value
+
+func _flush_project_events(delta: float) -> void:
+    _project_elapsed += delta
+    if not _authenticated or _project_elapsed < 0.1 or _project_pending.is_empty():
+        return
+    _project_elapsed = 0.0
+    if _socket.get_current_outbound_buffered_amount() > 256 * 1024:
+        return
+    for kind in _project_pending.keys():
+        _send_event("project.changed", {"kind": kind, "path": _project_pending[kind], "dropped": _project_dropped})
+    _project_pending.clear()
 
 func start(editor_interface, runtime = null) -> void:
     _editor_interface = editor_interface
@@ -65,6 +84,7 @@ func _process(delta: float) -> void:
         if not _hello_sent:
             _send_hello()
         _drain_messages()
+        _flush_project_events(delta)
     elif state == WebSocketPeer.STATE_CLOSED:
         _invalidate()
         _socket = null

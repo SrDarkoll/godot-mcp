@@ -31,3 +31,6 @@ export * from './tooling.js';
 export * from './headless.js';
 
 export * from './debugger.js';
+export * from './batch.js';
+export * from './dependencies.js';
+export * from './comparison.js';

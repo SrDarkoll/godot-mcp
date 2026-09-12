@@ -21,6 +21,11 @@ it('controls a real run, inspects canonical properties, pauses and persists nati
     expect((await call('runtime.get_property',{node_path:'/root/Main',property:'counter'})).value).toEqual(before.value);
     expect((await call('runtime.resume')).state).toBe('running');
     const perf=await call('debug.performance');expect(perf.nodeCount).toBeGreaterThan(0);
+    const baseline=await call('performance.snapshot',{samples:2,intervalMs:10,label:'runtime baseline'});
+    const candidate=await call('performance.snapshot',{samples:2,intervalMs:10,label:'runtime candidate'});
+    const budget=await call('performance.compare',{baselineId:baseline.id,candidateId:candidate.id,budgets:{maxFpsDropRatio:10,maxFrameTimeIncreaseRatio:10,maxNodeIncreaseRatio:10,maxObjectIncreaseRatio:10}});
+    expect(budget).toMatchObject({mode:'relative',passed:true});
+    expect(baseline.sampleCount).toBe(2);
     await waitFor(async()=>JSON.stringify(await call('debug.output')).includes('RUNTIME_OUTPUT'));
     expect(JSON.stringify(await call('debug.errors'))).toContain('RUNTIME_ERROR');
     expect(JSON.stringify(await call('debug.warnings'))).toContain('RUNTIME_WARNING');

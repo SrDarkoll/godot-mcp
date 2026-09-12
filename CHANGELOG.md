@@ -2,6 +2,29 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.4.0] - 2026-09-12
+
+### Added
+
+- Structured scene/resource batches with bounded prevalidation, stale-state fingerprints, one-step Undo/Redo and verified rollback.
+- Resumable project events with cursor pagination, bounded retention, long polling, coalescing and explicit loss counters.
+- Resource dependency graphs, inbound move/delete impact analysis and confirmed editor reimport for declared files.
+- Deterministic retained screenshot comparison with bounded PNG decoding and difference artifacts.
+- Relative runtime performance snapshots and caller-defined regression budgets.
+
+### Changed
+
+- Expanded the canonical public catalog from 183 to 192 MCP tools across all eight profiles.
+- Coordinated monorepo, server, protocol, addon and public CLI versions at `0.4.0`.
+- Preserved the headless-child addon guard and the existing generated contract, policy, approval and recovery architecture.
+
+### Validation
+
+- Node 22.13.0: 357 unit tests, typecheck, 18 general integrations, 10 runtime integrations, 2 visual integrations, headless manager and advanced DAP debugger gates passed.
+- Godot 4.6.3 validated 38 addon scripts plus the generated runtime logger.
+- Node 24.20.0: 357 unit tests, typecheck and external-consumer distribution smoke test passed.
+- npm public-package checks, 16 release-script tests, tarball consumer installation and `npm publish --dry-run` passed.
+
 ## [0.3.3] - 2026-09-08
 
 ### Changed

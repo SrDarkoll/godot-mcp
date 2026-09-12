@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - run: npm run check:docs
       - name: Install verified Godot
         shell: pwsh
         run: ./scripts/ci-install-godot.ps1 -Destination "$env:RUNNER_TEMP/godot-mcp-engine"
