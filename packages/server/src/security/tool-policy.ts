@@ -15,6 +15,7 @@ import { CONTROL_TOOL_NAMES, NORMAL_MUTATION_TOOL_NAMES, READ_TOOL_NAMES } from 
 const READS = new Set(READ_TOOL_NAMES);
 const CONTROLS = new Set(CONTROL_TOOL_NAMES);
 const NORMAL_MUTATIONS = new Set(NORMAL_MUTATION_TOOL_NAMES);
+const UNGATED_READS = new Set(['project.events']);
 const LOCAL = (name: string): boolean => name === 'godot.tools' || /^(transaction|checkpoint|permissions|risk)\./.test(name) ||
     name.startsWith('session.') ||
     ['headless.status','headless.get_output'].includes(name) ||
@@ -339,7 +340,10 @@ export class ToolPolicy {
             }
         };
         try {
-            const result = await (CONTROLS.has(name) ? execute() : this.gate.run(!READS.has(name), execute));
+            // Long-poll subscriptions must not hold a read lease while awaiting an edit-generated event.
+            const result = await (CONTROLS.has(name) || UNGATED_READS.has(name)
+                ? execute()
+                : this.gate.run(!READS.has(name), execute));
             this.telemetry.record(
                 name,
                 performance.now() - started,

@@ -6,6 +6,7 @@ import { createSession } from '../src/session/session.js';
 import { SessionStore } from '../src/session/session-store.js';
 import { RecoveryService } from '../src/recovery/recovery-service.js';
 import { ToolPolicy } from '../src/security/tool-policy.js';
+import { ProjectEvents } from '../src/events/project-events.js';
 async function setup() {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), 'godot-mcp-policy-'));
     const session = createSession(root);
@@ -60,6 +61,49 @@ it('classifies godot.tools as a local read-only operation', async () => {
 it('accepts synchronous operations as well as promises', async () => {
     const { policy } = await setup();
     expect(await policy.execute('session.status', {}, () => ({ ok: true }))).toEqual({ ok: true });
+});
+it('does not let a project event long-poll block the mutation that produces its event', async () => {
+    const { session, policy } = await setup();
+    const events = new ProjectEvents(session.id);
+    const waiting = policy.execute('project.events', { after: 0, limit: 1, wait_ms: 2000 },
+        () => events.read(0, 1, 2000));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    const mutation = policy.execute('node.create', {}, async () => {
+        events.append('scene.changed', { path: 'res://main.tscn' });
+        return { created: true };
+    });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+        const completed = await Promise.race([
+            mutation.then(() => true),
+            new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 300); })
+        ]);
+        expect(completed).toBe(true);
+        expect((await waiting).events[0]?.event).toBe('scene.changed');
+    } finally {
+        if (timer) clearTimeout(timer);
+        events.close();
+        await Promise.allSettled([waiting, mutation]);
+    }
+});
+it('does not wait for an idle project event subscription before shutdown', async () => {
+    const { session, policy } = await setup();
+    const events = new ProjectEvents(session.id);
+    const waiting = policy.execute('project.events', { after: 0, limit: 1, wait_ms: 30000 },
+        () => events.read(0, 1, 30000));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+        const closedPromptly = await Promise.race([
+            policy.close().then(() => true),
+            new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 300); })
+        ]);
+        expect(closedPromptly).toBe(true);
+    } finally {
+        if (timer) clearTimeout(timer);
+        events.close();
+        expect((await waiting).closed).toBe(true);
+    }
 });
 it('blocks unrelated mutations while a file transaction is open', async () => {
     const { recovery, policy } = await setup();
@@ -388,4 +432,3 @@ it('rejects cyclic and deep inputs before fingerprinting or execution', async ()
   await expect(policy.execute('node.create', { value: deep }, async () => ({}))).rejects.toMatchObject({ code: 'ARGUMENT_TOO_LARGE' });
   await expect(policy.assess('node.create', { value: deep })).rejects.toMatchObject({ code: 'ARGUMENT_TOO_LARGE' });
 });
-
