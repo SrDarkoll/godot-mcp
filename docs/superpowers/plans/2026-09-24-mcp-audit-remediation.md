@@ -23,10 +23,10 @@
 
 **Files:** `packages/server/src/project/project-lease.ts`, `packages/cli/src/init/init-project.ts`, `packages/server/test/project-lease.test.ts`, `packages/cli/test/init-project.test.ts`, new `docs/tools/project-maintenance.md`.
 
-- [ ] Reproduce contention between a running server and an addon update, plus contention between two short maintenance operations.
-- [ ] Return bounded lease metadata: operation, acquisition time and process identity where available; distinguish `EACCES` from an occupied lease.
-- [ ] Surface authenticated server status before retrying; retry only short maintenance contention with a fixed deadline, never a known live server.
-- [ ] Verify release after owner exit and crash; preserve unrelated project files and journals.
+- [x] Reproduce contention between a running server and an addon update, plus contention between two short maintenance operations.
+- [x] Return bounded lease metadata: operation, acquisition time and process identity where available; distinguish `EACCES` from an occupied lease.
+- [x] Surface authenticated server status when busy; retry only short maintenance contention with a fixed deadline, never a known live server.
+- [x] Verify release after owner exit and crash; preserve unrelated project files and journals.
 
 ## Task 3: Explain native Variant mismatches (A6)
 

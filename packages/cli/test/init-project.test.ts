@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { initProject } from '../src/init/init-project.js';
+import { ProjectLease } from '@godot-mcp/server/project-lease';
 
 async function createTempGodotProject(): Promise<string> {
   const root = await mkdtemp(path.join(tmpdir(), 'godot-mcp-cli-'));
@@ -38,4 +39,15 @@ it('backs up changed managed addon files before updating them',async()=>{
  expect(updated.backupPath).toEqual(expect.any(String));
  expect(await readFile(path.join(updated.backupPath!,'files/plugin.gd'),'utf8')).toBe('custom addon code');
  expect(await readFile(path.join(root,'addons/godot_mcp/plugin.gd'),'utf8')).toContain('extends EditorPlugin');
+});
+it('identifies a running server before changing addon files', async () => {
+  const root = await createTempGodotProject();
+  const owner = await ProjectLease.acquire(root, { operation: 'server' });
+  try {
+    await expect(initProject({ projectRoot: root, enable: false, operation: 'addon_update' }))
+      .rejects.toMatchObject({ code: 'PROJECT_BUSY', details: { owner: { operation: 'server' } } });
+    await expect(stat(path.join(root, 'addons', 'godot_mcp', 'plugin.cfg'))).rejects.toMatchObject({ code: 'ENOENT' });
+  } finally {
+    await owner.release();
+  }
 });
