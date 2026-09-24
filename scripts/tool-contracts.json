@@ -3928,6 +3928,14 @@
       "description": "Compare two retained performance snapshots using caller-provided relative regression budgets.",
       "risk": { "tags": ["normal_mutation"], "dynamic": "none" },
       "binding": { "status": "legacy", "source": "packages/server/src/tools/visual-comparison-tools.ts" }
+    },
+    {
+      "name": "visual.resolve_capture",
+      "domain": "visual",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "runtime", "full"],
+      "description": "Resolve a retained capture reference after reconnect and verify its manifest, file and SHA-256 before returning its absolute path.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/mcp/register-visual-tools.ts" }
     }
   ]
 }

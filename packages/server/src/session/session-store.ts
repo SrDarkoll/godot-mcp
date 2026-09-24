@@ -7,7 +7,7 @@ import { BridgeRpcError } from '../bridge/rpc-router.js';
 
 export class SessionStore {
   private readonly queues = new Map<string, Promise<unknown>>();
-  constructor(private readonly projectRoot: string) {}
+  constructor(readonly projectRoot: string) {}
 
   sessionDir(sessionId: string): string {
     if (!/^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}$/.test(sessionId)) throw new Error('Invalid session id');

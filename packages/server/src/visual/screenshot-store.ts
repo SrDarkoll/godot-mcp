@@ -95,6 +95,10 @@ export class ScreenshotStore {
       screenshotId:screenshot.id,timestamp:screenshot.timestamp,label:screenshot.label} : null;
     await this.sessions.update(this.session.id,m => ({...m,screenshots:[...m.screenshots,screenshot],
       checkpoints:checkpoint ? [...m.checkpoints,checkpoint] : m.checkpoints}));
-    return {sessionId:this.session.id,screenshot,checkpoint};
+    return {
+      sessionId:this.session.id,screenshot,checkpoint,
+      captureRef:`${this.session.id}/${screenshot.id}`,
+      absolutePath:path.join(this.sessions.sessionDir(this.session.id),...relative.split('/'))
+    };
   }
 }

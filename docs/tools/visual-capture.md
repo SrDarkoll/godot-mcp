@@ -1,6 +1,6 @@
 # Editor viewport captures
 
-Plan 3 adds `visual.capture_viewport_2d`, `visual.capture_viewport_3d` and `session.manifest`.
+The visual tools include `visual.capture_viewport_2d`, `visual.capture_viewport_3d`, `visual.capture_game`, `visual.resolve_capture` and `session.manifest`.
 These are standard MCP tools. The first two return a PNG image content block and structured metadata after the image and manifest have been persisted. They use Godot APIs, with no desktop input simulation.
 
 ## Examples
@@ -33,11 +33,13 @@ The editor must have graphical rendering and the required public viewport API. H
 
 Each screenshot records its ID, sequence, relative path, scene, reason, timestamp, dimensions, byte length, SHA-256 and viewport index. A checkpoint with `kind: "visual"` references that screenshot. It does not provide rollback or a recoverable project snapshot. Transaction references remain null until the transaction subsystem exists.
 
+The capture response also returns `absolutePath` and a self-contained `captureRef` in the form `<session-id>/<screenshot-uuid>`. Keep `captureRef` when continuing in a later session. `visual.resolve_capture` accepts `{"capture_ref":"<captureRef>"}` and returns the retained metadata and absolute path after checking the original session manifest, the ordinary PNG file and its SHA-256. It works after the original MCP session ends and does not need the old session ID as a separate argument. The UUID alone remains scoped to its session.
+
 No capture is deleted automatically, including after failures or server restart. Names are exclusive and ordered; failed writes can leave sequence gaps. A PNG written before a failed manifest publication is retained as an unindexed artifact, and the tool returns an error without an image success response. Partially written artifacts are retained as well. There is no automatic cleanup or recovery command in this milestone.
 
 The manifest also retains version metadata, timestamps and controlled visual error records. Tokens and base64 are never stored in it. Graceful shutdown sets `endedAt`; forced termination can leave it null. Restart creates a new session and preserves previous directories.
 
-Reasons: `manual_request`, `after_visual_change`, `after_visual_fix`, `before_major_change`, `after_major_change`, `on_error`. These are explicit caller annotations; automatic runtime/transaction checkpoint triggers and running-game screenshots are future milestones. The earlier design's illustrative `visual.capture_editor_2d/3d` names are superseded by the canonical names above, without aliases.
+Reasons: `manual_request`, `after_visual_change`, `after_visual_fix`, `before_major_change`, `after_major_change`, `on_error`. These are explicit caller annotations. Running-game screenshots use `visual.capture_game`; visual checkpoints are not file rollback snapshots.
 
 ## Verification
 

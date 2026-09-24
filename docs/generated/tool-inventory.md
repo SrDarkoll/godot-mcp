@@ -2,20 +2,20 @@
 
 > **Generated file. Do not edit directly.** Source: `scripts/tool-contracts.json`. Regenerate with `npm run generate:tool-contracts`.
 
-Total public tools: **192**
+Total public tools: **193**
 
 Canonical schema/handler bindings: **39**
 
 ## Profile counts
 
 - `minimal`: 5
-- `core`: 84
-- `2d`: 128
-- `3d`: 114
-- `navigation`: 73
-- `ui`: 88
-- `runtime`: 52
-- `full`: 192
+- `core`: 85
+- `2d`: 129
+- `3d`: 115
+- `navigation`: 74
+- `ui`: 89
+- `runtime`: 53
+- `full`: 193
 
 ## Tools
 
@@ -210,6 +210,7 @@ Canonical schema/handler bindings: **39**
 | `visual.capture_viewport_2d` | visual | 2d, ui, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-visual-tools.ts | Activate the 2D editor tab and capture its viewport as a persistent PNG. Requires a graphical editor. |
 | `visual.capture_viewport_3d` | visual | 3d, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-visual-tools.ts | Activate the 3D editor tab and capture the requested visible viewport (0-3) as a persistent PNG. |
 | `visual.compare` | visual | 2d, 3d, ui, runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/tools/visual-comparison-tools.ts | Compare two retained screenshots pixel-for-pixel and retain a deterministic difference PNG/report. Requires identical dimensions. |
+| `visual.resolve_capture` | visual | core, 2d, 3d, navigation, ui, runtime, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-visual-tools.ts | Resolve a retained capture reference after reconnect and verify its manifest, file and SHA-256 before returning its absolute path. |
 | `workflow.diff_since` | workflow | runtime, full | normal; read; dynamic=none | legacy: packages/server/src/mcp/register-workflow-tools.ts | Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project. |
 | `workflow.run_check` | workflow | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-workflow-tools.ts | Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict. |
 | `workflow.snapshot` | workflow | runtime, full | normal; normal_mutation; dynamic=none | legacy: packages/server/src/mcp/register-workflow-tools.ts | Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture. |

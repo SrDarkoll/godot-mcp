@@ -40,10 +40,10 @@
 
 **Files:** `packages/protocol/src/session-artifacts.ts`, `packages/server/src/visual/screenshot-store.ts`, `packages/server/src/visual/capture-resolver.ts`, `packages/server/src/mcp/register-visual-tools.ts`, `scripts/tool-contracts.json`, `packages/server/test/visual-tools.test.ts`, `tests/integration/visual-capture.test.ts`.
 
-- [ ] Add an absolute path and one opaque, self-contained capture reference to new capture results while retaining the existing fields.
-- [ ] Add a read-only resolver that validates the reference, session manifest, ordinary file and hash before returning metadata/path.
-- [ ] Verify resolution after closing the original session and starting a new one; reject malformed and cross-project references.
-- [ ] Regenerate and verify tool contracts and profile counts.
+- [x] Add an absolute path and one opaque, self-contained capture reference to new capture results while retaining the existing fields.
+- [x] Add a read-only resolver that validates the reference, session manifest, ordinary file and hash before returning metadata/path.
+- [x] Verify resolution after closing the original session and starting a new one; reject malformed and cross-project references.
+- [x] Regenerate and verify tool contracts and profile counts (193 tools).
 
 ## Task 5: Capture a sector without saving a camera change (A8)
 

@@ -17,6 +17,10 @@ export const VisualCheckpointRecordSchema = z.strictObject({
   id: z.uuid(), kind: z.literal('visual'), screenshotId: z.uuid(), timestamp: z.iso.datetime(),
   label: z.string().min(1).max(80)
 });
+export const CaptureReferenceSchema = z.string().regex(
+  /^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/
+);
+export const CaptureResolveInputSchema = z.strictObject({ capture_ref: CaptureReferenceSchema });
 export const SessionManifestSchema = z.strictObject({
   manifestVersion: z.literal(1), sessionId: z.string().min(1), projectRoot: z.string().min(1),
   startedAt: z.iso.datetime(), endedAt: z.iso.datetime().nullable(),
@@ -37,8 +41,10 @@ export const SessionManifestSchema = z.strictObject({
   }
 });
 export const CaptureResultSchema = z.strictObject({
-  sessionId:z.string(), screenshot:ScreenshotRecordSchema, checkpoint:VisualCheckpointRecordSchema.nullable()
-});
+  sessionId:z.string(), screenshot:ScreenshotRecordSchema, checkpoint:VisualCheckpointRecordSchema.nullable(),
+  captureRef:CaptureReferenceSchema, absolutePath:z.string().min(1)
+}).refine(value => value.captureRef === `${value.sessionId}/${value.screenshot.id}`,
+  'Capture reference does not match the session and screenshot');
 export type ScreenshotRecord = z.infer<typeof ScreenshotRecordSchema>;
 export type VisualCheckpointRecord = z.infer<typeof VisualCheckpointRecordSchema>;
 export type CaptureResult = z.infer<typeof CaptureResultSchema>;

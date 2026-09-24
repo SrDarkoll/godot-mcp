@@ -30,10 +30,16 @@ it('returns the exact persisted image through MCP and reads manifest without edi
     const response = await client.callTool({name:'visual.capture_viewport_2d',arguments:{label:'initial',checkpoint:true}});
     expect(response.isError).not.toBe(true);
     expect(response.content).toContainEqual({type:'image',mimeType:'image/png',data:png});
+    const capture = response.structuredContent as {captureRef:string;absolutePath:string;screenshot:{id:string}};
+    expect(capture.captureRef).toContain(capture.screenshot.id);
+    expect(await fs.readFile(capture.absolutePath)).toEqual(Buffer.from(png,'base64'));
     const manifest = await sessions.read(session.id);
     expect(manifest.screenshots).toHaveLength(1);
     expect(await fs.readFile(path.join(sessions.sessionDir(session.id),manifest.screenshots[0]!.path))).toEqual(Buffer.from(png,'base64'));
     bridge.connected = false;
+    const resolved = await client.callTool({name:'visual.resolve_capture',arguments:{capture_ref:capture.captureRef}});
+    expect(resolved.isError).not.toBe(true);
+    expect(resolved.structuredContent).toMatchObject({captureRef:capture.captureRef,absolutePath:capture.absolutePath});
     const read = await client.callTool({name:'session.manifest',arguments:{}});
     expect(read.structuredContent).toMatchObject({manifest:{checkpoints:[{kind:'visual'}]}});
     const invalid = await client.callTool({name:'visual.capture_viewport_2d',arguments:{path:'../x'}});

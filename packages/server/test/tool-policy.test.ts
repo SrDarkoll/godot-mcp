@@ -58,6 +58,18 @@ it('classifies godot.tools as a local read-only operation', async () => {
     expect(assessment.risk).toBe('normal');
     expect(assessment.permissions).toEqual([]);
 });
+it('resolves retained captures with filesystem permission but no editor connection permission', async () => {
+    const { policy } = await setup();
+    const args = { capture_ref: '2026-09-24T00-00-00-000Z_abcdef12/123e4567-e89b-42d3-a456-426614174000' };
+    const assessment = await policy.assess('visual.resolve_capture', args);
+    expect(assessment.risk).toBe('normal');
+    expect(assessment.permissions).toEqual(['filesystem.project']);
+    await policy.setPermission('network.local', false);
+    expect(await policy.execute('visual.resolve_capture', args, async () => ({ found: true }))).toEqual({ found: true });
+    await policy.setPermission('filesystem.project', false);
+    await expect(policy.execute('visual.resolve_capture', args, async () => ({})))
+        .rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
+});
 it('accepts synchronous operations as well as promises', async () => {
     const { policy } = await setup();
     expect(await policy.execute('session.status', {}, () => ({ ok: true }))).toEqual({ ok: true });
