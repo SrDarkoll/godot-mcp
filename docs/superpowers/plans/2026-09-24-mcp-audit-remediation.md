@@ -32,9 +32,9 @@
 
 **Files:** `packages/godot-addon/addons/godot_mcp/bridge/handlers/batch_handlers.gd`, `tests/integration/scene-batch.test.ts`, `docs/tools/structured-batches.md`.
 
-- [ ] Add a Polygon2D/Line2D case where plain points fail with expected type, received type and a valid encoded example.
-- [ ] Keep the existing typed `PackedVector2Array` conversion working and verify Undo/Redo.
-- [ ] Run the native scene-batch integration test.
+- [x] Add a Polygon2D/Line2D case where plain points fail with expected type, received type and a valid encoded example.
+- [x] Keep the existing typed `PackedVector2Array` conversion working and verify Undo/Redo.
+- [x] Run the native scene-batch integration test.
 
 ## Task 4: Resolve retained captures after reconnect (A7)
 
