@@ -49,10 +49,10 @@
 
 **Files:** `packages/protocol/src/visual.ts`, `packages/server/src/tools/visual-tools.ts`, `packages/godot-addon/addons/godot_mcp/runtime/runtime_capture.gd`, `packages/godot-addon/addons/godot_mcp/runtime/runtime_handlers.gd`, `tests/integration/runtime-game-capture.test.ts`, `docs/tools/visual-capture.md`.
 
-- [ ] Extend game capture with optional finite `center {x,y}` and positive `zoom {x,y}`; keep existing calls unchanged.
-- [ ] In the owned runtime, apply a temporary Camera2D for the capture, restore the prior camera in all completion/error paths, and leave scene files untouched.
-- [ ] Include the actual framing in returned metadata and test both successful capture and restoration after failure.
-- [ ] Run graphical runtime integration and inspect the retained capture evidence.
+- [x] Extend game capture with optional finite `center {x,y}` and positive `zoom {x,y}`; keep existing calls unchanged.
+- [x] In the owned runtime, apply a temporary Camera2D for the capture, restore the prior camera in all completion/error paths, and leave scene files untouched.
+- [x] Include the actual framing in returned metadata and test both successful capture and restoration after failure.
+- [x] Run graphical runtime integration and inspect the retained capture evidence.
 
 ## Task 6: Read-only geometric route validation (A1)
 

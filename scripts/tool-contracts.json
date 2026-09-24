@@ -3749,7 +3749,7 @@
         "runtime",
         "full"
       ],
-      "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.",
+      "description": "Capture the owned graphical game runtime to a persistent PNG, optionally with temporary center and zoom that never saves the scene.",
       "risk": {
         "tags": [
           "normal_mutation"

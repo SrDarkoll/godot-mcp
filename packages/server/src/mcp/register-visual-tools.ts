@@ -1,4 +1,4 @@
-import { Capture2DParamsSchema, Capture3DParamsSchema, CaptureResolveInputSchema } from '@godot-mcp/protocol';
+import { Capture2DParamsSchema, Capture3DParamsSchema, CaptureResolveInputSchema, GameCaptureParamsSchema } from '@godot-mcp/protocol';
 import * as z from 'zod/v4';
 import type { SessionStore } from '../session/session-store.js';
 import type { Session } from '../session/session.js';
@@ -16,7 +16,7 @@ export function registerVisualTools(registrar: ToolRegistrar, visual: VisualTool
         try { return toolSuccess(await resolver.resolve(args.capture_ref)); }
         catch (error) { return toolError(error); }
     });
-    registrar.registerTool('visual.capture_game', { description: 'Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.', inputSchema: Capture2DParamsSchema }, async (args) => {
+    registrar.registerTool('visual.capture_game', { description: 'Capture the owned graphical game runtime to a persistent PNG, optionally with temporary center and zoom that never saves the scene.', inputSchema: GameCaptureParamsSchema }, async (args) => {
         try {
             const capture = await visual.capture('game', args);
             return toolImageSuccess(capture.result, capture.data);

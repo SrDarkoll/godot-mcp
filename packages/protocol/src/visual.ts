@@ -9,6 +9,15 @@ export const Capture2DParamsSchema = z.strictObject({
   reason: VisualReasonSchema.default('manual_request'),
   checkpoint: z.boolean().default(false)
 });
+const coordinate = z.number().finite().min(-10_000_000).max(10_000_000);
+const zoomAxis = z.number().finite().min(0.05).max(64);
+export const CaptureFramingSchema = z.strictObject({
+  center: z.strictObject({ x: coordinate, y: coordinate }),
+  zoom: z.strictObject({ x: zoomAxis, y: zoomAxis })
+});
+export const GameCaptureParamsSchema = Capture2DParamsSchema.extend({
+  framing: CaptureFramingSchema.optional()
+});
 export const Capture3DParamsSchema = Capture2DParamsSchema.extend({
   viewport_index: z.number().int().min(0).max(3).default(0)
 });
@@ -18,9 +27,12 @@ export const CapturePayloadSchema = z.strictObject({
   height: z.number().int().min(1).max(4096),
   scene: z.string().nullable(),
   captured_at: z.iso.datetime(),
-  viewport_index: z.number().int().min(0).max(3).nullable()
+  viewport_index: z.number().int().min(0).max(3).nullable(),
+  framing: CaptureFramingSchema.nullable().optional()
 });
 export type Capture2DParams = z.infer<typeof Capture2DParamsSchema>;
 export type Capture3DParams = z.infer<typeof Capture3DParamsSchema>;
+export type GameCaptureParams = z.infer<typeof GameCaptureParamsSchema>;
 export type CapturePayload = z.infer<typeof CapturePayloadSchema>;
+export type CaptureFraming = z.infer<typeof CaptureFramingSchema>;
 export const GameCapturePayloadSchema=CapturePayloadSchema.extend({run_id:z.uuid()});

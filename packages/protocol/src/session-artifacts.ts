@@ -1,5 +1,5 @@
 import * as z from 'zod/v4';
-import { MAX_CAPTURE_BYTES, VisualReasonSchema } from './visual.js';
+import { CaptureFramingSchema, MAX_CAPTURE_BYTES, VisualReasonSchema } from './visual.js';
 import {RuntimeRunSchema} from './runtime.js';
 import {FileCheckpointSchema} from './recovery.js';
 import {HeadlessExecutionRecordSchema} from './headless.js';
@@ -11,7 +11,8 @@ export const ScreenshotRecordSchema = z.strictObject({
   scene: z.string().nullable(), reason: VisualReasonSchema, label: z.string().min(1).max(80),
   transaction: z.null(), timestamp: z.iso.datetime(), width: z.number().int().min(1).max(4096),
   height: z.number().int().min(1).max(4096), byteLength: z.number().int().positive().max(MAX_CAPTURE_BYTES),
-  sha256: z.string().regex(/^[a-f0-9]{64}$/), viewportIndex: z.number().int().min(0).max(3).nullable()
+  sha256: z.string().regex(/^[a-f0-9]{64}$/), viewportIndex: z.number().int().min(0).max(3).nullable(),
+  framing: CaptureFramingSchema.nullable().default(null)
 }).refine(s=>s.type==='game' ? s.runId!==null&&s.viewportIndex===null&&s.path.startsWith('screenshots/game/') : s.runId===null&&s.path.startsWith('screenshots/editor/'));
 export const VisualCheckpointRecordSchema = z.strictObject({
   id: z.uuid(), kind: z.literal('visual'), screenshotId: z.uuid(), timestamp: z.iso.datetime(),

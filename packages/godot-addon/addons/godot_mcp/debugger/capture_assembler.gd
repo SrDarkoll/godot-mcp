@@ -27,4 +27,5 @@ func finish() -> Dictionary:
     if bytes.size()!=int(metadata.totalBytes) or Marshalls.raw_to_base64(bytes)!=encoded or hashing.finish().hex_encode()!=metadata.sha256:
         return {"__error":{"code":"INVALID_CAPTURE_PAYLOAD","message":"Game capture checksum mismatch"}}
     return {"png_base64":encoded,"width":metadata.width,"height":metadata.height,"scene":metadata.get("scene"),
-        "captured_at":metadata.get("captured_at"),"viewport_index":null,"run_id":metadata.runId}
+        "captured_at":metadata.get("captured_at"),"viewport_index":null,"run_id":metadata.runId,
+        "framing":metadata.get("framing")}

@@ -1,4 +1,4 @@
-import {Capture2DParamsSchema,Capture3DParamsSchema,CapturePayloadSchema,GameCapturePayloadSchema,
+import {Capture2DParamsSchema,Capture3DParamsSchema,CapturePayloadSchema,GameCaptureParamsSchema,GameCapturePayloadSchema,
   type AddonCapabilities,type CaptureResult} from '@godot-mcp/protocol';
 import type {Session} from '../session/session.js';
 import {SessionStore} from '../session/session-store.js';
@@ -23,14 +23,16 @@ export class VisualTools {
       if (this.closed) throw new BridgeRpcError('SESSION_CLOSED','Session is closing');
       const tool = type==='game'?'visual.capture_game':type === 'editor_2d' ? 'visual.capture_viewport_2d' : 'visual.capture_viewport_3d';
       try {
-        const params = (type !== 'editor_3d' ? Capture2DParamsSchema : Capture3DParamsSchema).safeParse(input);
+        const params = (type === 'game' ? GameCaptureParamsSchema : type === 'editor_3d' ? Capture3DParamsSchema : Capture2DParamsSchema).safeParse(input);
         if (!params.success) throw new BridgeRpcError('INVALID_REQUEST','Invalid capture parameters');
         if (!this.bridge.connected) throw new BridgeRpcError('EDITOR_NOT_CONNECTED','Editor is not connected');
         if(type==='game'){
           if(!this.runtime)throw new BridgeRpcError('CAPABILITY_UNAVAILABLE','Runtime integration is unavailable');
-          const game=GameCapturePayloadSchema.parse(await this.runtime.request(tool,{},10000));
+          const framing = GameCaptureParamsSchema.parse(input).framing;
+          const game=GameCapturePayloadSchema.parse(await this.runtime.request(tool,framing?{framing}:{},10000));
           const {run_id,...payload}=game;
-          const saved=await this.screenshots.save({type,payload,runId:run_id,metadata:Capture2DParamsSchema.parse(input)});
+          const metadata={label:params.data.label,reason:params.data.reason,checkpoint:params.data.checkpoint};
+          const saved=await this.screenshots.save({type,payload,runId:run_id,metadata});
           return {result:saved,data:game.png_base64};
         }
         if (!(type === 'editor_2d' ? this.bridge.capabilities?.viewport2d : this.bridge.capabilities?.viewport3d)) {

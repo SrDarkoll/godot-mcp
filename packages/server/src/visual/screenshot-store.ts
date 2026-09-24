@@ -90,7 +90,8 @@ export class ScreenshotStore {
     const screenshot:ScreenshotRecord = {id:randomUUID(),sequence,type:input.type,path:relative,runId:input.type==='game'?input.runId!:null,
       scene:payload.scene,reason:metadata.data.reason,label:metadata.data.label,transaction:null,
       timestamp:payload.captured_at,width:payload.width,height:payload.height,byteLength:bytes.length,
-      sha256:createHash('sha256').update(bytes).digest('hex'),viewportIndex:payload.viewport_index};
+      sha256:createHash('sha256').update(bytes).digest('hex'),viewportIndex:payload.viewport_index,
+      framing:payload.framing??null};
     const checkpoint = metadata.data.checkpoint ? {id:randomUUID(),kind:'visual' as const,
       screenshotId:screenshot.id,timestamp:screenshot.timestamp,label:screenshot.label} : null;
     await this.sessions.update(this.session.id,m => ({...m,screenshots:[...m.screenshots,screenshot],

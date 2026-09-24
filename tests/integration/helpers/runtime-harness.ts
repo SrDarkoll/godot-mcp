@@ -18,7 +18,7 @@ async function allocateLoopbackPort(excluded:number|null=null):Promise<number>{
   throw new Error('Unable to allocate distinct loopback debugger ports');
 }
 
-export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:boolean;breakAfterReady?:boolean;slowCapture?:boolean;noRuntimeError?:boolean;manualBreakpoint?:boolean}={}) {
+export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:boolean;breakAfterReady?:boolean;slowCapture?:boolean;failFramedCapture?:boolean;sceneCamera?:boolean;noRuntimeError?:boolean;manualBreakpoint?:boolean}={}) {
   const manual=options.manual??false;
   if(options.manualBreakpoint&&(manual||options.manualAfterStop))throw new Error('manualBreakpoint fixture cannot be combined with manual runtime launch fixtures');
   const godot=process.env.GODOT_BIN;
@@ -26,6 +26,10 @@ export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:b
   const parent=path.resolve('.godot-mcp/runtime-test-runs');await mkdir(parent,{recursive:true});
   const root=await mkdtemp(path.join(parent,'runtime-'));
   await cp(path.resolve('fixtures/runtime-project'),root,{recursive:true});
+  if(options.sceneCamera){
+    const scene=path.join(root,'main.tscn');
+    await writeFile(scene,(await readFile(scene,'utf8'))+'\n[node name="AuditCamera" type="Camera2D" parent="."]\nposition = Vector2(120, 100)\n');
+  }
   const generated=spawnSync(godot,['--headless','--path',root,'--script',path.resolve('tests/integration/helpers/generate_noise.gd')],{windowsHide:true,encoding:'utf8',timeout:15000});
   if(generated.status!==0)throw new Error(generated.stderr);
   await initProject({projectRoot:root,godotBin:godot,enable:true});
@@ -44,6 +48,13 @@ export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:b
   if(options.slowCapture){
     const file=path.join(root,'addons/godot_mcp/runtime/runtime_capture.gd');const source=await readFile(file,'utf8');
     await writeFile(file,source.replace('func _capture(agent: Node, packet: Dictionary) -> Dictionary:', 'func _capture(agent: Node, packet: Dictionary) -> Dictionary:\n    var marker := FileAccess.open("res://.godot-mcp/capture-started",FileAccess.WRITE)\n    marker.store_string("started")\n    marker.close()\n    await agent.get_tree().create_timer(5.0).timeout'));
+  }
+  if(options.failFramedCapture){
+    const file=path.join(root,'addons/godot_mcp/runtime/runtime_capture.gd');
+    const source=await readFile(file,'utf8');
+    const signature='func _frame_image(agent: Node, viewport: Viewport, scene: Node) -> Dictionary:';
+    if(!source.includes(signature))throw new Error('Runtime capture frame seam changed');
+    await writeFile(file,source.replace(signature,signature+'\n    var marker := "res://.godot-mcp/force-capture-fail"\n    if FileAccess.file_exists(marker):\n        DirAccess.remove_absolute(ProjectSettings.globalize_path(marker))\n        return _error("CAPTURE_FAILED","Injected frame failure")'));
   }
   if(manual||options.manualAfterStop){
     const plugin=path.join(root,'addons/godot_mcp/plugin.gd');
