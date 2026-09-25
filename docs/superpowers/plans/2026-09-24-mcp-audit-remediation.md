@@ -58,12 +58,12 @@
 
 **Files:** `packages/protocol/src/geometry.ts`, `packages/godot-addon/addons/godot_mcp/bridge/handlers/geometry_handlers.gd`, `packages/godot-addon/addons/godot_mcp/bridge/rpc_dispatcher.gd`, `packages/server/src/mcp/register-geometry-tools.ts`, `packages/server/src/mcp/create-server.ts`, `scripts/tool-contracts.json`, `tests/integration/geometry-validation.test.ts`, `docs/tools/geometry-validation.md`.
 
-- [ ] Define a bounded read-only input for Line2D centerline/width or Polygon2D route footprints, explicit CollisionShape2D/CollisionPolygon2D obstacles, agent clearance and endpoint links/tolerance.
-- [ ] Convert all points and supported primitive collision shapes into scene-global coordinates. Report unsupported/disabled/hollow shapes explicitly instead of silently treating them as clear.
-- [ ] Compare full corridor footprints against obstacles using `Geometry2D`, and measure declared endpoint gaps without mutating the scene.
-- [ ] Return structured node paths, coordinates, overlap/gap measurements, `complete`, truncation and diagnostics. Bound routes, obstacles, points, intersections and response bytes.
-- [ ] Verify an intersection like the reported `CentralCross` case fails and a corrected route passes, including rotated/scaled transforms, clear routes, touching boundaries, unsupported shapes and no-save invariants.
-- [ ] Regenerate contracts, run real Godot integration and verify the new tool is available in appropriate profiles.
+- [x] Define a bounded read-only input for Line2D centerline/width or Polygon2D route footprints, explicit CollisionShape2D/CollisionPolygon2D obstacles, agent clearance and endpoint links/tolerance.
+- [x] Convert all points and supported primitive collision shapes into scene-global coordinates. Report unsupported/disabled/hollow shapes explicitly instead of silently treating them as clear.
+- [x] Compare full corridor footprints against obstacles using `Geometry2D`, and measure declared endpoint gaps without mutating the scene.
+- [x] Return structured node paths, coordinates, overlap/gap measurements, `complete`, truncation and diagnostics. Bound routes, obstacles, points, intersections and response bytes.
+- [x] Verify an intersection like the reported `CentralCross` case fails and a corrected route passes, including rotated/scaled transforms, clear routes, touching boundaries with clearance, unsupported shapes and no-save invariants.
+- [x] Regenerate contracts, run real Godot integration and verify the new tool is available in appropriate profiles (194 tools).
 
 ## Task 7: Correct public guarantees and compatibility (A3/A4)
 

@@ -9,7 +9,7 @@ describe('tool catalog', () => {
     expect(TOOL_CATALOG.every(entry => entry.profiles.includes('full'))).toBe(true);
     expect(TOOL_CATALOG.every(entry => entry.description.trim().length > 0)).toBe(true);
     expect(Object.fromEntries(TOOL_PROFILES.map(profile => [profile, toolNamesForProfile(profile).length]))).toEqual({
-      minimal:5, core:85, '2d':129, '3d':115, navigation:74, ui:89, runtime:53, full:193
+      minimal:5, core:86, '2d':130, '3d':115, navigation:75, ui:89, runtime:53, full:194
     });
   });
 

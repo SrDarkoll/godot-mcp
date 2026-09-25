@@ -52,6 +52,15 @@ it('classifies godot.capabilities as a normal read-only operation', async () => 
     expect(assessment.risk).toBe('normal');
     expect(assessment.permissions).not.toContain('editor.modify');
 });
+it('keeps geometric validation read-only while requiring the project editor bridge', async () => {
+    const { policy } = await setup();
+    const assessment = await policy.assess('geometry.validate_walkways', {
+        routes: ['/Main/CentralCross'], obstacles: ['/Main/Block/Collision']
+    });
+    expect(assessment.risk).toBe('normal');
+    expect(assessment.permissions).toEqual(['network.local', 'filesystem.project']);
+    expect(assessment.permissions).not.toContain('editor.modify');
+});
 it('classifies godot.tools as a local read-only operation', async () => {
     const { policy } = await setup();
     const assessment = await policy.assess('godot.tools', {});
