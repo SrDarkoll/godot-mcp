@@ -2,6 +2,25 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.5.0] - 2026-09-24
+
+### Added
+
+- Read-only walkway geometry validation against declared 2D collisions and endpoint connections.
+- Retained capture references that resolve and verify screenshots across MCP sessions.
+- Temporary center/zoom framing for running-game captures without saving camera edits.
+
+### Fixed
+
+- Long-polling project events no longer block edits or server shutdown.
+- Project lease contention reports known owner details, retries brief maintenance contention, and distinguishes access denial.
+- Scene batch type errors explain the expected Variant type and show a valid packed-points value.
+- Public transaction and platform guidance now matches the implementation: sequential recoverable publication and Windows runtime support.
+
+### Validation
+
+- Release gates and measured results are recorded in [the 0.5.0 release notes](docs/releases/0.5.0.md).
+
 ## [0.4.0] - 2026-09-12
 
 ### Added

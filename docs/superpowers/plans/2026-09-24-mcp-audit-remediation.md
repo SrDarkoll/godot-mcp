@@ -69,18 +69,18 @@
 
 **Files:** `README.md`, `packages/cli/README.md`, `docs/tools/transactions-recovery.md`, `docs/architecture/compatibility-capabilities.md`, new `docs/releases/0.5.0.md`.
 
-- [ ] Replace multi-file atomicity/zero-partial-write promises with journalled, recoverable publication and its external-writer limit.
-- [ ] State Windows as the supported runtime while the project lease rejects Linux/macOS; remove unverified cross-platform claims.
-- [ ] Document the new geometry, capture and contention behavior without claiming coverage beyond tested Godot versions.
-- [ ] Run documentation links and package README checks.
+- [x] Replace multi-file atomicity/zero-partial-write promises with journalled, recoverable publication and its external-writer limit.
+- [x] State Windows as the supported runtime while the project lease rejects Linux/macOS; remove unverified cross-platform claims.
+- [x] Document the new geometry, capture and contention behavior without claiming coverage beyond tested Godot versions.
+- [x] Run documentation links and package README checks (73 Markdown files; public package metadata valid).
 
 ## Task 8: Gate capture/runtime changes before release (A9)
 
 **Files:** `.github/workflows/ci.yml`, `.github/workflows/graphical.yml`, `scripts/run-integration.mjs`, `docs/releases/0.5.0.md`.
 
-- [ ] Make geometry validation part of normal Windows integration.
-- [ ] Define an actionable release gate for visual/runtime changes using a verified graphical runner or an equivalent deterministic test path; fail visibly if required evidence is absent.
-- [ ] Preserve artifact exclusions for runtime tokens and local project config.
+- [x] Make geometry validation part of normal Windows integration.
+- [x] Add graphical editor and runtime capture tests to the normal Windows Node 22 CI lane; missing prerequisites fail the job.
+- [x] Preserve artifact exclusions for runtime tokens and local project config.
 - [ ] Verify the workflow syntax and run the remotely available jobs.
 
 ## Task 9: Final verification and delivery

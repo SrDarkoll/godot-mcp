@@ -1,4 +1,4 @@
-name: Opt-in graphical validation
+name: Dedicated graphical validation
 on:
   workflow_dispatch:
 permissions:

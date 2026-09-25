@@ -13,13 +13,13 @@ The server supports exactly eight profiles:
 | Profile | Tools | Intended use |
 | --- | ---: | --- |
 | `minimal` | 5 | read-only orientation and discovery |
-| `core` | 84 | generic editor automation, batches, dependencies and project events |
-| `2d` | 128 | 2D, TileMap, UI/animation, navigation and visual comparison |
-| `3d` | 114 | 3D, materials, animation, navigation and visual comparison |
-| `navigation` | 73 | focused NavigationRegion/mesh/agent workflows plus dependency preflight |
-| `ui` | 88 | Control layout, AnimationPlayer workflows and visual comparison |
-| `runtime` | 52 | run/debug/capture/workflow verification, events and performance comparison |
-| `full` | 192 | complete surface; backwards-compatible default |
+| `core` | 86 | generic editor automation, batches, geometry, dependencies and project events |
+| `2d` | 130 | 2D, TileMap, UI/animation, geometry, navigation and visual comparison |
+| `3d` | 115 | 3D, materials, animation, navigation and visual comparison |
+| `navigation` | 75 | focused NavigationRegion/mesh/agent workflows plus geometry and dependency preflight |
+| `ui` | 89 | Control layout, AnimationPlayer workflows and visual comparison |
+| `runtime` | 53 | run/debug/capture/workflow verification, events and performance comparison |
+| `full` | 194 | complete surface; backwards-compatible default |
 
 Counts include `godot.tools`, the Phase 6 discovery tool.
 

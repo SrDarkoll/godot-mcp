@@ -30,7 +30,7 @@ async function stopProcess(child: ChildProcess | null): Promise<void> {
         child.kill('SIGKILL');
 }
 afterEach(async () => {
-    await Promise.all(tempRoots.splice(0).map(root => rm(root, { recursive: true, force: true })));
+    await Promise.all(tempRoots.splice(0).map(root => rm(root, { recursive: true, force: true, maxRetries: 15, retryDelay: 200 })));
 });
 describe('Godot editor mutation surface', () => {
     test('executes complete 12-step mutation lifecycle and error suite against live Godot 4.x editor', async () => {

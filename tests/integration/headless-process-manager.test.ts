@@ -129,6 +129,6 @@ test('owns a real Godot 4.6.3 headless lifecycle without authenticating an edito
       if ((status.structuredContent as any)?.active) await approve('headless.stop');
     } catch { /* server teardown still owns its child */ }
     await client.close();
-    await rm(root, { recursive: true, force: true });
+    await rm(root, { recursive: true, force: true, maxRetries: 15, retryDelay: 200 });
   }
 }, 120_000);

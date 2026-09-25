@@ -8,7 +8,7 @@ permissions:
 jobs:
   validate:
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -30,6 +30,16 @@ jobs:
         run: ./scripts/ci-install-godot.ps1 -Destination "$env:RUNNER_TEMP/godot-mcp-engine"
       - run: npm run check:godot
       - run: npm run test:integration
+      - name: Verify running-game capture and runtime behavior
+        if: matrix.node == '22'
+        env:
+          GODOT_RUNTIME_INTEGRATION: '1'
+        run: npm run test:integration:runtime
+      - name: Verify graphical editor capture
+        if: matrix.node == '22'
+        env:
+          GODOT_VISUAL_INTEGRATION: '1'
+        run: npm run test:integration:visual
       - run: npm run test:distribution
       - name: Retain test and package evidence
         if: always()
