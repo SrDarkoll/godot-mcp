@@ -184,7 +184,7 @@ Godot MCP exposes **194 MCP tools** partitioned into 8 profiles to optimize AI c
 Godot MCP provides guarded operations for AI-assisted editing:
 
 - **Kernel-Level Project Lease**: Windows Named Pipes (`\\.\pipe\godot-mcp-project-<sha256>`) prevent concurrent conflicting processes. Instant kernel cleanup if a process terminates abnormally.
-- **Addon Journal & Rollback**: Addon updates are staged in `.godot-mcp/addon-backups/` with SHA-256 verification and atomic markers. Interruptions are automatically rolled back.
+- **Addon Journal & Rollback**: Addon updates are staged in `.godot-mcp/addon-backups/` with SHA-256 verification and journal markers. Startup attempts to roll back interrupted updates and stops if recovery cannot be verified.
 - **Defensive Serialization Budgets**: Bound recursion (64 depth), item count (50,000) and strings (8 MB), with cycle detection via `WeakSet`.
 - **Reflection Guard**: Blocks 31 dangerous reflective methods (`call_thread_safe`, `emit_signal`, etc.) and restricts node mutations to the active edited scene tree.
 - **Recoverable Multi-File Transactions**: Stage declared file edits, verify preconditions and publish them sequentially with a journal and compensation. Other processes can observe intermediate writes; failed compensation leaves a journal requiring recovery.

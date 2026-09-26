@@ -76,7 +76,7 @@ Godot MCP uses a decoupled, secure two-tier architecture communicating over stan
 Godot MCP includes bounded checks and recovery controls for autonomous work in trusted Godot projects:
 
 - 🔒 **Kernel-Level Project Lease (`project-lease.ts`)**: Multi-process mutual exclusion via Windows Named Pipes (`\\.\pipe\godot-mcp-project-<sha256>`). Ensures only one server or CLI process modifies a project concurrently, with automatic instant cleanup by the OS kernel if a process terminates abnormally.
-- 🔄 **Addon Journal & Rollback Barrier (`addon-journal.ts`)**: Addon installations and updates are staged with SHA-256 integrity verification. Any interrupted or crashed update is detected and automatically compensated before any subsequent operation runs.
+- 🔄 **Addon Journal & Rollback Barrier (`addon-journal.ts`)**: Addon installations and updates are staged with SHA-256 integrity verification. Startup detects a pending update and attempts rollback before normal work; an invalid journal or failed rollback stops the operation for inspection.
 - 📦 **Defensive Memory & Recursion Budgets (`argument-budget.ts`, `serialization_budget.gd`)**: Bound accepted inputs and serialized results; they reduce resource exhaustion but cannot sandbox project code.
 - 🛡️ **Reflection Guardrails (`reflection-safety.ts`, `safety_policy.gd`)**: Block dangerous reflective methods and restrict node mutations to the active edited scene tree; Godot and project scripts still run with their normal OS privileges.
 - 📝 **Journalled Multi-File Transactions & Checkpoints (`transaction.*`, `checkpoint.*`)**: Publish files sequentially with preconditions and compensation. An unsuccessful compensation retains evidence and requires recovery. External processes can observe intermediate files.
