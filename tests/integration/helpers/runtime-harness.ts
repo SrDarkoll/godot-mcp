@@ -134,8 +134,16 @@ func _test_set_manual_breakpoint(breakpoint_path: String, line: int, enabled: bo
     '--',`--godot-mcp-dap-port=${dapPort}`,`--godot-mcp-debug-server=${debugServer}`
   ],{windowsHide:true});let logs='';
   child.stdout.on('data',d=>logs+=d);child.stderr.on('data',d=>logs+=d);
-  await waitFor(async()=>(await client.callTool({name:'session.status',arguments:{}})).structuredContent?.editorConnected===true);
-  await waitFor(async()=>!!(await client.callTool({name:'scene.get_tree',arguments:{}})).structuredContent?.root);
+  try {
+    await waitFor(async()=>(await client.callTool({name:'session.status',arguments:{}})).structuredContent?.editorConnected===true,25000);
+    await waitFor(async()=>!!(await client.callTool({name:'scene.get_tree',arguments:{}})).structuredContent?.root,25000);
+  } catch (error) {
+    await client.close().catch(()=>{});
+    await stopProcess(child).catch(()=>{});
+    const logPath=path.join(root,'engine.log');
+    await writeFile(logPath,logs).catch(()=>{});
+    throw new Error(`Runtime editor did not become ready; see ${logPath}`,{cause:error});
+  }
   let clientClosed=false;let editorClosed=false;
   const closeClient=async()=>{if(clientClosed)return;clientClosed=true;await client.close().catch(()=>{});};
   const closeEditor=async()=>{if(editorClosed)return;editorClosed=true;await stopProcess(child);await writeFile(path.join(root,'engine.log'),logs);};

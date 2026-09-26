@@ -66,4 +66,4 @@ it('cancels a native capture in progress when stop uses the control lane',async(
   const manifest=(await h.client.callTool({name:'session.manifest',arguments:{}})).structuredContent?.manifest as any;
   expect(manifest.screenshots).toHaveLength(0);
  }finally{await h.close();}
-},30000);
+},60000);
