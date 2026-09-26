@@ -85,6 +85,6 @@
 
 ## Task 9: Final verification and delivery
 
-- [ ] `npm ci`, `npm test`, `npm run typecheck`, `npm run check:tool-contracts`, `npm run check:docs`, `npm run check:godot`, `npm run test:integration`, visual/runtime suites, package dry run and consumer install.
-- [ ] Verify Node 22 and 24, release manifest file allowlist, secret scan, `git diff --check`, no residual Godot processes and clean tracked tree.
+- [x] `npm ci` (CI), `npm test`, `npm run typecheck`, `npm run check:tool-contracts`, `npm run check:docs`, `npm run check:godot`, `npm run test:integration`, visual/runtime suites, package dry run and consumer install.
+- [ ] Verify the final Node 22/24 CI matrix, release manifest file allowlist, secret scan, `git diff --check`, no residual Godot processes and clean tracked tree.
 - [ ] Commit cohesive changes, push, review remote CI, merge to `main`, tag a new version and publish the exact reviewed tarball to npm and GitHub Release under the user’s standing authorization.

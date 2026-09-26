@@ -2,7 +2,7 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
-## [0.5.0] - 2026-09-24
+## [0.5.0] - 2026-09-26
 
 ### Added
 
@@ -19,7 +19,7 @@ All notable release-level changes to Godot MCP are documented here.
 
 ### Validation
 
-- Release gates and measured results are recorded in [the 0.5.0 release notes](docs/releases/0.5.0.md).
+- Release gates and measured local results are recorded in [the 0.5.0 release notes](docs/releases/0.5.0.md).
 
 ## [0.4.0] - 2026-09-12
 
