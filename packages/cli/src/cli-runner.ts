@@ -61,7 +61,8 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    }
    case 'init':case 'addon.install':case 'addon.update':{
     const godot=await resolveGodot(root,cliGodot);
-    const result=await initProject({projectRoot:root,godotBin:godot,enable:true});
+    const result=await initProject({projectRoot:root,godotBin:godot,enable:true,
+      operation:args.command==='init'?'project_init':args.command==='addon.install'?'addon_install':'addon_update'});
     let config=await readProjectConfig(root);
     if(args.command==='init'&&args.toolProfile)config=await writeProjectConfig(root,{toolProfile:args.toolProfile});
     const client=args.command==='init'&&args.client?await configureClient({client:args.client,projectRoot:root,toolProfile:config.toolProfile}):null;

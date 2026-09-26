@@ -4,6 +4,8 @@
 
 Supported operations create native Node classes, set bounded native node/resource properties, rename, reparent, reorder and delete non-root scene nodes. `@id` references address nodes created earlier in the batch. Other paths resolve against the initial active scene through the shared scoped resolver. Parent traversal, foreign absolute paths, script resources/classes, script-defined properties and dedicated fields such as owner/script/name are rejected.
 
+Native property types matter. `Polygon2D.polygon` and `Line2D.points` require a `PackedVector2Array`, so send `{"type":"PackedVector2Array","value":[{"x":0,"y":0},{"x":32,"y":0},{"x":32,"y":32}]}` as the operation value. A plain JSON array is decoded as a Godot `Array`; `BATCH_TYPE_MISMATCH` now reports `property`, `expectedType`, `receivedType` and, for vector point arrays, a valid example.
+
 A successful batch is one Editor Undo action. It changes the editor's in-memory scene/resources and reports `saved: false`; call the appropriate structured save tool separately. Undo restores deleted subtrees, child order, owners, names, hierarchy and property values. Redo reapplies the batch. Resource property changes remain in Undo history and are not written until explicitly saved.
 
 Before registering the action, the addon applies native operations and checks every postcondition. If a setter rejects a value or a target becomes invalid, inverse operations run immediately. The response reports whether rollback was verified. `BATCH_RECOVERY_REQUIRED` means the inverse state could not be proven; inspect the scene and use editor history or reopen without saving as appropriate. Unsaved editor state cannot be recovered from the file transaction journal.

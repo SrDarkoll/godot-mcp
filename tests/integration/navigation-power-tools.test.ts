@@ -28,7 +28,7 @@ async function stopProcess(child:ChildProcess|null):Promise<void>{
   ]);
   if(child.exitCode===null&&child.signalCode===null) child.kill('SIGKILL');
 }
-afterEach(async()=>{await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true})));});
+afterEach(async()=>{await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true,maxRetries:15,retryDelay:200})));});
 
 describe('Godot navigation power tools',()=>{
   test('authors, bakes and persists unified 2D/3D navigation regions, meshes and agents with Undo/Redo',async()=>{

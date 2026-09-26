@@ -75,6 +75,28 @@ it('prevalidates a scene/resource batch, rejects stale state, and undoes/redoes 
   expect(rejected.structuredContent).toMatchObject({error:{details:{rollbackVerified:true}}});
   expect((await call('node.list_children',{node_path:'/Main'})).children.map((n:any)=>n.name)).toEqual(['Player','BatchPlayer']);
   expect((await call('resource.inspect',{path:'res://gradient.tres'})).properties.interpolation_mode).toBe(1);
+  await call('node.create',{parent_path:'/Main',type:'Polygon2D',name:'Walkway'});
+  await call('node.create',{parent_path:'/Main',type:'Line2D',name:'WalkwayEdge'});
+  const points=[{x:0,y:0},{x:32,y:0},{x:32,y:32}];
+  for(const [node,property] of [['/Main/Walkway','polygon'],['/Main/WalkwayEdge','points']]){
+    const plain=await client.callTool({name:'scene.batch.preview',arguments:{operations:[{op:'set_property',node,property,value:points}]}});
+    expect(plain.structuredContent).toMatchObject({error:{code:'BATCH_TYPE_MISMATCH',details:{
+      property,expectedType:'PackedVector2Array',receivedType:'Array',
+      example:{type:'PackedVector2Array',value:points}
+    }}});
+  }
+  const polygonOperations=[
+    {op:'set_property',node:'/Main/Walkway',property:'polygon',value:{type:'PackedVector2Array',value:points}},
+    {op:'set_property',node:'/Main/WalkwayEdge',property:'points',value:{type:'PackedVector2Array',value:points}}
+  ];
+  const polygonPreview=await call('scene.batch.preview',{operations:polygonOperations});
+  expect((await call('scene.batch',{operations:polygonOperations,expected:polygonPreview.expected})).applied).toBe(true);
+  expect(JSON.stringify(await call('node.get_property',{node_path:'/Main/Walkway',property:'polygon'}))).toContain('32');
+  expect(JSON.stringify(await call('node.get_property',{node_path:'/Main/WalkwayEdge',property:'points'}))).toContain('32');
+  const polygonUndo=await confirmFixtureOperation(client,'editor.undo',{});
+  expect(polygonUndo.isError).not.toBe(true);
+  expect(JSON.stringify(await call('node.get_property',{node_path:'/Main/Walkway',property:'polygon'}))).not.toContain('32');
+  expect(JSON.stringify(await call('node.get_property',{node_path:'/Main/WalkwayEdge',property:'points'}))).not.toContain('32');
  }finally{
   await client.close();
   if(editor&&editor.exitCode===null&&editor.signalCode===null){const exited=once(editor,'exit');editor.kill();await Promise.race([exited,new Promise(r=>setTimeout(r,2000))]);if(editor.exitCode===null&&editor.signalCode===null)editor.kill('SIGKILL');}

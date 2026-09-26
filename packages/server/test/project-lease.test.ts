@@ -24,6 +24,25 @@ it('canonicalizes aliases and permits different projects while rejecting the sam
   await next.release();
   await next.release();
 });
+it('reports the active operation and waits only for a short maintenance lease', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'godot-lease-owner-'));
+  const server = await ProjectLease.acquire(root, { operation: 'server' });
+  try {
+    await expect(ProjectLease.acquire(root, { operation: 'addon_update', waitMs: 500 }))
+      .rejects.toMatchObject({
+        code: 'PROJECT_BUSY',
+        details: { owner: { operation: 'server', pid: process.pid }, waitedMs: 0 }
+      });
+  } finally {
+    await server.release();
+  }
+
+  const maintenance = await ProjectLease.acquire(root, { operation: 'addon_update' });
+  const next = ProjectLease.acquire(root, { operation: 'project_init', waitMs: 1000 });
+  setTimeout(() => { void maintenance.release(); }, 100);
+  const acquired = await next;
+  await acquired.release();
+});
 
 it('releases exclusion after an owning process crashes, without deleting lock files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'godot-lease-crash-'));
@@ -36,7 +55,9 @@ it('releases exclusion after an owning process crashes, without deleting lock fi
   try {
     const [ready] = await once(child, 'message');
     expect(ready).toBe('ready');
-    await expect(ProjectLease.acquire(root)).rejects.toMatchObject({ code: 'PROJECT_BUSY' });
+    await expect(ProjectLease.acquire(root)).rejects.toMatchObject({
+      code: 'PROJECT_BUSY', details: { owner: { operation: 'unknown', pid: child.pid } }
+    });
     const exited = once(child, 'exit');
     child.kill('SIGKILL');
     await exited;

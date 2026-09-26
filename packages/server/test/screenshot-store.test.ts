@@ -6,6 +6,7 @@ import {expect,it,vi} from 'vitest';
 import {createSession} from '../src/session/session.js';
 import {SessionStore} from '../src/session/session-store.js';
 import {ScreenshotStore} from '../src/visual/screenshot-store.js';
+import {CaptureResolver} from '../src/visual/capture-resolver.js';
 
 export const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 export const payload = {png_base64:png,width:1,height:1,scene:null,captured_at:'2026-09-05T00:00:00Z',viewport_index:null};
@@ -34,6 +35,8 @@ it('persists unique images and checkpoints across concurrent saves and store res
   expect(results.map(r => r.screenshot.sequence)).toEqual([1,2,3]);
   for (const result of results) {
     const bytes = await fs.readFile(path.join(sessions.sessionDir(session.id),result.screenshot.path));
+    expect(result.captureRef).toBe(`${session.id}/${result.screenshot.id}`);
+    expect(result.absolutePath).toBe(path.join(sessions.sessionDir(session.id),result.screenshot.path));
     expect(bytes).toEqual(Buffer.from(png,'base64'));
     expect(result.screenshot.sha256).toBe(createHash('sha256').update(bytes).digest('hex'));
     expect(result.checkpoint?.screenshotId).toBe(result.screenshot.id);
@@ -42,6 +45,24 @@ it('persists unique images and checkpoints across concurrent saves and store res
   await sessions.finish(session.id,new Date().toISOString());
   await expect(store.save(input)).rejects.toMatchObject({code:'SESSION_CLOSED'});
   expect(await fs.readdir(path.join(sessions.sessionDir(session.id),'screenshots/editor'))).toHaveLength(3);
+});
+it('resolves a capture after its session ends and rejects changed image bytes',async()=>{
+  const {session,sessions,store}=await setup();
+  const capture=await store.save(input);
+  await sessions.finish(session.id,new Date().toISOString());
+  const next=createSession(session.projectRoot);
+  await sessions.create(next);
+  const resolver=new CaptureResolver(sessions);
+  expect(await resolver.resolve(capture.captureRef)).toMatchObject({
+    captureRef:capture.captureRef,absolutePath:capture.absolutePath,sessionId:session.id,
+    screenshot:{id:capture.screenshot.id}
+  });
+  await fs.writeFile(capture.absolutePath,Buffer.alloc(capture.screenshot.byteLength));
+  await expect(resolver.resolve(capture.captureRef)).rejects.toMatchObject({code:'SCREENSHOT_CORRUPT'});
+  await expect(resolver.resolve('../outside')).rejects.toMatchObject({code:'INVALID_ARGUMENT'});
+  const other=await setup();
+  await expect(new CaptureResolver(other.sessions).resolve(capture.captureRef))
+    .rejects.toMatchObject({code:'SCREENSHOT_CORRUPT'});
 });
 it('rejects corrupt, noncanonical and dimension-mismatched images without writing',async () => {
   const {session,sessions,store} = await setup();

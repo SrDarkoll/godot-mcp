@@ -3749,7 +3749,7 @@
         "runtime",
         "full"
       ],
-      "description": "Capture the running game viewport to a persistent PNG; requires an owned graphical runtime.",
+      "description": "Capture the owned graphical game runtime to a persistent PNG, optionally with temporary center and zoom that never saves the scene.",
       "risk": {
         "tags": [
           "normal_mutation"
@@ -3928,6 +3928,22 @@
       "description": "Compare two retained performance snapshots using caller-provided relative regression budgets.",
       "risk": { "tags": ["normal_mutation"], "dynamic": "none" },
       "binding": { "status": "legacy", "source": "packages/server/src/tools/visual-comparison-tools.ts" }
+    },
+    {
+      "name": "visual.resolve_capture",
+      "domain": "visual",
+      "profiles": ["core", "2d", "3d", "navigation", "ui", "runtime", "full"],
+      "description": "Resolve a retained capture reference after reconnect and verify its manifest, file and SHA-256 before returning its absolute path.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/mcp/register-visual-tools.ts" }
+    },
+    {
+      "name": "geometry.validate_walkways",
+      "domain": "2d",
+      "profiles": ["core", "2d", "navigation", "full"],
+      "description": "Read the edited 2D scene and report full walkway-footprint collisions, endpoint gaps and unsupported geometry without saving or mutating it.",
+      "risk": { "tags": ["read"], "dynamic": "none" },
+      "binding": { "status": "legacy", "source": "packages/server/src/mcp/register-geometry-tools.ts" }
     }
   ]
 }

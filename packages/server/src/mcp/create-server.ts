@@ -46,6 +46,7 @@ import { registerProjectEventTools } from '../tools/project-event-tools.js';
 import { registerDependencyTools } from '../tools/dependency-tools.js';
 import { VisualComparisonService } from '../visual/visual-comparison.js';
 import { registerVisualComparisonTools } from '../tools/visual-comparison-tools.js';
+import { registerGeometryTools } from './register-geometry-tools.js';
 export interface McpServerContext {
     session: Session;
     bridge: BridgeServer;
@@ -105,6 +106,7 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     registerObjectTools(registrar, rpc);
     registerSceneTools(registrar, rpc);
     registerBatchTools(registrar, recovery, rpc);
+    registerGeometryTools(registrar, rpc);
     registerNodeTools(registrar, rpc);
     registerResourceTools(registrar, rpc);
     registerDependencyTools(registrar, rpc, recovery);

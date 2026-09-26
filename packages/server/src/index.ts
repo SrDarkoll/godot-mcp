@@ -58,7 +58,7 @@ export function parseServerArgs(argv: string[]): ServerArgs {
 export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const args = parseServerArgs(argv);
   const projectRoot = await resolveProjectRoot(args.project ?? process.cwd());
-  const lease = await ProjectLease.acquire(projectRoot);
+  const lease = await ProjectLease.acquire(projectRoot, { operation: 'server' });
   try {
     await startOwnedServer(projectRoot, args, lease);
   } catch (error) {

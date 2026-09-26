@@ -49,7 +49,7 @@ it('persists a baseline and returns only post-baseline workflow changes',async()
   expect(delta.activeScene.changed).toBe(true);
   expect(delta.runtime.runChanged).toBe(true);
   expect(delta.diagnostics.entries).toEqual([diagnostic]);
-  expect(delta.screenshots).toEqual([screenshot]);
+  expect(delta.screenshots).toEqual([{...screenshot,framing:null}]);
   expect(delta.errors).toHaveLength(1);
   expect(delta.runtimeRuns).toHaveLength(1);
 });

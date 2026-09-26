@@ -29,7 +29,7 @@ async function stopProcess(child:ChildProcess|null):Promise<void>{
   ]);
   if(child.exitCode===null&&child.signalCode===null) child.kill('SIGKILL');
 }
-afterEach(async()=>{await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true})));});
+afterEach(async()=>{await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true,maxRetries:15,retryDelay:200})));});
 
 describe('Godot 3D and material power tools',()=>{
   test('authors persistent 3D primitives, camera, collisions, lights, materials and spatial shader state with Undo/Redo',async()=>{

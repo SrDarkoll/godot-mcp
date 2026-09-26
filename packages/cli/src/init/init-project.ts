@@ -6,12 +6,13 @@ import { enablePlugin } from './enable-plugin.js';
 import { readProjectConfig, writeProjectConfig, ensureProjectDirectory } from '@godot-mcp/server/project-config';
 import { serverStatus } from '@godot-mcp/server/management';
 import { installAddon } from './install-addon.js';
-import { ProjectLease, requireNoRecoveryJournal } from '@godot-mcp/server/project-lease';
+import { ProjectLease, requireNoRecoveryJournal, type LeaseOperation } from '@godot-mcp/server/project-lease';
 
 export interface InitProjectOptions {
   projectRoot: string;
   godotBin?: string | null;
   enable?: boolean;
+  operation?: Extract<LeaseOperation, 'project_init' | 'addon_install' | 'addon_update'>;
 }
 
 export interface InitProjectResult {
@@ -65,7 +66,29 @@ async function ensureProjectGitignore(projectRoot: string): Promise<void> {
 
 export async function initProject(options: InitProjectOptions): Promise<InitProjectResult> {
   const projectRoot = await resolveProjectRoot(options.projectRoot);
-  const lease = await ProjectLease.acquire(projectRoot);
+  let lease: ProjectLease;
+  try {
+    lease = await ProjectLease.acquire(projectRoot, {
+      operation: options.operation ?? 'project_init',
+      waitMs: 1500
+    });
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'PROJECT_BUSY') {
+      const status = await serverStatus(projectRoot).catch(() => null);
+      if (status && status.state !== 'offline') {
+        throw Object.assign(new Error(
+          `Godot MCP session ${status.sessionId} is running (editor connected: ${status.editorConnected}); stop it before addon maintenance`
+        ), {
+          code: 'PROJECT_BUSY',
+          details: {
+            ...('details' in error && error.details && typeof error.details === 'object' ? error.details : {}),
+            server: { sessionId: status.sessionId, editorConnected: status.editorConnected, runtimeConnected: status.runtimeConnected }
+          }
+        });
+      }
+    }
+    throw error;
+  }
   try {
     return await initOwnedProject(projectRoot, options);
   } finally {
@@ -81,7 +104,10 @@ async function initOwnedProject(projectRoot: string, options: InitProjectOptions
     return null;
   });
   if (status && status.state !== 'offline') {
-    throw Object.assign(new Error('Stop the running MCP server before updating the addon'), { code: 'PROJECT_BUSY' });
+    throw Object.assign(new Error(`Godot MCP session ${status.sessionId} is running; stop it before updating the addon`), {
+      code: 'PROJECT_BUSY',
+      details: { server: { sessionId: status.sessionId, editorConnected: status.editorConnected, runtimeConnected: status.runtimeConnected } }
+    });
   }
   const config = await readProjectConfig(projectRoot);
   const godotBin = options.godotBin ?? config.godotBin;

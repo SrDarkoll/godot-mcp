@@ -4,10 +4,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Godot Engine](https://img.shields.io/badge/Godot-v4.x-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![MCP](https://img.shields.io/badge/MCP-192%20Tools-8A2BE2)](https://github.com/SrDarkoll/godot-mcp)
-[![Status](https://img.shields.io/badge/Status-Stable%20%7C%20Production--Ready-success)](https://github.com/SrDarkoll/godot-mcp)
+[![MCP](https://img.shields.io/badge/MCP-194%20Tools-8A2BE2)](https://github.com/SrDarkoll/godot-mcp)
+[![Verified target](https://img.shields.io/badge/Verified-Windows%20%7C%20Godot%204.6.3-success)](https://github.com/SrDarkoll/godot-mcp)
 
-The official CLI launcher and Model Context Protocol bridge for **Godot Engine 4.x**.
+The CLI launcher and Model Context Protocol bridge verified on **Windows with Godot Engine 4.6.3**. Other Godot 4.x versions require their own integration checks.
 
 Connect modern AI assistants (**Cursor**, **Claude Desktop**, **Antigravity**, **Roo Code**, **Cline**, and custom agents) directly to your running Godot editor and game runtime.
 
@@ -33,7 +33,7 @@ npx @srdarkx/godot-mcp init . --client claude
 ```
 *(Tip: You can also pass a full path instead of `.`, e.g. `npx @srdarkx/godot-mcp init C:\Projects\MyGame --client antigravity`)*
 
-#### What happens automatically in 3 seconds:
+#### What the setup command does:
 1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x binary across standard Windows and system paths.
 2. 📦 **Installs Bridge Plugin**: Copies the hardened `addons/godot_mcp` EditorPlugin directly into your game folder.
 3. ⚡ **Activates Plugin**: Enables the plugin automatically in `project.godot` (via Godot's headless CLI, no manual editor clicks needed).
@@ -162,42 +162,42 @@ npx @srdarkx/godot-mcp config . --repair
 
 ---
 
-## 🎯 192 Tools Across 8 Profiles
+## 🎯 194 Tools Across 8 Profiles
 
-Godot MCP exposes **192 MCP tools** partitioned into 8 profiles to optimize AI context window tokens:
+Godot MCP exposes **194 MCP tools** partitioned into 8 profiles to optimize AI context window tokens:
 
 | Profile | Tools | Focus | Key Capabilities |
 | :--- | :---: | :--- | :--- |
 | `minimal` | 5 | Liveness | Status, project info, scene tree, engine capabilities, tool registry |
-| `core` | 84 | Project & Scenes | Nodes, resources, scene batches, dependencies, events, transactions |
-| `2d` | 128 | 2D Games | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D |
-| `3d` | 114 | 3D Worlds | Core + Node3D, Mesh3D, Camera3D, Lights, Materials, Shaders |
-| `navigation` | 73 | Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
-| `ui` | 88 | UI & Animation | Core + Control nodes, anchors, layouts, AnimationPlayer & AnimationMixer |
-| `runtime` | 52 | QA & Debug | Headless runner, events, visual/performance comparison, live inspection, DAP debugger |
-| `full` | 192 | Unrestricted | All available Godot MCP tools (default) |
+| `core` | 86 | Project & Scenes | Nodes, resources, scene batches, geometry validation, dependencies, events, transactions |
+| `2d` | 130 | 2D Games | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D |
+| `3d` | 115 | 3D Worlds | Core + Node3D, Mesh3D, Camera3D, Lights, Materials, Shaders |
+| `navigation` | 75 | Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
+| `ui` | 89 | UI & Animation | Core + Control nodes, anchors, layouts, AnimationPlayer & AnimationMixer |
+| `runtime` | 53 | QA & Debug | Headless runner, events, retained capture lookup, live inspection, DAP debugger |
+| `full` | 194 | Unrestricted | All available Godot MCP tools (default) |
 
 ---
 
 ## 🛡️ Enterprise Hardening & Safety
 
-Godot MCP is engineered for safe, autonomous AI pair-programming:
+Godot MCP provides guarded operations for AI-assisted editing:
 
 - **Kernel-Level Project Lease**: Windows Named Pipes (`\\.\pipe\godot-mcp-project-<sha256>`) prevent concurrent conflicting processes. Instant kernel cleanup if a process terminates abnormally.
-- **Addon Journal & Rollback**: Addon updates are staged in `.godot-mcp/addon-backups/` with SHA-256 verification and atomic markers. Interruptions are automatically rolled back.
-- **Defensive Serialization Budgets**: Prevents engine hangs and OOM crashes with recursion bounds (64 depth, 50,000 items, 8 MB strings, cycle detection via `WeakSet`).
-- **Reflection Safety & Sandbox**: Blocks 31 dangerous reflective methods (`call_thread_safe`, `emit_signal`, etc.) and restricts node mutations to the active edited scene tree.
-- **Atomic Multi-File Transactions**: Stage multiple file edits in memory. If any operation fails, the entire transaction is reverted with zero partial writes.
+- **Addon Journal & Rollback**: Addon updates are staged in `.godot-mcp/addon-backups/` with SHA-256 verification and journal markers. Startup attempts to roll back interrupted updates and stops if recovery cannot be verified.
+- **Defensive Serialization Budgets**: Bound recursion (64 depth), item count (50,000) and strings (8 MB), with cycle detection via `WeakSet`.
+- **Reflection Guard**: Blocks 31 dangerous reflective methods (`call_thread_safe`, `emit_signal`, etc.) and restricts node mutations to the active edited scene tree.
+- **Recoverable Multi-File Transactions**: Stage declared file edits, verify preconditions and publish them sequentially with a journal and compensation. Other processes can observe intermediate writes; failed compensation leaves a journal requiring recovery.
 - **Interactive DAP Debugger**: Live breakpoint management, call stack inspection, lazy variable evaluation, and stepping (into, over, out) during runtime execution.
-- **Multimodal Visual Grounding**: High-resolution PNG captures of 2D/3D editor viewports and live running game frames.
+- **Visual and Geometry Checks**: Capture 2D/3D editor viewports or a temporary close-up of a running game, resolve captures across sessions and validate walkway footprints against declared collisions before running.
 
 ---
 
 ## 📋 Requirements
 
 - **Node.js**: `v22.0.0` or newer
-- **Godot Engine**: `4.x` (Tested and verified against Godot 4.6.3-stable)
-- **OS**: Windows 10/11 (Tier-1 validated); Linux and macOS supported via standard Node.js/Godot CLI
+- **Godot Engine**: `4.6.3-stable` verified on Windows; other 4.x versions require integration validation.
+- **OS**: Windows 10/11. The current project lease returns `UNSUPPORTED_PLATFORM` on Linux and macOS.
 
 ---
 

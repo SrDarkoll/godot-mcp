@@ -22,7 +22,7 @@ async function stopProcess(child:ChildProcess|null):Promise<void>{
   await Promise.race([new Promise<void>(resolve=>child.once('exit',()=>resolve())),new Promise<void>(resolve=>setTimeout(resolve,2000))]);
   if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');
 }
-afterEach(async()=>{await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true})));});
+afterEach(async()=>{await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true,maxRetries:15,retryDelay:200})));});
 
 test('starts with a deterministic minimal tool surface while preserving the live Godot handshake',async()=>{
   const godotBin=process.env.GODOT_BIN;if(!godotBin)throw new Error('GODOT_BIN must be set by scripts/run-integration.mjs');

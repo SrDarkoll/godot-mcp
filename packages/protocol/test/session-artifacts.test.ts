@@ -6,6 +6,7 @@ const screenshot = {id:'123e4567-e89b-42d3-a456-426614174000', sequence:1, type:
   transaction:null, timestamp:'2026-09-05T00:00:00Z', width:1,height:1,byteLength:70,sha256:'a'.repeat(64),viewportIndex:null};
 it('allows only generated screenshot paths', () => {
   expect(ScreenshotRecordSchema.safeParse(screenshot).success).toBe(true);
+  expect(ScreenshotRecordSchema.parse(screenshot)).toMatchObject({runId:null,framing:null});
   for (const path of ['C:/x.png','../x.png','screenshots/editor/../x.png','screenshots\\editor\\x.png']) {
     expect(ScreenshotRecordSchema.safeParse({...screenshot,path}).success).toBe(false);
   }

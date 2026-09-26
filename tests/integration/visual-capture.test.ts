@@ -25,6 +25,8 @@ it('captures real 2D and 3D pixels, checkpoints and persistent session closure t
       expect(r.isError,JSON.stringify(r.structuredContent)).not.toBe(true);
       const value=CaptureResultSchema.parse(r.structuredContent);
       const file=path.join(h.root,'.godot-mcp/sessions',value.sessionId,value.screenshot.path);
+      expect(value.absolutePath).toBe(file);
+      expect(value.captureRef).toBe(`${value.sessionId}/${value.screenshot.id}`);
       manifestFile=path.join(h.root,'.godot-mcp/sessions',value.sessionId,'manifest.json');
       const bytes=await readFile(file);
       if(name.endsWith('2d'))expect(bytes.length).toBeGreaterThan(65536);
@@ -65,6 +67,9 @@ it('captures real 2D and 3D pixels, checkpoints and persistent session closure t
     await waitFor(async()=>JSON.parse(await readFile(manifestFile,'utf8')).endedAt!==null,5000);
     const next=await startClient(h.root);
     try {
+      const prior=await next.callTool({name:'visual.resolve_capture',arguments:{capture_ref:initial2d.captureRef}});
+      expect(prior.isError).not.toBe(true);
+      expect(prior.structuredContent).toMatchObject({sessionId:initial2d.sessionId,absolutePath:initial2d.absolutePath});
       const fresh=await next.callTool({name:'session.manifest',arguments:{}});
       expect(fresh.structuredContent?.manifest).toMatchObject({screenshots:[]});
       expect((fresh.structuredContent?.manifest as {sessionId:string}).sessionId).not.toBe(manifest.sessionId);

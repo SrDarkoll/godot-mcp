@@ -1,6 +1,6 @@
 {
   "name": "@srdarkx/godot-mcp",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": false,
   "description": "Hardened CLI launcher and companion bridge for Godot MCP",
   "type": "module",
@@ -12,12 +12,12 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.4.0",
-    "@godot-mcp/server": "0.4.0",
-    "@godot-mcp/godot-addon": "0.4.0",
+    "@godot-mcp/protocol": "0.5.0",
+    "@godot-mcp/server": "0.5.0",
+    "@godot-mcp/godot-addon": "0.5.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "ws": "^8.18.0",
     "zod": "^4.0.0"

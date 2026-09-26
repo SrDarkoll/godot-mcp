@@ -5,13 +5,13 @@
 [![Godot Engine](https://img.shields.io/badge/Godot-v4.6.3--stable-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![MCP](https://img.shields.io/badge/MCP-192%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
-[![Status](https://img.shields.io/badge/Status-Stable%20%7C%20Godot%204.x%20Production--Ready-success)](https://github.com/SrDarkoll/godot-mcp)
+[![MCP](https://img.shields.io/badge/MCP-194%20Tools-8A2BE2)](docs/architecture/tool-registry-profiles.md)
+[![Status](https://img.shields.io/badge/Status-Windows%20%7C%20Godot%204.6.3%20Verified-success)](https://github.com/SrDarkoll/godot-mcp)
 [![npm version](https://img.shields.io/npm/v/@srdarkx/godot-mcp.svg)](https://www.npmjs.com/package/@srdarkx/godot-mcp)
 
 > **Give your AI coding assistants hands, eyes, and deep debugging powers directly inside Godot Engine 4.x.**
 
-Godot MCP is an open-source, production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to **Godot Engine 4.x**.
+Godot MCP is an open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to Godot. The verified runtime target is **Windows with Godot 4.6.3**; other Godot 4.x minors need their own integration evidence.
 
 Instead of copying and pasting GDScript snippets, guessing node hierarchy paths, or struggling to describe visual bugs to an LLM, Godot MCP provides a bidirectional control plane: agents can inspect scene trees, author 2D/3D nodes, build TileMaps, edit animations, step through code with a live DAP debugger, and capture high-resolution viewport screenshots for visual grounding.
 
@@ -31,10 +31,11 @@ Instead of copying and pasting GDScript snippets, guessing node hierarchy paths,
 - 🐞 **Interactive DAP Debugger (Phase 9)**: Real-time breakpoint management, stepping (into, over, out), call stack inspection, and lazy variable evaluation during live game execution.
 - 👁️ **Visual Grounding & Viewport Capture**: Capture 2D and 3D editor viewports as well as running game frames as PNGs, enabling multimodal AI models to visually inspect level layouts, shaders, and lighting.
 - ⚡ **Headless Process Manager (Phase 8)**: Run project validation, asset importing, automated tests, and background game instances without GUI dependencies—ideal for autonomous CI/CD or agent self-testing.
-- 🛡️ **Transactional Safety & Reversibility**: Multi-file atomic write transactions (`transaction.*`), file checkpoints (`checkpoint.*`), and risk previews prevent unintended project corruption.
+- 🛡️ **Recoverable File Transactions**: `transaction.*` stages declared files, checks preconditions and retains a journal and snapshots for compensation or manual recovery after a failed publication.
 - 🧩 **Structured Scene Batches**: Prevalidate up to 64 native scene/resource operations, reject stale state, then apply them as one Undo/Redo action.
 - 🔄 **Project Events & Dependency Impact**: Resume bounded project event streams and inspect direct, transitive, broken, and inbound resource references before changing assets.
 - 📊 **Deterministic Regression Evidence**: Compare retained viewport captures pixel by pixel and evaluate runtime snapshots against caller-defined performance budgets.
+- 📐 **Walkway Geometry Preflight**: Check complete 2D route footprints against declared colliders and measure endpoint gaps before running the game.
 - 🎯 **8 Bounded Tool Profiles**: Select focused toolsets (`minimal`, `core`, `2d`, `3d`, `navigation`, `ui`, `runtime`, `full`) to drastically reduce LLM context token usage and latency.
 
 ---
@@ -51,7 +52,7 @@ Godot MCP uses a decoupled, secure two-tier architecture communicating over stan
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  Godot MCP Server (Node.js 22+)             │
-│  ├─ Tool Registry (192 tools across 8 profiles)             │
+│  ├─ Tool Registry (194 tools across 8 profiles)             │
 │  ├─ Headless Process Manager (Godot CLI runner)             │
 │  ├─ DAP Client (Interactive debugger bridge)                │
 │  ├─ Transaction & Snapshot Recovery Engine                  │
@@ -72,13 +73,13 @@ Godot MCP uses a decoupled, secure two-tier architecture communicating over stan
 
 ## Enterprise Hardening & Safety Architecture
 
-Godot MCP is engineered for safe, reliable autonomous AI development inside production game projects:
+Godot MCP includes bounded checks and recovery controls for autonomous work in trusted Godot projects:
 
 - 🔒 **Kernel-Level Project Lease (`project-lease.ts`)**: Multi-process mutual exclusion via Windows Named Pipes (`\\.\pipe\godot-mcp-project-<sha256>`). Ensures only one server or CLI process modifies a project concurrently, with automatic instant cleanup by the OS kernel if a process terminates abnormally.
-- 🔄 **Addon Journal & Rollback Barrier (`addon-journal.ts`)**: Addon installations and updates are staged with SHA-256 integrity verification. Any interrupted or crashed update is detected and automatically compensated before any subsequent operation runs.
-- 📦 **Defensive Memory & Recursion Budgets (`argument-budget.ts`, `serialization_budget.gd`)**: Prevents engine freezes and OOM crashes through strict bounds (64 depth, 50,000 items, 8 MB string limits, and cycle detection via `WeakSet` in Node.js and ancestor sets in GDScript).
-- 🛡️ **Reflection Safety Sandbox (`reflection-safety.ts`, `safety_policy.gd`)**: Blocks 31 dangerous reflective methods and restricts node mutations to the active edited scene tree.
-- 📝 **Multi-File Atomic Transactions & Checkpoints (`transaction.*`, `checkpoint.*`)**: Staged edits are validated before committing. Any failure triggers an automatic compensation rollback with zero partial writes.
+- 🔄 **Addon Journal & Rollback Barrier (`addon-journal.ts`)**: Addon installations and updates are staged with SHA-256 integrity verification. Startup detects a pending update and attempts rollback before normal work; an invalid journal or failed rollback stops the operation for inspection.
+- 📦 **Defensive Memory & Recursion Budgets (`argument-budget.ts`, `serialization_budget.gd`)**: Bound accepted inputs and serialized results; they reduce resource exhaustion but cannot sandbox project code.
+- 🛡️ **Reflection Guardrails (`reflection-safety.ts`, `safety_policy.gd`)**: Block dangerous reflective methods and restrict node mutations to the active edited scene tree; Godot and project scripts still run with their normal OS privileges.
+- 📝 **Journalled Multi-File Transactions & Checkpoints (`transaction.*`, `checkpoint.*`)**: Publish files sequentially with preconditions and compensation. An unsuccessful compensation retains evidence and requires recovery. External processes can observe intermediate files.
 - 🐞 **Interactive DAP Debugger (`debug.*`)**: Real-time breakpoints, stepping (into, over, out), stack frame inspection, and lazy variable expansion during live game runs.
 - ⚡ **Headless Process Manager (`headless.*`)**: Run project validations, asset imports, and automated tests in headless mode without GUI dependencies.
 - 👁️ **Visual Grounding (`visual.*`)**: High-resolution PNG captures of 2D/3D editor viewports and running game frames.
@@ -87,18 +88,18 @@ Godot MCP is engineered for safe, reliable autonomous AI development inside prod
 
 ## Tool Profiles
 
-To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 192 tools into 8 specialized profiles:
+To keep LLM context sizes bounded, Godot MCP divides its 194 tools into 8 specialized profiles:
 
 | Profile | Tools | Primary Focus | Included Capabilities |
 | :--- | :---: | :--- | :--- |
 | `minimal` | 5 | Liveness & Discovery | Session status, project info, scene tree, engine capabilities, tool registry |
-| `core` | 84 | Project & Scene CRUD | Project info, scene tree, nodes, resources, batches, dependencies, transactions |
-| `2d` | 128 | 2D Game Development | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D, Parallax2D |
-| `3d` | 114 | 3D World Building | Core + Node3D, Mesh3D, Camera3D, Collision3D, Light3D, StandardMaterial3D, Shader3D |
-| `navigation` | 73 | Navigation & Pathfinding | Core + 2D/3D NavigationRegion, NavigationMesh baking, NavigationAgent |
-| `ui` | 88 | User Interface & Animation | Core + Control nodes, anchors, layout presets, AnimationPlayer & AnimationMixer |
-| `runtime` | 52 | QA, Headless & Debugging | Headless runner, live game inspection, events, visual and performance comparison, DAP debugger |
-| `full` | 192 | Unrestricted Power-Agent | Complete tool surface across all domains (default) |
+| `core` | 86 | Project & Scene CRUD | Project info, scene tree, nodes, resources, batches, geometry, dependencies, transactions |
+| `2d` | 130 | 2D Game Development | Core + Node2D, Sprite2D, TileMapLayer, TileSet, Camera2D, Collision2D, Parallax2D |
+| `3d` | 115 | 3D World Building | Core + Node3D, Mesh3D, Camera3D, Collision3D, Light3D, StandardMaterial3D, Shader3D |
+| `navigation` | 75 | Navigation & Pathfinding | NavigationRegion/mesh/agent workflows and 2D geometry preflight |
+| `ui` | 89 | User Interface & Animation | Control layout, focus, animation and visual capture |
+| `runtime` | 53 | QA, Headless & Debugging | Headless runner, live game inspection, events, visual and performance comparison, DAP debugger |
+| `full` | 194 | Complete | All available Godot MCP tools (default) |
 
 > **Tip:** You can set a default profile in `.godot-mcp/config.json` via `godot-mcp config <project> --tool-profile 2d` or override it on server start with `--tool-profile <name>`.
 
@@ -106,8 +107,8 @@ To keep LLM context sizes optimal and avoid prompt bloat, Godot MCP divides its 
 
 ## Requirements & Compatibility Boundary
 
-- **Operating System:** Windows 10/11 is the primary **Tier-1 validated target**. Linux and macOS are expected to work via Node.js and the Godot CLI, but are not yet Tier-1 validated in continuous integration.
-- **Godot Engine:** Tested and hardened specifically against **Godot 4.6.3-stable** on Windows. Other Godot 4.x releases are expected to work, but have not been formally certified across all 10 gates.
+- **Operating System:** Windows 10/11 is the supported runtime. The project lease currently rejects Linux and macOS at server/CLI initialization with `UNSUPPORTED_PLATFORM`.
+- **Godot Engine:** Verified against **Godot 4.6.3-stable** on Windows. Other Godot 4.x releases have capability probes but lack the complete integration matrix.
 - **Node.js:** v22.0.0 or newer.
 - **Package Manager:** npm (bundled with Node.js).
 
@@ -133,7 +134,7 @@ npx @srdarkx/godot-mcp init . --client claude
 ```
 *(Tip: You can also pass a full path instead of `.`, e.g. `npx @srdarkx/godot-mcp init C:\Projects\MyGame --client antigravity`)*
 
-#### What happens automatically in 3 seconds:
+#### What the setup command does:
 1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x executable across standard Windows and system paths.
 2. 📦 **Installs Bridge Plugin**: Copies `addons/godot_mcp` directly into your game folder.
 3. ⚡ **Activates Plugin**: Enables the plugin automatically in `project.godot` (via Godot's headless CLI, no manual editor clicks needed).
@@ -249,13 +250,16 @@ Once connected, you can interact with your project naturally. Here are examples 
 ### 🤖 Autonomous Verification Workflow
 > *"Run `workflow.run_check` on `res://scenes/test_arena.tscn`. Run headless tests, capture the game frame after 2 seconds, verify there are zero script errors, and report a pass/fail verdict with evidence."*
 
+### 📐 Walkway Preflight
+> *"Use `geometry.validate_walkways` to check `CentralCross` against its declared collision nodes and measure the gap to its connecting route before capturing a frame."*
+
 ---
 
 ## Safety & Reversibility
 
-Godot MCP is built with strict safety guarantees to prevent AI agents from accidentally damaging your game assets:
+Godot MCP reduces risk with explicit permissions, previews, snapshots and recoverable publication. Review the result of any write to a trusted project:
 
-1. **Declared Transactions (`transaction.*`)**: Agents can stage multiple file changes in an isolated transaction. If any operation fails, the entire transaction is rolled back automatically with zero partial writes.
+1. **Declared Transactions (`transaction.*`)**: Agents stage multiple file changes and publish them one by one after precondition checks. Failed publications attempt compensation; unresolved journals block further normal work until inspected. Other processes may observe intermediate writes.
 2. **File Checkpoints (`checkpoint.*`)**: Creates snapshot restore points before complex refactors, allowing one-command restoration of critical files.
 3. **Risk Preview (`risk.preview`)**: High-risk operations (such as file deletions or batch property overwrites) require explicit confirmation and permission checks.
 4. **Isolated Loopback Security**: The WebSocket bridge binds strictly to `127.0.0.1` using short-lived tokens and randomized ports generated per session.
@@ -326,6 +330,8 @@ powershell -ExecutionPolicy Bypass -File scripts/run-all-gates.ps1 -GodotBin "C:
 - [TileMap & TileSet Power Tools](docs/tools/tilemap-tileset.md)
 - [Runtime & DAP Debugger](docs/tools/runtime-debugger.md)
 - [Visual Viewport Capture](docs/tools/visual-capture.md)
+- [Walkway Geometry Validation](docs/tools/geometry-validation.md)
+- [Project Lease and Maintenance](docs/tools/project-maintenance.md)
 - [Transactions & Recovery](docs/tools/transactions-recovery.md)
 - [Autonomous Verification Workflows](docs/tools/workflow.md)
 

@@ -54,7 +54,13 @@ func _property(target: Object, property: String, value) -> Dictionary:
     if expected == TYPE_STRING_NAME and decoded is String: decoded = StringName(decoded)
     if expected == TYPE_NODE_PATH and decoded is String: decoded = NodePath(decoded)
     if expected != TYPE_NIL and typeof(decoded) != expected and not (expected == TYPE_OBJECT and decoded == null):
-        return _error("BATCH_TYPE_MISMATCH","Batch value type does not match " + property)
+        var expected_name := type_string(expected)
+        var received_name := type_string(typeof(decoded))
+        var details := {"property": property, "expectedType": expected_name, "receivedType": received_name}
+        if expected == TYPE_PACKED_VECTOR2_ARRAY:
+            details["example"] = {"type":"PackedVector2Array","value":[{"x":0,"y":0},{"x":32,"y":0},{"x":32,"y":32}]}
+        return _error("BATCH_TYPE_MISMATCH",
+            "Batch property %s expects %s; received %s" % [property, expected_name, received_name], details)
     if not Budget.check(target.get(property)).is_empty(): return _error("RESULT_TOO_LARGE","Existing property exceeds undo snapshot limits")
     return {"value":decoded}
 func _prepare(params: Dictionary) -> Dictionary:

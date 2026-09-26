@@ -25,10 +25,12 @@ var _runtime
 var _recovery
 var _batch
 var _dependencies
+var _geometry
 
 func _init(editor_interface, runtime = null) -> void:
     _batch = preload("res://addons/godot_mcp/bridge/handlers/batch_handlers.gd").new(editor_interface)
     _dependencies = preload("res://addons/godot_mcp/bridge/handlers/dependency_handlers.gd").new(editor_interface)
+    _geometry = preload("res://addons/godot_mcp/bridge/handlers/geometry_handlers.gd").new(editor_interface)
     _runtime = runtime
     _compatibility = preload("res://addons/godot_mcp/bridge/compatibility/compatibility_core.gd").new(editor_interface)
     _recovery = preload("res://addons/godot_mcp/bridge/handlers/recovery_handlers.gd").new(editor_interface)
@@ -94,6 +96,8 @@ func dispatch(raw_text: String) -> Dictionary:
                 return _failure(request_id, "ARGUMENT_TOO_LARGE", value_issue)
     var result
     match method:
+        "geometry.validate_walkways":
+            result = _geometry.validate_walkways(params)
         "resource.dependencies":
             result = _dependencies.dependencies(params)
         "resource.impact":

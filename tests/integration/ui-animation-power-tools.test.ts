@@ -31,7 +31,7 @@ async function stopProcess(child:ChildProcess|null):Promise<void>{
 }
 
 afterEach(async()=>{
-  await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true})));
+  await Promise.all(tempRoots.splice(0).map(root=>rm(root,{recursive:true,force:true,maxRetries:15,retryDelay:200})));
 });
 
 describe('Godot UI and animation power tools',()=>{
