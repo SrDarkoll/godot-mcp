@@ -1,9 +1,9 @@
 import * as z from 'zod/v4';
 
-const nodePath = z.string().min(2).max(1024).refine(value =>
-  value.startsWith('/') && !value.includes('..') && !value.includes('\\') &&
+const nodePath = z.string().min(1).max(1024).refine(value =>
+  !value.includes('..') && !value.includes('\\') &&
   !value.includes('\0') && !value.includes(':') && !value.includes('//'),
-  'Expected a logical path within the edited scene');
+  'Expected a scene node path such as /Main/CentralCross or CentralCross relative to the edited scene root');
 const boundedDistance = z.number().finite().min(0).max(4096);
 
 export const GeometryConnectionSchema = z.strictObject({

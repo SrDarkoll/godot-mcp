@@ -128,5 +128,9 @@ async function initOwnedProject(projectRoot: string, options: InitProjectOptions
     }
   }
 
+  if (options.operation === 'addon_update' && backupPath) {
+    warnings.push('If an open Godot editor does not load the updated addon, run a FileSystem scan or reopen the project.');
+  }
+
   return { projectRoot, addonPath, enabled, warnings, ...(backupPath ? { backupPath } : {}) };
 }

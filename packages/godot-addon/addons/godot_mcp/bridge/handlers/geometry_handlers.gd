@@ -146,6 +146,8 @@ func validate_walkways(params: Dictionary) -> Dictionary:
         return _error("INVALID_ARGUMENT","Geometry bounds are invalid")
     var routes: Dictionary = {}
     var obstacles: Dictionary = {}
+    var route_node_ids: Dictionary = {}
+    var obstacle_node_ids: Dictionary = {}
     var diagnostics: Array = []
     var approximate: Array = []
     var skipped_disabled: Array = []
@@ -153,6 +155,9 @@ func validate_walkways(params: Dictionary) -> Dictionary:
         var node = Scope.resolve(root,str(route_path))
         if node == null:
             return _error("NODE_NOT_FOUND","Route does not exist in the edited scene: "+str(route_path))
+        if route_node_ids.has(node.get_instance_id()):
+            return _error("INVALID_ARGUMENT","Routes must refer to distinct scene nodes")
+        route_node_ids[node.get_instance_id()] = true
         var route = _route(node,clearance) if node is Node2D else {"unsupported":"Route is not Node2D"}
         if route.has("unsupported"):
             diagnostics.append({"code":"UNSUPPORTED_ROUTE","nodePath":route_path,"message":route.unsupported})
@@ -162,6 +167,9 @@ func validate_walkways(params: Dictionary) -> Dictionary:
         var node = Scope.resolve(root,str(obstacle_path))
         if node == null:
             return _error("NODE_NOT_FOUND","Obstacle does not exist in the edited scene: "+str(obstacle_path))
+        if obstacle_node_ids.has(node.get_instance_id()):
+            return _error("INVALID_ARGUMENT","Obstacles must refer to distinct scene nodes")
+        obstacle_node_ids[node.get_instance_id()] = true
         var obstacle = _obstacle(node) if node is Node2D else {"unsupported":"Obstacle is not Node2D"}
         if obstacle.has("disabled"):
             skipped_disabled.append(obstacle_path)

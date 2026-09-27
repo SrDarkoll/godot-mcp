@@ -19,3 +19,19 @@ it('bounds route, obstacle and endpoint validation requests', () => {
     {...request,routes:['/Main/../Outside']}
   ]) expect(GeometryValidateSchema.safeParse(invalid).success).toBe(false);
 });
+
+it('accepts scene-root-relative node paths already supported by the Godot scene resolver', () => {
+  const request = GeometryValidateSchema.parse({
+    routes: ['CentralCross', 'Paths/EntranceLink'],
+    obstacles: ['academic_block_unidentified/Collision'],
+    connections: [{
+      from: 'CentralCross', from_end: 'end',
+      to: 'Paths/EntranceLink', to_end: 'start', max_gap_px: 10
+    }]
+  });
+  expect(request.routes).toEqual(['CentralCross', 'Paths/EntranceLink']);
+  expect(request.obstacles).toEqual(['academic_block_unidentified/Collision']);
+  expect(GeometryValidateSchema.safeParse({
+    routes: ['../Outside'], obstacles: ['academic_block_unidentified/Collision']
+  }).success).toBe(false);
+});

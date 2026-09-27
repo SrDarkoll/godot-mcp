@@ -2,6 +2,13 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.5.1] - Unreleased
+
+- Accept paths relative to the edited scene root in `geometry.validate_walkways`, matching the native scene resolver.
+- Warn after a changed addon update that an already-open Godot editor may need a FileSystem scan or project reopen.
+- Show the required `GODOT_BIN` setup before `check:godot` in the contributor instructions.
+- Clarify that `clear: true` covers declared geometry only and `visual.compare` does not judge resemblance to a reference image.
+
 ## [0.5.0] - 2026-09-26
 
 ### Added

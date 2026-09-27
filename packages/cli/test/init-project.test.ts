@@ -35,8 +35,9 @@ it('preserves unrelated config keys and existing addon files', async () => {
 it('backs up changed managed addon files before updating them',async()=>{
  const root=await createTempGodotProject();await initProject({projectRoot:root,enable:false});
  await writeFile(path.join(root,'addons/godot_mcp/plugin.gd'),'custom addon code');
- const updated=await initProject({projectRoot:root,enable:false});
+ const updated=await initProject({projectRoot:root,enable:false,operation:'addon_update'});
  expect(updated.backupPath).toEqual(expect.any(String));
+ expect(updated.warnings).toEqual(expect.arrayContaining([expect.stringContaining('FileSystem scan')]));
  expect(await readFile(path.join(updated.backupPath!,'files/plugin.gd'),'utf8')).toBe('custom addon code');
  expect(await readFile(path.join(root,'addons/godot_mcp/plugin.gd'),'utf8')).toContain('extends EditorPlugin');
 });
