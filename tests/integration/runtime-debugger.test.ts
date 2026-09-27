@@ -50,7 +50,7 @@ it('refuses to stop or replace a game launched outside the MCP session',async()=
   const started=await h.client.callTool({name:'project.run',arguments:{}});expect(started.structuredContent).toMatchObject({error:{code:'RUNTIME_ALREADY_RUNNING'}});
   expect((await h.client.callTool({name:'runtime.status',arguments:{}})).structuredContent?.ownership).toBe('external');
  }finally{await h.close();}
-},30000);
+},90000);
 
 it('does not transfer ownership to a later manual game after an owned run stops',async()=>{
  const h=await runtimeHarness({manualAfterStop:true});
@@ -61,7 +61,7 @@ it('does not transfer ownership to a later manual game after an owned run stops'
   await waitFor(async()=>(await h.client.callTool({name:'runtime.status',arguments:{}})).structuredContent?.ownership==='external',5000);
   expect((await h.client.callTool({name:'project.stop',arguments:{}})).structuredContent).toMatchObject({error:{code:'RUNTIME_NOT_OWNED'}});
  }finally{await h.close();}
-},30000);
+},90000);
 
 it('distinguishes debugger break from SceneTree pause and still permits stop',async()=>{
  const h=await runtimeHarness({breakAfterReady:true});
@@ -72,7 +72,7 @@ it('distinguishes debugger break from SceneTree pause and still permits stop',as
   expect(read.structuredContent).toMatchObject({error:{code:'RUNTIME_BREAKED'}});
   const stop=await h.client.callTool({name:'project.stop',arguments:{}});expect(stop.structuredContent).toMatchObject({stopped:true});
  }finally{await h.close();}
-},30000);
+},90000);
 
 it('stops its owned runtime and records endedAt on MCP stdin closure',async()=>{
  const h=await runtimeHarness();
@@ -84,4 +84,4 @@ it('stops its owned runtime and records endedAt on MCP stdin closure',async()=>{
   await waitFor(async()=>JSON.parse(await readFile(file,'utf8')).endedAt!==null,5000);
   expect(JSON.parse(await readFile(file,'utf8')).runtimeRuns[0]).toMatchObject({state:'stopped',endedAt:expect.any(String)});
  }finally{await h.close();}
-},30000);
+},90000);

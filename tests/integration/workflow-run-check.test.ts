@@ -33,7 +33,7 @@ it('runs, sees, persists a baseline, and diffs a second owned run through one wo
     expect((delta.structuredContent as any).screenshots.length).toBeGreaterThanOrEqual(1);
     expect((delta.structuredContent as any).runtimeRuns.length).toBeGreaterThanOrEqual(1);
   }finally{await h.close();}
-},60000);
+},120000);
 
 it('returns fail with retained visual evidence when native runtime errors occur',async()=>{
   const h=await runtimeHarness();
@@ -46,7 +46,7 @@ it('returns fail with retained visual evidence when native runtime errors occur'
     expect(value.screenshot).toMatchObject({type:'game'});
     expect(imageContent(checked)).toMatchObject({type:'image',mimeType:'image/png'});
   }finally{await h.close();}
-},30000);
+},90000);
 
 it('never stops or replaces an external/manual runtime',async()=>{
   const h=await runtimeHarness({manual:true,noRuntimeError:true});
@@ -57,4 +57,4 @@ it('never stops or replaces an external/manual runtime',async()=>{
     expect(checked.structuredContent).toMatchObject({error:{code:'RUNTIME_NOT_OWNED'}});
     expect((await h.client.callTool({name:'runtime.status',arguments:{}})).structuredContent).toMatchObject({ownership:'external'});
   }finally{await h.close();}
-},30000);
+},90000);

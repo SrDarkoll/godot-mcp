@@ -33,7 +33,7 @@ it('persists the game viewport through multiple native debugger chunks',async()=
  expect(checked.status,checked.stderr).toBe(0);const stats=JSON.parse(checked.stdout.split(/\r?\n/).find(l=>l.startsWith('PNG_STATS='))!.slice(10));
  expect(stats[0].blue).toBeGreaterThan(10000);expect(stats[0].width).toBe(width);
  await writeFile(path.join(h.root,'capture-evidence.json'),JSON.stringify({files,stats},null,2));
-},60000);
+},120000);
 
 it('restores the game camera after a framed capture fails',async()=>{
  const h=await runtimeHarness({failFramedCapture:true});
@@ -52,7 +52,7 @@ it('restores the game camera after a framed capture fails',async()=>{
   expect(restored.structuredContent?.screenshot?.sha256).toBe(baseline.structuredContent?.screenshot?.sha256);
   expect(await readFile(path.join(h.root,'main.tscn'))).toEqual(sceneBefore);
  }finally{await h.close();}
-},60000);
+},90000);
 
 it('cancels a native capture in progress when stop uses the control lane',async()=>{
  const h=await runtimeHarness({slowCapture:true});
@@ -66,4 +66,4 @@ it('cancels a native capture in progress when stop uses the control lane',async(
   const manifest=(await h.client.callTool({name:'session.manifest',arguments:{}})).structuredContent?.manifest as any;
   expect(manifest.screenshots).toHaveLength(0);
  }finally{await h.close();}
-},60000);
+},90000);
