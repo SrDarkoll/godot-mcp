@@ -118,3 +118,5 @@ Later approved milestones own:
 - expanded audit logging;
 - headless project tools beyond foundation checks;
 - Codex auto-registration and release packaging.
+
+This list records the original foundation boundary, not the current release surface. [Codex client setup](../tools/codex.md) and the release guides describe the features delivered in later milestones.

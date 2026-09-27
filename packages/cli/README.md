@@ -9,7 +9,7 @@
 
 The CLI launcher and Model Context Protocol bridge verified on **Windows with Godot Engine 4.6.3**. Other Godot 4.x versions require their own integration checks.
 
-Connect modern AI assistants (**Cursor**, **Claude Desktop**, **Antigravity**, **Roo Code**, **Cline**, and custom agents) directly to your running Godot editor and game runtime.
+Connect modern AI assistants (**Codex**, **Cursor**, **Claude Desktop**, **Antigravity**, **Roo Code**, **Cline**, and custom agents) directly to your running Godot editor and game runtime.
 
 ---
 
@@ -21,7 +21,13 @@ Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing 
 ### Step 2: Run the Setup Command (Single Step)
 Open a terminal in your project directory and run the command for your AI editor:
 
+Codex bootstrap is in the current source; use the next npm release for the `npx` command, or follow the [source-checkout recipe](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) until then.
+
+
 ```bash
+# For Codex
+npx @srdarkx/godot-mcp init . --client codex
+
 # For Google Antigravity / Gemini
 npx @srdarkx/godot-mcp init . --client antigravity
 
@@ -37,10 +43,10 @@ npx @srdarkx/godot-mcp init . --client claude
 1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x binary across standard Windows and system paths.
 2. 📦 **Installs Bridge Plugin**: Copies the hardened `addons/godot_mcp` EditorPlugin directly into your game folder.
 3. ⚡ **Activates Plugin**: Enables the plugin automatically in `project.godot` (via Godot's headless CLI, no manual editor clicks needed).
-4. 🤖 **Configures Your AI Client**: Automatically creates or updates your client configuration file (`.agents/mcp_config.json`, `.cursor/mcp.json`, or Claude Desktop config).
+4. 🤖 **Configures Your AI Client**: Automatically creates or updates `.codex/config.toml`, `.agents/mcp_config.json`, `.cursor/mcp.json`, or Claude Desktop config.
 
 ### Step 3: Open Your AI Editor and Godot
-1. **Open your project in your AI editor** (**Antigravity**, **Cursor**, or **Claude Desktop**). It will detect the configuration and launch the Godot MCP server automatically. (If already open, simply reload the window).
+1. **Open your project in your AI editor** (**Codex**, **Antigravity**, **Cursor**, or **Claude Desktop**). Codex loads project-local configuration only when you trust the project. Restart an already-open client after changing MCP configuration.
 2. **Open your project in Godot Engine**. The editor plugin connects to the bridge over local WebSocket in ~1 second.
 
 🎉 **You're all set!** You can now prompt your AI directly:
@@ -70,7 +76,7 @@ npx @srdarkx/godot-mcp init . --client antigravity --tool-profile 2d
 | Flag | Description | Default |
 | :--- | :--- | :--- |
 | `--godot <path>` | Path to Godot 4.x executable | Auto-discovered |
-| `--client <name>` | Target AI client: `cursor`, `claude`, `antigravity`, `none` | Prompt / Auto |
+| `--client <name>` | Target AI client: `codex`, `cursor`, `claude`, or `antigravity`; omit for none | None |
 | `--tool-profile <profile>` | Default tool profile (`minimal`, `core`, `2d`, `3d`, `full`) | `full` |
 | `--port <number>` | Custom WebSocket bridge port | `0` (dynamic loopback) |
 
@@ -121,6 +127,18 @@ npx @srdarkx/godot-mcp config . --repair
 ---
 
 ## 🤖 AI Client Configurations
+
+### Codex (`.codex/config.toml`)
+
+`init --client codex` writes a managed, project-local TOML entry while preserving other settings:
+
+```toml
+[mcp_servers.godot-mcp]
+command = "npx"
+args = ["--yes", "@srdarkx/godot-mcp", "start", "C:/path/to/YourProject", "--tool-profile", "full"]
+```
+
+Trust the project in Codex and restart the local client. `codex mcp list` or `/mcp` shows the connection. The source checkout also offers `godot-mcp setup codex` as a read-only recipe for launching its bundled server before the next npm publication. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) and [official Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
 
 ### Cursor (`.cursor/mcp.json`)
 ```json

@@ -4,6 +4,7 @@ All notable release-level changes to Godot MCP are documented here.
 
 ## [0.5.1] - Unreleased
 
+- Add Codex as an `init --client codex` target with project-local MCP configuration, managed updates, and doctor verification.
 - Accept paths relative to the edited scene root in `geometry.validate_walkways`, matching the native scene resolver.
 - Warn after a changed addon update that an already-open Godot editor may need a FileSystem scan or project reopen.
 - Show the required `GODOT_BIN` setup before `check:godot` in the contributor instructions.

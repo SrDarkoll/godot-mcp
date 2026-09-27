@@ -26,7 +26,7 @@ function cli(args){
  assert.equal(result.status,0,result.stderr||result.stdout);
  return result.stdout;
 }
-assert(cli(['--help']).includes('--client <antigravity|cursor|claude>'));
+assert(cli(['--help']).includes('--client <antigravity|cursor|claude|codex>'));
 const initialized=JSON.parse(cli(['init',project,'--client','cursor','--tool-profile','2d','--json']));
 assert.equal(initialized.projectRoot,project);
 assert.equal(initialized.client.client,'cursor');
@@ -35,6 +35,14 @@ const projectConfig=JSON.parse(await fs.readFile(path.join(project,'.godot-mcp/c
 assert.equal(projectConfig.toolProfile,'2d');
 const clientConfig=JSON.parse(await fs.readFile(path.join(project,'.cursor/mcp.json'),'utf8'));
 assert.deepEqual(clientConfig.mcpServers['godot-mcp'],{command:'npx',args:['--yes','@srdarkx/godot-mcp','start',project,'--tool-profile','2d']});
+const codexInit=JSON.parse(cli(['init',project,'--client','codex','--tool-profile','2d','--json']));
+assert.equal(codexInit.client.client,'codex');
+assert.equal(codexInit.client.path,path.join(project,'.codex','config.toml'));
+const codexConfig=await fs.readFile(codexInit.client.path,'utf8');
+assert(codexConfig.includes('[mcp_servers.godot-mcp]'));
+assert(codexConfig.includes('command = "npx"'));
+assert.deepEqual(JSON.parse(codexConfig.match(/^args = (.+)$/m)?.[1]??'null'),
+ ['--yes','@srdarkx/godot-mcp','start',project,'--tool-profile','2d']);
 const recipe=JSON.parse(cli(['setup','codex',project,'--json']));
 assert.equal(recipe.changedProfile,false);
 const publicReal=await fs.realpath(publicRoot);
@@ -67,7 +75,7 @@ await fs.writeFile(path.join(packed.out,'consumer-validation.json'),JSON.stringi
   'addon init',
   'scoped client bootstrap',
   'tool profile persistence',
-  'Codex recipe inside public package',
+  'Codex project config and recipe inside public package',
   'MCP session.status',
   'authenticated status and stop'
  ]

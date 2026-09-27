@@ -3,8 +3,11 @@ import {runCommand} from '../process/run-command.js';
 import path from 'node:path';
 import { resolveProjectRoot } from '@godot-mcp/server/project-root';
 import {serverStatus} from '@godot-mcp/server/management';
+import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
+import { makeClientLaunchEntry } from '../setup/client-config.js';
+import { inspectManagedCodexConfig } from '../setup/codex-config.js';
 
-export type DoctorCheckId = 'node' | 'project' | 'addon' | 'godot' | 'protocol' | 'runtime' | 'bridge' | 'runtimeConnection';
+export type DoctorCheckId = 'node' | 'project' | 'addon' | 'godot' | 'protocol' | 'runtime' | 'bridge' | 'runtimeConnection' | 'codex';
 export interface DoctorCheck { id: DoctorCheckId; ok: boolean; detail: string; required?:boolean; }
 export interface DoctorReport { ok: boolean; checks: DoctorCheck[]; }
 export interface DoctorOptions { projectRoot: string; godotBin?: string | null; }
@@ -33,6 +36,7 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
   }
 
   if (projectRoot) {
+    let toolProfile: ToolProfile = 'full';
     const cfg = path.join(projectRoot, 'addons', 'godot_mcp', 'plugin.cfg');
     const gd = path.join(projectRoot, 'addons', 'godot_mcp', 'plugin.gd');
     const addonOk = await exists(cfg) && await exists(gd);
@@ -48,12 +52,25 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
       try {
         const config = JSON.parse(await readFile(configPath, 'utf8'));
         const ok = config?.protocol === 1;
+        const parsedProfile = ToolProfileSchema.safeParse(config?.toolProfile);
+        if (parsedProfile.success) toolProfile = parsedProfile.data;
         checks.push({ id: 'protocol', ok, detail: ok ? 'Protocol 1' : `Expected protocol 1, found ${String(config?.protocol)}` });
       } catch (error) {
         checks.push({ id: 'protocol', ok: false, detail: `Invalid config.json: ${error instanceof Error ? error.message : String(error)}` });
       }
     } else {
       checks.push({ id: 'protocol', ok: false, detail: 'Missing .godot-mcp/config.json' });
+    }
+    try {
+      const codexPath = path.join(projectRoot, '.codex', 'config.toml');
+      const matches = await inspectManagedCodexConfig(codexPath, makeClientLaunchEntry(projectRoot, toolProfile));
+      if (matches !== null) {
+        checks.push({ id: 'codex', ok: matches, detail: matches
+          ? 'Managed project-local Codex MCP server matches this project and tool profile'
+          : 'Managed Codex MCP server differs from this project or tool profile; run init --client codex again' });
+      }
+    } catch (error) {
+      checks.push({ id: 'codex', ok: false, detail: `Unable to inspect managed Codex config: ${error instanceof Error ? error.message : String(error)}` });
     }
   } else {
     checks.push({ id: 'addon', ok: false, detail: 'Project unavailable' });
