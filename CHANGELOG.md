@@ -2,7 +2,7 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
-## Unreleased
+## [0.5.1] - Unreleased
 
 - Accept paths relative to the edited scene root in `geometry.validate_walkways`, matching the native scene resolver.
 - Warn after a changed addon update that an already-open Godot editor may need a FileSystem scan or project reopen.
