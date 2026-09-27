@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, it } from 'vitest';
@@ -21,9 +21,10 @@ it('checks the managed Codex entry only when that project uses one', async () =>
   await writeFile(path.join(root, 'project.godot'), '[application]\nconfig/name="Fixture"\n');
   await mkdir(path.join(root, '.godot-mcp'), { recursive: true });
   await writeFile(path.join(root, '.godot-mcp', 'config.json'), JSON.stringify({ protocol: 1, toolProfile: '2d' }));
-  await configureClient({ client: 'codex', projectRoot: root, toolProfile: '2d', env: {}, homeDir: root });
+  await configureClient({ client: 'codex', projectRoot: await realpath(root), toolProfile: '2d', env: {}, homeDir: root });
   const configured = await doctor({ projectRoot: root, godotBin: null });
-  expect(configured.checks.find(check => check.id === 'codex')).toMatchObject({ ok: true });
+  const codexCheck = configured.checks.find(check => check.id === 'codex');
+  expect(codexCheck?.ok, codexCheck?.detail).toBe(true);
   const file = path.join(root, '.codex', 'config.toml');
   await writeFile(file, (await readFile(file, 'utf8')).replace('"--tool-profile","2d"', '"--tool-profile","3d"'));
   const stale = await doctor({ projectRoot: root, godotBin: null });
