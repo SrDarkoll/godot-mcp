@@ -5,7 +5,7 @@ export interface ParsedCommand {command:Command;projectRoot:string;godotBin:stri
 export const SESSION_ID=/^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}$/;
 export function usage():string{return [
  'Usage: godot-mcp <command> [path] [options]',
- '  init [--godot <exe>] [--client <antigravity|cursor|claude>] [--tool-profile <profile>] [--json]',
+ '  init [--godot <exe>] [--client <antigravity|cursor|claude|codex>] [--tool-profile <profile>] [--json]',
  '  addon install | addon update [--godot <exe>] [--json]',
  '  doctor [--godot <exe>] [--json]',
  '  start [--bridge-port <0..65535>] [--tool-profile <profile>]  MCP stdio, no CLI output',

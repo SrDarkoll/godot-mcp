@@ -11,7 +11,7 @@
 
 > **Give your AI coding assistants hands, eyes, and deep debugging powers directly inside Godot Engine 4.x.**
 
-Godot MCP is an open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to Godot. The verified runtime target is **Windows with Godot 4.6.3**; other Godot 4.x minors need their own integration evidence.
+Godot MCP is an open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that connects modern AI assistants (Codex, Anthropic Claude Desktop, Cursor, Antigravity, Roo Code, Cline, and custom agents) directly to Godot. The verified runtime target is **Windows with Godot 4.6.3**; other Godot 4.x minors need their own integration evidence.
 
 Instead of copying and pasting GDScript snippets, guessing node hierarchy paths, or struggling to describe visual bugs to an LLM, Godot MCP provides a bidirectional control plane: agents can inspect scene trees, author 2D/3D nodes, build TileMaps, edit animations, step through code with a live DAP debugger, and capture high-resolution viewport screenshots for visual grounding.
 
@@ -46,7 +46,7 @@ Godot MCP uses a decoupled, secure two-tier architecture communicating over stan
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│             AI Client (Claude, Cursor, Antigravity)         │
+│             AI Client (Codex, Claude, Cursor, Antigravity)  │
 └──────────────────────────────┬──────────────────────────────┘
                                │ MCP Protocol (stdio / JSON-RPC)
                                ▼
@@ -122,7 +122,13 @@ Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing 
 ### Step 2: Run the Setup Command (Single Step)
 Open a terminal in your project directory and run the command for your AI editor:
 
+Codex bootstrap is in the current source; until the next npm release, use the [source-checkout recipe](docs/tools/codex.md) instead of `npx`.
+
+
 ```powershell
+# For Codex
+npx @srdarkx/godot-mcp init . --client codex
+
 # For Google Antigravity / Gemini
 npx @srdarkx/godot-mcp init . --client antigravity
 
@@ -138,10 +144,10 @@ npx @srdarkx/godot-mcp init . --client claude
 1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x executable across standard Windows and system paths.
 2. 📦 **Installs Bridge Plugin**: Copies `addons/godot_mcp` directly into your game folder.
 3. ⚡ **Activates Plugin**: Enables the plugin automatically in `project.godot` (via Godot's headless CLI, no manual editor clicks needed).
-4. 🤖 **Configures Your AI Client**: Automatically generates or updates your client configuration file (`.agents/mcp_config.json`, `.cursor/mcp.json`, or Claude Desktop config).
+4. 🤖 **Configures Your AI Client**: Automatically generates or updates its configuration (`.codex/config.toml`, `.agents/mcp_config.json`, `.cursor/mcp.json`, or Claude Desktop config).
 
 ### Step 3: Open Your AI Editor and Godot
-1. **Open your project in your AI editor** (**Antigravity**, **Cursor**, or **Claude Desktop**). It will detect the configuration and launch the Godot MCP server automatically. (If already open, simply reload the window).
+1. **Open your project in your AI editor** (**Codex**, **Antigravity**, **Cursor**, or **Claude Desktop**). Codex loads the project-local MCP config only after you trust the project. Restart an already-open client after changing its MCP configuration.
 2. **Open your project in Godot Engine**. The editor plugin connects to the bridge over local WebSocket in ~1 second.
 
 🎉 **You're all set!** You can now prompt your AI directly:
@@ -176,6 +182,18 @@ npm run build
 ## Client Configuration
 
 Add Godot MCP to your preferred AI assistant configuration:
+
+### Codex
+
+`godot-mcp init . --client codex` writes a managed server entry to the project's `.codex/config.toml`:
+
+```toml
+[mcp_servers.godot-mcp]
+command = "npx"
+args = ["--yes", "@srdarkx/godot-mcp", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
+```
+
+Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project, restart Codex, then check `codex mcp list` or `/mcp`. Until this source change reaches npm, use the local `setup codex` recipe described in the [Codex guide](docs/tools/codex.md). See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
 
 ### Claude Desktop
 
@@ -323,6 +341,7 @@ powershell -ExecutionPolicy Bypass -File scripts/run-all-gates.ps1 -GodotBin "C:
 - [Architecture Foundation](docs/architecture/foundation.md)
 - [Tool Registry & Profiles Guide](docs/architecture/tool-registry-profiles.md)
 - [Protocol RPC Specification](docs/protocol/foundation-rpc.md)
+- [Codex Client Setup](docs/tools/codex.md)
 - [2D Power Tools](docs/tools/2d.md)
 - [3D & Materials Power Tools](docs/tools/3d-materials.md)
 - [Navigation & AI Power Tools](docs/tools/navigation.md)

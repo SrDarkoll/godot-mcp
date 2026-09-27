@@ -2,8 +2,9 @@ import {copyFile,mkdir,readFile,writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type {ToolProfile} from '@godot-mcp/protocol';
+import {configureCodexConfig} from './codex-config.js';
 
-export const CLIENT_NAMES=['antigravity','cursor','claude'] as const;
+export const CLIENT_NAMES=['antigravity','cursor','claude','codex'] as const;
 export type ClientName=typeof CLIENT_NAMES[number];
 export const DEFAULT_NPX_PACKAGE='@srdarkx/godot-mcp';
 
@@ -31,9 +32,11 @@ function isRecord(value:unknown):value is Record<string,unknown>{
 }
 
 export function clientConfigPath(client:ClientName,projectRoot:string,options:{env?:NodeJS.ProcessEnv;homeDir?:string;platform?:NodeJS.Platform}={}):string{
+ if(!CLIENT_NAMES.includes(client))throw new Error(`Unsupported MCP client: ${String(client)}`);
  const env=options.env??process.env;
  const home=options.homeDir??os.homedir();
  const platform=options.platform??process.platform;
+ if(client==='codex')return path.resolve(projectRoot,'.codex','config.toml');
  if(client==='cursor')return path.resolve(env.GODOT_MCP_CURSOR_CONFIG??path.join(projectRoot,'.cursor','mcp.json'));
  if(client==='antigravity')return path.resolve(env.GODOT_MCP_ANTIGRAVITY_CONFIG??path.join(projectRoot,'.agents','mcp_config.json'));
  if(env.GODOT_MCP_CLAUDE_CONFIG)return path.resolve(env.GODOT_MCP_CLAUDE_CONFIG);
@@ -46,13 +49,19 @@ function backupStamp(now:Date):string{
  return now.toISOString().replace(/[:.]/g,'-');
 }
 
+export function makeClientLaunchEntry(projectRoot:string,toolProfile:ToolProfile,npxPackage=DEFAULT_NPX_PACKAGE):ClientLaunchEntry{
+ return {command:'npx',args:['--yes',npxPackage,'start',projectRoot,'--tool-profile',toolProfile]};
+}
+
 export async function configureClient(options:ClientConfigOptions):Promise<ClientConfigResult>{
+ if(!CLIENT_NAMES.includes(options.client))throw new Error(`Unsupported MCP client: ${String(options.client)}`);
  const projectRoot=path.resolve(options.projectRoot);
  const file=clientConfigPath(options.client,projectRoot,options);
- const entry:ClientLaunchEntry={
-  command:'npx',
-  args:['--yes',options.npxPackage??DEFAULT_NPX_PACKAGE,'start',projectRoot,'--tool-profile',options.toolProfile]
- };
+ const entry=makeClientLaunchEntry(projectRoot,options.toolProfile,options.npxPackage);
+ if(options.client==='codex'){
+  const configured=await configureCodexConfig(file,entry,options.now);
+  return {client:'codex',path:file,entry,...configured};
+ }
  let text:string|null=null;
  let root:Record<string,unknown>={};
  try{
