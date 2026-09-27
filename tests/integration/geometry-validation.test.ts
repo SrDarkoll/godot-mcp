@@ -106,6 +106,15 @@ it('reports full walkway footprint collisions and endpoint gaps without saving t
     })]));
     expect(crossing.findings[0].overlapAreaPx2).toBeGreaterThan(0);
 
+    const relative=await call({routes:['CentralCross'],obstacles:['academic_block_unidentified/Collision']});
+    expect(relative.findings[0]).toMatchObject({
+      code:'PATH_COLLISION',routePath:'CentralCross',obstaclePath:'academic_block_unidentified/Collision'
+    });
+    const duplicate=await client.callTool({name:'geometry.validate_walkways',arguments:{
+      routes:['CentralCross','/Main/CentralCross'],obstacles:[block]
+    }});
+    expect(duplicate.structuredContent).toMatchObject({error:{code:'INVALID_ARGUMENT'}});
+
     const clear=await call({routes:['/Main/ClearWalk'],obstacles:[block]});
     expect(clear).toMatchObject({complete:true,clear:true,findings:[]});
     const transformed=await call({routes:['/Main/Transformed/RotatedWalk'],obstacles:['/Main/Transformed/Block/Collision']});

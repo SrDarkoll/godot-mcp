@@ -295,11 +295,11 @@ npm test
 npm run typecheck
 npm run check:tool-contracts
 
-# Check Godot addon GDScript syntax
+# Godot syntax and live integration require the Godot executable
+$env:GODOT_BIN = "C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
 npm run check:godot
 
-# Run live integration tests (requires Godot 4.x)
-$env:GODOT_BIN = "C:\Tools\Godot\Godot_v4.6.3-stable_win64.exe"
+# Run live integration tests
 $env:REQUIRE_GODOT_INTEGRATION = "1"
 npm run test:integration
 
