@@ -34,9 +34,23 @@ it('imports resources and reports bounded dependency graphs, broken references a
   const outside=await fs.mkdtemp(path.join(parent,'dependency-outside-'));await fs.writeFile(path.join(outside,'outside.tres'),'[gd_resource type="Resource" format=3]\n');await fs.symlink(outside,path.join(root,'linked'),'junction');
   const linked=await call('resource.impact',{path:'res://shared.tres',action:'delete',max_files:100});expect(linked.linksSkipped).toBe(1);expect(linked.warnings).toContain('LINKS_SKIPPED');
   const truncatedImpact=await call('resource.impact',{path:'res://shared.tres',action:'delete',max_files:1});expect(truncatedImpact).toMatchObject({complete:false,safe:false});expect(truncatedImpact.warnings).toContain('SCAN_TRUNCATED');
+  // Start after fixture startup events; the native import signal may arrive after its RPC reply.
+  let eventCursor=0;
+  for(let pageIndex=0;pageIndex<10;pageIndex++){
+    const page=await call('project.events',{after:eventCursor,limit:200});
+    eventCursor=page.nextCursor;
+    if(page.events.length<200)break;
+  }
   const importedResult=await confirmFixtureOperation(client,'editor.import_resources',{paths:['res://icon.svg'],timeout_ms:15000});expect(importedResult.isError,JSON.stringify(importedResult)+errors).not.toBe(true);const imported=importedResult.structuredContent as any;
   expect(imported).toMatchObject({complete:true,requested:['res://icon.svg']});expect(imported.results[0].valid).toBe(true);
-  const page=await call('project.events',{wait_ms:2000});expect(page.events.some((e:any)=>e.event==='import.finished')).toBe(true);
+  const deadline=Date.now()+5000;
+  let importFinished=false;
+  while(!importFinished&&Date.now()<deadline){
+    const page=await call('project.events',{after:eventCursor,limit:200,wait_ms:Math.min(1000,Math.max(0,deadline-Date.now()))});
+    eventCursor=page.nextCursor;
+    importFinished=page.events.some((e:any)=>e.event==='import.finished');
+  }
+  expect(importFinished).toBe(true);
   const bounded=await call('resource.dependencies',{path:'res://main.tscn',recursive:true,max_nodes:1,max_depth:8});expect(bounded.complete).toBe(false);expect(bounded.truncated).toBe(true);
  }finally{await client.close();if(editor&&editor.exitCode===null&&editor.signalCode===null){const exited=once(editor,'exit');editor.kill();await Promise.race([exited,new Promise(r=>setTimeout(r,2000))]);if(editor.exitCode===null&&editor.signalCode===null)editor.kill('SIGKILL');}}
-},45000);
+},60000);
