@@ -7,7 +7,7 @@
 [![MCP](https://img.shields.io/badge/MCP-194%20Tools-8A2BE2)](https://github.com/SrDarkoll/godot-mcp)
 [![Verified target](https://img.shields.io/badge/Verified-Windows%20%7C%20Godot%204.6.3-success)](https://github.com/SrDarkoll/godot-mcp)
 
-The CLI launcher and Model Context Protocol bridge verified on **Windows with Godot Engine 4.6.3**. Other Godot 4.x versions require their own integration checks.
+Godot MCP connects AI assistants to Godot 4 so they can create and edit scenes, run games, debug code, and capture screenshots. The verified target is **Windows with Godot Engine 4.6.3**. Other Godot 4.x versions require their own integration checks.
 
 Connect modern AI assistants (**Codex**, **Cursor**, **Claude Desktop**, **Antigravity**, **Roo Code**, **Cline**, and custom agents) directly to your running Godot editor and game runtime.
 
@@ -21,7 +21,7 @@ Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing 
 ### Step 2: Run the Setup Command (Single Step)
 Open a terminal in your project directory and run the command for your AI editor:
 
-Codex bootstrap is in the current source; use the next npm release for the `npx` command, or follow the [source-checkout recipe](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) until then.
+Codex setup is available in npm versions 0.5.1 and newer. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) for project trust and configuration details.
 
 
 ```bash
@@ -138,7 +138,7 @@ command = "npx"
 args = ["--yes", "@srdarkx/godot-mcp", "start", "C:/path/to/YourProject", "--tool-profile", "full"]
 ```
 
-Trust the project in Codex and restart the local client. `codex mcp list` or `/mcp` shows the connection. The source checkout also offers `godot-mcp setup codex` as a read-only recipe for launching its bundled server before the next npm publication. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) and [official Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
+Trust the project in Codex and restart the local client. `codex mcp list` or `/mcp` shows the connection. The source checkout also offers `godot-mcp setup codex` as a read-only recipe for launching its compiled server during development. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) and [official Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
 
 ### Cursor (`.cursor/mcp.json`)
 ```json

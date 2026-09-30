@@ -2,7 +2,12 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
-## [0.5.1] - Unreleased
+## [0.5.2] - 2026-09-29
+
+- Explain the package purpose in its public description: AI assistants can create and edit Godot scenes, run games, debug code, and capture screenshots.
+- Update Codex setup guidance to reflect its availability in the published npm package.
+
+## [0.5.1] - 2026-09-29
 
 - Add Codex as an `init --client codex` target with project-local MCP configuration, managed updates, and doctor verification.
 - Accept paths relative to the edited scene root in `geometry.validate_walkways`, matching the native scene resolver.

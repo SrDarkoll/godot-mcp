@@ -122,7 +122,7 @@ Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing 
 ### Step 2: Run the Setup Command (Single Step)
 Open a terminal in your project directory and run the command for your AI editor:
 
-Codex bootstrap is in the current source; until the next npm release, use the [source-checkout recipe](docs/tools/codex.md) instead of `npx`.
+Codex setup is available in npm versions 0.5.1 and newer. See the [Codex setup guide](docs/tools/codex.md) for project trust and configuration details.
 
 
 ```powershell
@@ -193,7 +193,7 @@ command = "npx"
 args = ["--yes", "@srdarkx/godot-mcp", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
 ```
 
-Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project, restart Codex, then check `codex mcp list` or `/mcp`. Until this source change reaches npm, use the local `setup codex` recipe described in the [Codex guide](docs/tools/codex.md). See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
+Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project, restart Codex, then check `codex mcp list` or `/mcp`. The local `setup codex` recipe in the [Codex guide](docs/tools/codex.md) is also available for source development. See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
 
 ### Claude Desktop
 
