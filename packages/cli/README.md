@@ -1,4 +1,6 @@
-# @srdarkx/godot-mcp
+# [Godot MCP on GitHub](https://github.com/SrDarkoll/godot-mcp)
+
+Find the source code, setup guides and issue tracker in the repository. If Godot MCP helps your project, consider starring the repository.
 
 [![npm version](https://img.shields.io/npm/v/@srdarkx/godot-mcp.svg)](https://www.npmjs.com/package/@srdarkx/godot-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

@@ -2,6 +2,11 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.5.3] - 2026-10-04
+
+- Put a prominent GitHub repository link and invitation to star the project at the top of the npm README.
+- Add repository, homepage and issue-tracker metadata to the public npm package.
+
 ## [0.5.2] - 2026-09-29
 
 - Explain the package purpose in its public description: AI assistants can create and edit Godot scenes, run games, debug code, and capture screenshots.
