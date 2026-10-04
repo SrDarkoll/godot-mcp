@@ -1,8 +1,17 @@
 {
   "name": "@srdarkx/godot-mcp",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "private": false,
   "description": "Connects AI assistants like Codex, Claude and Cursor to Godot 4 to create and edit scenes, run games, debug code and capture screenshots.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SrDarkoll/godot-mcp.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/SrDarkoll/godot-mcp",
+  "bugs": {
+    "url": "https://github.com/SrDarkoll/godot-mcp/issues"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,9 +24,9 @@
     "test": "vitest run --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.5.2",
-    "@godot-mcp/server": "0.5.2",
-    "@godot-mcp/godot-addon": "0.5.2",
+    "@godot-mcp/protocol": "0.5.3",
+    "@godot-mcp/server": "0.5.3",
+    "@godot-mcp/godot-addon": "0.5.3",
     "@modelcontextprotocol/server": "^2.0.0",
     "ws": "^8.18.0",
     "zod": "^4.0.0"
