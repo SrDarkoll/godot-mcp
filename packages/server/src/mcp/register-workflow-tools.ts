@@ -12,7 +12,7 @@ export function registerWorkflowTools(registrar:ToolRegistrar,workflow:WorkflowS
   registrar.registerTool('workflow.snapshot',{description:'Persist a deterministic baseline of editor/runtime/session state with an optional explicit visual capture.',inputSchema:WorkflowSnapshotParamsSchema},async args=>{
     try{const value=await workflow.snapshot(args);return withOptionalImage({snapshot:value.snapshot},value.imageData);}catch(error){return toolError(error);}
   });
-  registrar.registerTool('workflow.run_check',{description:'Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict.',inputSchema:WorkflowRunCheckParamsSchema},async args=>{
+  registrar.registerTool('workflow.run_check',{description:'Check runtime health and native diagnostics, optionally wait for a declared project-test property, and capture evidence. Unconfigured project tests and visual review remain not checked; console FAIL text is not a test contract.',inputSchema:WorkflowRunCheckParamsSchema},async args=>{
     try{const value=await workflow.runCheck(args);return withOptionalImage(value.result,value.imageData);}catch(error){return toolError(error);}
   });
   registrar.registerTool('workflow.diff_since',{description:'Compare current editor/runtime/session evidence with a persisted workflow snapshot without mutating the project.',inputSchema:WorkflowDiffParamsSchema},async args=>{

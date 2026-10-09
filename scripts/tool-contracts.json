@@ -2911,7 +2911,7 @@
         "ui",
         "full"
       ],
-      "description": "Validate GDScript syntax and compile checks without saving.",
+      "description": "Compile GDScript without saving and return native diagnostic messages and actual line numbers when available. An optional path supplies source context; unknown locations remain null.",
       "risk": {
         "tags": [
           "read"
@@ -3220,7 +3220,7 @@
         "2d",
         "full"
       ],
-      "description": "Inspect selected TileMapLayer cells or enumerate all used cells up to 4096.",
+      "description": "Inspect TileMapLayer cells in byte-bounded pages. Continue with next_cursor and the same selection until has_more is false; changed cells invalidate the cursor. Use tilemap.inspect for the used-cell count.",
       "risk": {
         "tags": [
           "read"
@@ -3315,7 +3315,7 @@
         "2d",
         "full"
       ],
-      "description": "Atomically set up to 4096 TileMapLayer cells in one Undo/Redo action.",
+      "description": "Prevalidate up to 4096 TileMapLayer cells, apply one Undo/Redo action and verify the applied count. A lost response leaves the outcome unknown; inspect the layer before retrying.",
       "risk": {
         "tags": [
           "normal_mutation"
@@ -3826,7 +3826,7 @@
         "runtime",
         "full"
       ],
-      "description": "Restart only a session-owned runtime, collect diagnostics/performance, optionally capture the game, and return a deterministic verification verdict.",
+      "description": "Check runtime health and native diagnostics, optionally wait for a declared project-test property, and capture evidence. Unconfigured project tests and visual review remain not checked; console FAIL text is not a test contract.",
       "risk": {
         "tags": [
           "normal_mutation"

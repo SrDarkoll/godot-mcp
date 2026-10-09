@@ -18,6 +18,10 @@ var _mcp_breakpoints: Dictionary = {}
 var _mcp_breakpoint_session := ""
 var _mcp_origin_depth := 0
 var _dap_sync_depth := 0
+const NativeDiagnostics = preload("res://addons/godot_mcp/serialization/native_diagnostics.gd")
+var _startup: Dictionary = {}
+var _startup_log := ""
+var _launch_debug_id := -1
 
 func configure(editor_interface) -> void:
     _editor = editor_interface
@@ -55,6 +59,8 @@ func _active_sessions() -> Array:
     return get_sessions().filter(func(session): return session.is_active())
 func _on_started(id: int) -> void:
     _apply_owned_breakpoints(get_session(id))
+    if _launching and _state == "starting" and _active_sessions().size() == 1:
+        _launch_debug_id = id
     if not _launching or _state != "starting":
         # A later manually started game must not inherit the previous run's owner.
         _owner_session = ""
@@ -64,6 +70,16 @@ func _on_started(id: int) -> void:
         _scene_path = null
     _publish()
 func _on_stopped(id: int) -> void:
+    if id == _launch_debug_id and _state == "starting":
+        _state = "failed"
+        _error_code = "RUNTIME_START_FAILED"
+        if not _startup.is_empty():
+            _startup.phase = "process_stopped"
+            _startup.processState = "editor_stopped"
+        _debug_id = -1
+        _cancel_pending("RUNTIME_NOT_CONNECTED","Game stopped before readiness")
+        _publish()
+        return
     if id == _debug_id:
         _state = "failed" if _state == "starting" else "stopped"
         _debug_id = -1
@@ -84,10 +100,12 @@ func snapshot() -> Dictionary:
     var state := _state
     if not active.is_empty() and not owned:
         state = "running"
-    return {"state":state,"runId":_run_id if owned and not _run_id.is_empty() else null,
+    var result := {"state":state,"runId":_run_id if owned and not _run_id.is_empty() else null,
         "scenePath":_scene_path,"connected":owned and _debug_id>=0 and state in ["running","paused","breaked"],
         "ownership":"session" if owned else ("external" if not active.is_empty() else "none"),
         "features":_features if owned else {"inspect":false,"scenePause":false,"gameCapture":false,"diagnostics":false,"performance":false},"errorCode":_error_code}
+    if owned and not _startup.is_empty(): result.startup = _startup
+    return result
 func _publish() -> void:
     if not _mcp_session.is_empty():
         runtime_event.emit("runtime.state",snapshot())
@@ -287,8 +305,6 @@ func launch(params: Dictionary) -> Dictionary:
         return _error("SCENE_NOT_SAVED","Scene has no saved path")
     if not _safe_scene(scene):
         return _error("INVALID_REQUEST","Scene path is outside the supported project scope")
-    if not ResourceLoader.exists(scene) or not load(scene) is PackedScene:
-        return _error("RUNTIME_START_FAILED","Scene cannot be loaded")
     _launching = true
     _run_id = str(params.runId)
     _owner_session = _mcp_session
@@ -297,8 +313,60 @@ func launch(params: Dictionary) -> Dictionary:
     _features = {"inspect":false,"scenePause":false,"gameCapture":false,"diagnostics":false,"performance":false}
     _error_code = null
     _debug_id = -1
+    _launch_debug_id = -1
+    _startup = {}
+    _startup_log = ""
+    if params.has("startupLogPath"):
+        var uuid := RegEx.new()
+        uuid.compile("^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$")
+        var expected_log := ".godot-mcp/sessions/"+_mcp_session+"/logs/runtime/"+_run_id+".boot.log"
+        if uuid.search(_run_id) == null or _mcp_session.contains("/") or _mcp_session.contains("\\") or _mcp_session.contains("..") or str(params.startupLogPath) != expected_log or not FileAccess.file_exists("res://"+expected_log):
+            _launching = false
+            _state = "failed"
+            _error_code = "INVALID_REQUEST"
+            _publish()
+            return _error("INVALID_REQUEST","Startup log must be precreated inside the current MCP session")
+        _startup_log = expected_log
+        _startup = {"phase":"scene_validation","processState":"not_started","exitCode":null,"logPath":"res://"+expected_log}
+    var scope := NativeDiagnostics.begin()
+    var loaded = ResourceLoader.load(scene,"PackedScene",ResourceLoader.CACHE_MODE_IGNORE_DEEP) if ResourceLoader.exists(scene) else null
+    var captured := NativeDiagnostics.finish(scope)
+    var failed_compile := false
+    for entry in captured.entries:
+        if entry.kind == "error": failed_compile = true
+    if not loaded is PackedScene or failed_compile:
+        _launching = false
+        _state = "failed"
+        _error_code = "RUNTIME_START_FAILED"
+        if not _startup.is_empty():
+            var entries: Array = []
+            for entry in captured.entries:
+                var diagnostic: Dictionary = entry.duplicate(true)
+                diagnostic.runId = _run_id
+                diagnostic.source = "scene_validation"
+                entries.append(diagnostic)
+            if not entries.is_empty():
+                _features.diagnostics = true
+                runtime_event.emit("runtime.diagnostics",{"runId":_run_id,"entries":entries,"dropped":captured.dropped})
+        _publish()
+        var failure := _error("RUNTIME_START_FAILED","Scene failed native compilation or could not be loaded")
+        if not _startup.is_empty(): failure.__error.details = {"startup":_startup}
+        return failure
     _publish()
+    if not _startup.is_empty(): _startup.phase = "launching"
+    var args_key := "editor/run/main_run_args"
+    var had_args := ProjectSettings.has_setting(args_key)
+    var previous_args = ProjectSettings.get_setting(args_key,"")
+    if not _startup_log.is_empty():
+        ProjectSettings.set_setting(args_key,str(previous_args)+" --log-file "+_startup_log)
+        # The Run Instances dialog caches this setting. Refresh it synchronously
+        # before starting, then restore both setting and cache after launch.
+        ProjectSettings.emit_signal("settings_changed")
     _editor.play_custom_scene(scene)
+    if not _startup_log.is_empty():
+        ProjectSettings.set_setting(args_key,previous_args if had_args else null)
+        ProjectSettings.emit_signal("settings_changed")
+    if not _startup.is_empty(): _startup.processState = "editor_playing" if _editor.is_playing_scene() else "editor_stopped"
     var deadline := Time.get_ticks_msec()+15000
     while _state == "starting" and Time.get_ticks_msec()<deadline:
         await _editor.get_base_control().get_tree().process_frame
@@ -308,9 +376,14 @@ func launch(params: Dictionary) -> Dictionary:
     if _state == "starting":
         _state = "failed"
         _error_code = "RUNTIME_START_TIMEOUT"
+        if not _startup.is_empty():
+            _startup.phase = "bridge_timeout"
+            _startup.processState = "editor_playing" if _editor.is_playing_scene() else "editor_stopped"
         _editor.stop_playing_scene()
         _publish()
-    return _error(str(_error_code) if _error_code else "RUNTIME_START_FAILED","Game did not become ready")
+    var failure := _error(str(_error_code) if _error_code else "RUNTIME_START_FAILED","Game did not become ready")
+    if not _startup.is_empty(): failure.__error.details = {"startup":_startup}
+    return failure
 func stop_run() -> Dictionary:
     if _active_sessions().size()>1:
         return _error("MULTIPLE_RUNTIME_SESSIONS","More than one debugger session is active")
@@ -401,6 +474,9 @@ func _capture(message: String, data: Array, session_id: int) -> bool:
         _state = str(packet.status.state)
         _features = packet.status.features
         _scene_path = packet.status.scenePath
+        if not _startup.is_empty():
+            _startup.phase = "ready"
+            _startup.processState = "editor_playing"
         _publish()
         return true
     if message == "godot_mcp:diagnostics" and packet.get("batch",{}).get("runId")==_run_id:

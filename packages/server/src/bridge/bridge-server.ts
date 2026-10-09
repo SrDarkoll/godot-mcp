@@ -238,14 +238,15 @@ export class BridgeServer {
         if (event.data.event === 'runtime.state') this.projectEvents.append('runtime.state', event.data.data);
       }else this.rpc.handleMessage(message);
     });
-    socket.once('close', () => {
+    socket.once('close', (closeCode,reason) => {
       if (this.client?.socket === socket) {
         this.client = null;
         this.options.session.editorConnected = false;
         this.options.session.runtimeConnected = false;
-        this.projectEvents.append('editor.disconnected', {});
+        const closeReason=reason.toString().slice(0,123);
+        this.projectEvents.append('editor.disconnected', {closeCode,closeReason});
         this.options.onDisconnected?.();
-        this.rpc.disconnect();
+        this.rpc.disconnect({closeCode,closeReason});
       }
     });
 

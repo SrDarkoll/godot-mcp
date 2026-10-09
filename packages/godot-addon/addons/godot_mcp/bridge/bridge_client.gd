@@ -2,7 +2,7 @@
 extends Node
 
 const DESCRIPTOR_PATH := "res://.godot-mcp/runtime/bridge.json"
-const ADDON_VERSION := "0.5.3"
+const ADDON_VERSION := "0.6.0"
 const PROTOCOL_VERSION := 1
 const DESCRIPTOR_POLL_SECONDS := 1.0
 
@@ -114,6 +114,8 @@ func _try_connect() -> void:
         return
 
     var socket := WebSocketPeer.new()
+    # Accept bounded bulk requests before dispatch; Godot's default input buffer is only 64 KiB.
+    socket.inbound_buffer_size = 8 * 1024 * 1024
     socket.outbound_buffer_size = 24 * 1024 * 1024
     var error := socket.connect_to_url("ws://127.0.0.1:%d" % port)
     if error != OK:

@@ -2,7 +2,7 @@ import type {TileCellWrite,TileMapCoordinate,TileVector2,TilemapCellsResult,Tile
 import type {RpcRouter} from '../bridge/rpc-router.js';
 type Rpc=Pick<RpcRouter,'call'>;
 export interface TilemapNodeParams{node_path:string;}
-export interface TilemapGetCellsParams extends TilemapNodeParams{coords?:TileMapCoordinate[];}
+export interface TilemapGetCellsParams extends TilemapNodeParams{coords?:TileMapCoordinate[];limit?:number;cursor?:string;max_bytes?:number;}
 export interface TilemapSetCellParams extends TilemapNodeParams,TileCellWrite{}
 export interface TilemapSetCellsParams extends TilemapNodeParams{cells:TileCellWrite[];}
 export interface TilemapEraseCellsParams extends TilemapNodeParams{coords:TileMapCoordinate[];}

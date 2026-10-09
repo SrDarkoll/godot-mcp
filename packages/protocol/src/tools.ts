@@ -190,6 +190,10 @@ export interface NodeSetPropertyResult {
   property: string;
   previous_value?: unknown;
   new_value?: unknown;
+  expected_type?:string;
+  matches_requested?:boolean;
+  applied?:boolean;
+  saved?:boolean;
 }
 
 export interface NodeGetPropertiesResult {
@@ -247,14 +251,19 @@ export interface ScriptDetachResult {
 }
 
 export interface ScriptDiagnosticError {
-  line: number;
-  column: number;
+  line: number|null;
+  column: number|null;
   message: string;
+  path?:string|null;
+  severity?:'error'|'warning';
 }
 
 export interface ScriptValidateResult {
   valid: boolean;
   errors: ScriptDiagnosticError[];
+  error_code?:number;
+  diagnostics_available?:boolean;
+  diagnostics_truncated?:boolean;
 }
 
 export interface ScriptInspectResult {

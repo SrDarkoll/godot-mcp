@@ -1,7 +1,7 @@
 import * as z from 'zod/v4';
 import {DiagnosticEntrySchema} from './diagnostics.js';
 import {FileCheckpointSchema} from './recovery.js';
-import {RuntimeRunSchema,RuntimeStatusSchema,ScenePathSchema} from './runtime.js';
+import {RuntimeRunSchema,RuntimeStatusSchema,ScenePathSchema,RuntimePropertyParamsSchema} from './runtime.js';
 import {ScreenshotRecordSchema,VisualCheckpointRecordSchema} from './session-artifacts.js';
 
 export const WorkflowCaptureModeSchema=z.enum(['none','game','editor_2d','editor_3d']);
@@ -17,11 +17,26 @@ export const WorkflowManifestCursorSchema=z.strictObject({
   nextScreenshotSequence:z.number().int().positive(),errors:z.number().int().nonnegative(),
   transactions:z.number().int().nonnegative(),checkpoints:z.number().int().nonnegative(),runtimeRuns:z.number().int().nonnegative()
 });
+const TestValueSchema=z.union([z.string().max(4096),z.number().finite(),z.boolean(),z.null()]);
+export const WorkflowProjectTestParamsSchema=RuntimePropertyParamsSchema.extend({
+  field_path:z.array(z.string().min(1).max(128)).max(8).default([]),
+  pass_value:TestValueSchema.default('pass'),fail_value:TestValueSchema.default('fail'),
+  timeout_ms:z.number().int().min(1).max(60000).default(5000)
+}).refine(value=>JSON.stringify(value.pass_value)!==JSON.stringify(value.fail_value),{message:'Pass and fail values must differ'});
+export const WorkflowProjectTestResultSchema=z.strictObject({
+  status:z.enum(['not_checked','pending','pass','fail','unavailable']),nodePath:z.string().nullable(),property:z.string().nullable(),
+  fieldPath:z.array(z.string()),value:z.json().nullable(),timedOut:z.boolean(),elapsedMs:z.number().int().nonnegative(),
+  error:z.strictObject({code:z.string().max(64),message:z.string().max(512)}).nullable()
+});
+export const WorkflowVerificationSchema=z.strictObject({
+  runtime:z.enum(['pass','fail','inconclusive']),engineDiagnostics:z.enum(['pass','fail','unavailable']),
+  projectTests:z.enum(['not_checked','pending','pass','fail','unavailable']),visualReview:z.literal('not_checked')
+});
 export const WorkflowSnapshotSchema=z.strictObject({
   id:z.uuid(),sessionId:z.string().min(1).max(128),label:z.string().trim().min(1).max(80),createdAt:z.iso.datetime(),
   activeScene:WorkflowActiveSceneSchema.nullable(),runtime:RuntimeStatusSchema,
   diagnostics:WorkflowDiagnosticSnapshotSchema.nullable(),screenshot:ScreenshotRecordSchema.nullable(),
-  cursors:WorkflowManifestCursorSchema
+  cursors:WorkflowManifestCursorSchema,verification:WorkflowVerificationSchema.optional(),projectTest:WorkflowProjectTestResultSchema.optional()
 });
 export const WorkflowSnapshotParamsSchema=z.strictObject({
   label:z.string().trim().min(1).max(80).default('workflow_snapshot'),
@@ -32,7 +47,8 @@ export const WorkflowRunCheckParamsSchema=z.strictObject({
   target:z.enum(['main','current','path']).default('current'),path:ScenePathSchema.optional(),
   label:z.string().trim().min(1).max(80).default('run_check'),capture:z.boolean().default(true),
   checkpoint:z.boolean().default(true),settle_ms:z.number().int().min(0).max(5000).default(500),
-  diagnostic_limit:z.number().int().min(1).max(200).default(100),include_performance:z.boolean().default(true)
+  diagnostic_limit:z.number().int().min(1).max(200).default(100),include_performance:z.boolean().default(true),
+  project_test:WorkflowProjectTestParamsSchema.optional()
 }).superRefine((value,ctx)=>{
   if(value.target==='path'&&!value.path)ctx.addIssue({code:'custom',path:['path'],message:'path is required when target is path'});
   if(value.target!=='path'&&value.path)ctx.addIssue({code:'custom',path:['path'],message:'path is only valid when target is path'});
@@ -45,7 +61,8 @@ export const WorkflowVerdictSchema=z.enum(['pass','fail','inconclusive']);
 export const WorkflowRunCheckResultSchema=z.strictObject({
   verdict:WorkflowVerdictSchema,snapshot:WorkflowSnapshotSchema,runtime:RuntimeStatusSchema,
   diagnostics:WorkflowDiagnosticSnapshotSchema.nullable(),performance:z.record(z.string(),z.json()).nullable(),
-  observationErrors:z.array(WorkflowObservationErrorSchema).max(8),screenshot:ScreenshotRecordSchema.nullable()
+  observationErrors:z.array(WorkflowObservationErrorSchema).max(8),screenshot:ScreenshotRecordSchema.nullable(),
+  verdictScope:z.enum(['runtime_health','configured_project_test']),checks:WorkflowVerificationSchema,projectTest:WorkflowProjectTestResultSchema
 });
 export const WorkflowDiagnosticDeltaSchema=z.strictObject({
   runId:z.uuid().nullable(),entries:z.array(DiagnosticEntrySchema).max(200),nextCursor:z.number().int().nonnegative(),
@@ -75,3 +92,6 @@ export type WorkflowDiffParams=z.infer<typeof WorkflowDiffParamsSchema>;
 export type WorkflowRunCheckResult=z.infer<typeof WorkflowRunCheckResultSchema>;
 export type WorkflowDiffResult=z.infer<typeof WorkflowDiffResultSchema>;
 export type WorkflowDiagnosticSnapshot=z.infer<typeof WorkflowDiagnosticSnapshotSchema>;
+export type WorkflowProjectTestParams=z.infer<typeof WorkflowProjectTestParamsSchema>;
+export type WorkflowProjectTestResult=z.infer<typeof WorkflowProjectTestResultSchema>;
+export type WorkflowVerification=z.infer<typeof WorkflowVerificationSchema>;

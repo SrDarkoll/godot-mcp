@@ -1,9 +1,12 @@
 import {randomUUID} from 'node:crypto';
-import {RuntimeStatusSchema,RunTargetSchema,NO_RUNTIME_FEATURES,type RuntimeStatus,type RunTarget,type BridgeRuntimeEvent,type DiagnosticPage} from '@godot-mcp/protocol';
+import {RuntimeStatusSchema,RuntimeStartupSchema,RunTargetSchema,NO_RUNTIME_FEATURES,type RuntimeStatus,type RunTarget,type BridgeRuntimeEvent,type DiagnosticPage} from '@godot-mcp/protocol';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import type {Session} from '../session/session.js';
 import type {SessionStore} from '../session/session-store.js';
 import {BridgeRpcError,type RpcRouter} from '../bridge/rpc-router.js';
 import {DiagnosticStore} from './diagnostic-store.js';
+import {parseStartupLog} from './startup-diagnostics.js';
 
 interface RuntimeBridge {connected:boolean;rpc:Pick<RpcRouter,'call'>;}
 export interface RuntimeDiagnosticTail extends DiagnosticPage {errorCount:number;warningCount:number;outputCount:number;}
@@ -15,12 +18,15 @@ export class RuntimeService {
   private lastRunId:string|null=null;
   private readonly known=new Set<string>();
   private readonly diagnosticRuns=new Set<string>();
+  private readonly startupLogs=new Map<string,string>();
   private writes:Promise<void>=Promise.resolve();
   private writeError:Error|null=null;
   private readonly listeners=new Set<(status:RuntimeStatus)=>void>();
   readonly diagnostics:DiagnosticStore;
   constructor(private readonly session:Session,private readonly sessions:SessionStore,private readonly bridge:RuntimeBridge){this.diagnostics=new DiagnosticStore(sessions,session.id);}
   private apply(status:RuntimeStatus):void {
+    const logPath=status.runId?this.startupLogs.get(status.runId):undefined;
+    if(logPath&&status.startup)status={...status,startup:{...status.startup,logPath}};
     this.current=status;this.session.runtimeConnected=status.connected;
     if(status.runId && status.features.diagnostics)this.diagnosticRuns.add(status.runId);
     if(status.runId && this.known.has(status.runId)) {
@@ -36,13 +42,13 @@ export class RuntimeService {
     if(event.event==='runtime.state') {
       if(event.data.runId!==this.current.runId)return;
       this.apply(event.data);
-    } else if(event.event==='runtime.diagnostics' && this.known.has(event.data.runId)) {void this.diagnostics.append(event.data).catch(()=>{});}
+    } else if(event.event==='runtime.diagnostics' && this.known.has(event.data.runId)) {this.diagnosticRuns.add(event.data.runId);void this.diagnostics.append(event.data).catch(()=>{});}
   }
   disconnect():void {if(['stopped','failed'].includes(this.current.state)){this.session.runtimeConnected=false;return;}this.apply({...this.current,state:'disconnected',connected:false,features:{...NO_RUNTIME_FEATURES}});}
   async status():Promise<RuntimeStatus> {
-    if(!this.bridge.connected)return {...this.current,state:'disconnected',connected:false,features:{...NO_RUNTIME_FEATURES}};
+    if(!this.bridge.connected)return {...this.current,state:['stopped','failed'].includes(this.current.state)?this.current.state:'disconnected',connected:false,features:{...NO_RUNTIME_FEATURES}};
     const status=RuntimeStatusSchema.parse(await this.bridge.rpc.call('runtime.status',{}));
-    this.apply(status);return status;
+    this.apply(status);return this.peek();
   }
   async run(input:RunTarget):Promise<RuntimeStatus> {
     if(this.closed)throw new BridgeRpcError('SESSION_CLOSED','Session is closing');
@@ -52,18 +58,43 @@ export class RuntimeService {
       const target=RunTargetSchema.parse(input);const old=await this.status();
       if(['starting','running','paused','breaked','stopping'].includes(old.state))throw new BridgeRpcError('RUNTIME_ALREADY_RUNNING','A game is already active');
       const runId=randomUUID();this.known.add(runId);this.lastRunId=runId;this.target=target;this.diagnostics.register(runId);
-      await this.sessions.update(this.session.id,m=>({...m,runtimeRuns:[...m.runtimeRuns,{runId,scenePath:target.target==='path'?target.path:null,startedAt:new Date().toISOString(),endedAt:null,state:'starting',logPath:`logs/runtime/${runId}.jsonl`,diagnosticsComplete:false,persistenceTruncated:false}]}));
-      this.current={...this.current,state:'starting',runId,connected:false,ownership:'session'};
+      const dir=await this.sessions.ensureDirectory(this.session.id,'logs/runtime');
+      const bootFile=path.join(dir,`${runId}.boot.log`);
+      const handle=await fs.open(bootFile,'wx',0o600);await handle.close();
+      this.startupLogs.set(runId,bootFile);
+      const startupLogPath=path.relative(this.session.projectRoot,bootFile).split(path.sep).join('/');
+      await this.sessions.update(this.session.id,m=>({...m,runtimeRuns:[...m.runtimeRuns,{runId,scenePath:target.target==='path'?target.path:null,startedAt:new Date().toISOString(),endedAt:null,state:'starting',logPath:`logs/runtime/${runId}.jsonl`,startupLogPath:`logs/runtime/${runId}.boot.log`,diagnosticsComplete:false,persistenceTruncated:false}]}));
+      this.current={...this.current,state:'starting',runId,connected:false,ownership:'session',startup:{phase:'preparing',processState:'not_started',exitCode:null,logPath:bootFile}};
       try {
-        const result=RuntimeStatusSchema.parse(await this.bridge.rpc.call('runtime.start',{...target,runId,mcpSessionId:this.session.id},20000));
+        const result=RuntimeStatusSchema.parse(await this.bridge.rpc.call('runtime.start',{...target,runId,mcpSessionId:this.session.id,startupLogPath},20000));
         if(result.runId!==runId || !result.connected)throw new BridgeRpcError('RUNTIME_START_FAILED','Runtime did not become ready');
-        this.apply(result);await this.flush();return result;
+        this.apply(result);await this.flush();return this.peek();
       } catch(error) {
+        const startup=error instanceof BridgeRpcError?RuntimeStartupSchema.safeParse(error.details?.startup):null;
+        const captured=await this.captureStartupLog(runId);
         if(error instanceof BridgeRpcError && error.code==='MANIFEST_WRITE_FAILED')this.current={...this.current,errorCode:error.code};
-        else if(this.current.state!=='stopped')this.apply({...this.current,state:'failed',connected:false,errorCode:error instanceof BridgeRpcError?error.code:'RUNTIME_START_FAILED'});
+        else if(this.current.state!=='stopped')this.apply({...this.current,state:'failed',connected:false,errorCode:error instanceof BridgeRpcError?error.code:'RUNTIME_START_FAILED',
+          startup:startup?.success?{...startup.data,logPath:bootFile}:this.current.startup??{phase:'failed',processState:'unknown',exitCode:null,logPath:bootFile}});
+        await this.flush();
+        if(error instanceof BridgeRpcError)throw new BridgeRpcError(error.code,error.message,{...error.details,runId,startup:this.current.startup,logTail:captured.tail,logTruncated:captured.truncated});
         throw error;
       }
     } finally {this.launching=false;}
+  }
+  private async captureStartupLog(runId:string):Promise<{tail:string[];truncated:boolean}>{
+    const file=this.startupLogs.get(runId);if(!file)return {tail:[],truncated:false};
+    try{
+      const stat=await fs.lstat(file);if(stat.isSymbolicLink()||!stat.isFile())return {tail:[],truncated:true};
+      const handle=await fs.open(file,'r');const length=Math.min(stat.size,256*1024);
+      const bytes=Buffer.alloc(length);try{await handle.read(bytes,0,length,0);}finally{await handle.close();}
+      const offset=this.diagnostics.tail(runId,1).nextCursor;
+      const parsed=parseStartupLog(bytes.toString('utf8'),runId,offset);
+      if(!this.diagnosticRuns.has(runId)){
+        for(let i=0;i<parsed.entries.length;i+=50)await this.diagnostics.append({runId,entries:parsed.entries.slice(i,i+50),dropped:0});
+      }
+      this.diagnosticRuns.add(runId);
+      return {tail:parsed.tail,truncated:parsed.truncated||stat.size>length};
+    }catch{return {tail:[],truncated:true};}
   }
   async stop():Promise<{stopped:boolean;runId:string|null}> {
     const result=await this.bridge.rpc.call('runtime.stop',{},7000) as {stopped:boolean;runId:string|null};
@@ -87,7 +118,7 @@ export class RuntimeService {
   }
   async tailDiagnostics(limit=100):Promise<RuntimeDiagnosticTail|null> {
     const status=await this.status();
-    if(!status.runId||!status.features.diagnostics||!this.diagnosticRuns.has(status.runId))return null;
+    if(!status.runId||!this.diagnosticRuns.has(status.runId))return null;
     await this.diagnostics.flush();
     return {...this.diagnostics.tail(status.runId,limit),...this.diagnostics.counts(status.runId)};
   }

@@ -61,7 +61,7 @@ export function registerScriptTools(registrar: ToolRegistrar, rpc: BridgeServer[
         }
     });
     registrar.registerTool('script.validate', {
-        description: 'Validate GDScript syntax and compile checks without saving.',
+        description: 'Compile GDScript without saving and return native diagnostic messages and actual line numbers when available. An optional path supplies source context; unknown locations remain null.',
         inputSchema: z.object({
             content: z.string(),
             path: z.string().optional()

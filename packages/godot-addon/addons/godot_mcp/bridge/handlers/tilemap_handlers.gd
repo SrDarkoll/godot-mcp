@@ -2,6 +2,8 @@
 extends RefCounted
 
 const MAX_BATCH := 4096
+const MAX_INSPECTION := 100000
+const Budget = preload("res://addons/godot_mcp/serialization/serialization_budget.gd")
 const MIN_MAP_COORD := -32768
 const MAX_MAP_COORD := 32767
 
@@ -11,7 +13,7 @@ func _init(editor_interface) -> void:
 	_editor_interface = editor_interface
 
 func _error(code: String, message: String) -> Dictionary:
-	return {"__error": {"code": code, "message": message}}
+	return {"__error": {"code": code, "message": message,"details":{"applied":false}}}
 
 func _root() -> Node:
 	return _editor_interface.get_edited_scene_root()
@@ -199,13 +201,48 @@ func get_cells(params: Dictionary) -> Dictionary:
 			coords_values.append(parsed)
 	else:
 		coords_values = layer.get_used_cells()
-		if coords_values.size() > MAX_BATCH:
-			return _error("LIMIT_EXCEEDED", "TileMapLayer has %d used cells; inspection limit is %d" % [coords_values.size(), MAX_BATCH])
+		if coords_values.size() > MAX_INSPECTION:
+			return _error("LIMIT_EXCEEDED", "TileMapLayer inspection supports at most %d cells" % MAX_INSPECTION)
 	coords_values.sort_custom(func(a: Vector2i, b: Vector2i): return a.y < b.y or (a.y == b.y and a.x < b.x))
+	var limit := int(params.get("limit",128))
+	var max_bytes := int(params.get("max_bytes",224*1024))
+	if limit < 1 or limit > 512 or max_bytes < 16384 or max_bytes > 224*1024:
+		return _error("INVALID_ARGUMENT", "Cell page requires limit 1..512 and max_bytes 16384..229376")
+	var fingerprint := PackedInt64Array()
+	for coord in coords_values:
+		var atlas := layer.get_cell_atlas_coords(coord)
+		fingerprint.append_array(PackedInt64Array([coord.x,coord.y,layer.get_cell_source_id(coord),atlas.x,atlas.y,layer.get_cell_alternative_tile(coord)]))
+	var snapshot := fingerprint.to_byte_array().hex_encode().sha256_text()
+	var node_id := str(layer.get_instance_id())
+	var offset := 0
+	if params.has("cursor"):
+		var raw := str(params.cursor)
+		if raw.length()>2048 or raw.is_empty(): return _error("INVALID_TILEMAP_CURSOR", "Invalid cell cursor")
+		var cursor = JSON.parse_string(Marshalls.base64_to_utf8(raw))
+		if not cursor is Dictionary or cursor.get("version") != 1 or not typeof(cursor.get("offset")) in [TYPE_INT,TYPE_FLOAT]:
+			return _error("INVALID_TILEMAP_CURSOR", "Invalid cell cursor")
+		if cursor.get("node") != node_id or cursor.get("snapshot") != snapshot:
+			return _error("TILEMAP_CURSOR_STALE", "Layer or inspected cells changed; restart enumeration")
+		var raw_offset = cursor.offset
+		if not is_finite(float(raw_offset)) or float(raw_offset) != floor(float(raw_offset)) or raw_offset < 0 or raw_offset > coords_values.size():
+			return _error("INVALID_TILEMAP_CURSOR", "Cell cursor offset is outside this selection")
+		offset = int(raw_offset)
 	var cells: Array = []
-	for coords in coords_values:
-		cells.append(_cell(layer, coords))
-	return {"node_path": _logical_path(root, layer), "count": cells.size(), "cells": cells}
+	while cells.size() < limit and offset+cells.size() < coords_values.size():
+		cells.append(_cell(layer,coords_values[offset+cells.size()]))
+		var candidate := _cell_page(root,layer,cells,offset,coords_values.size(),snapshot,node_id)
+		if not Budget.check(candidate,{"bytes":max_bytes}).is_empty():
+			cells.pop_back()
+			if cells.is_empty(): return _error("RESULT_TOO_LARGE", "One cell and page metadata exceed the requested byte budget")
+			break
+	return _cell_page(root,layer,cells,offset,coords_values.size(),snapshot,node_id)
+
+func _cell_page(root: Node, layer: TileMapLayer, cells: Array, offset: int, total: int, snapshot: String, node_id: String) -> Dictionary:
+	var end := offset + cells.size()
+	var has_more := end < total
+	var cursor = Marshalls.utf8_to_base64(JSON.stringify({"version":1,"node":node_id,"snapshot":snapshot,"offset":end})) if has_more else null
+	return {"node_path":_logical_path(root,layer),"count":cells.size(),"total_count":total,"cells":cells,
+		"has_more":has_more,"next_cursor":cursor,"snapshot":snapshot,"complete":not has_more}
 
 func _apply_cell(layer: TileMapLayer, cell: Dictionary) -> void:
 	layer.set_cell(cell.coords, int(cell.source_id), cell.atlas_coords, int(cell.alternative_tile))
@@ -248,7 +285,15 @@ func _set_cells_internal(root: Node, layer: TileMapLayer, raw_cells: Array) -> D
 	else:
 		for cell in cells:
 			_apply_cell(layer, cell)
-	return {"node_path": _logical_path(root, layer), "changed_count": cells.size()}
+	if not is_instance_valid(layer):
+		return {"__error":{"code":"TILEMAP_WRITE_UNCONFIRMED","message":"Layer became unavailable during the edit",
+			"details":{"executionOutcome":"unknown","appliedCount":null,"requestedCount":cells.size()}}}
+	var confirmed := 0
+	for cell in cells:
+		if layer.get_cell_source_id(cell.coords) == cell.source_id and layer.get_cell_atlas_coords(cell.coords) == cell.atlas_coords and layer.get_cell_alternative_tile(cell.coords) == cell.alternative_tile:
+			confirmed += 1
+	return {"node_path": _logical_path(root, layer), "changed_count": confirmed,"requested_count":cells.size(),
+		"applied_count":confirmed,"confirmation":"applied" if confirmed == cells.size() else "partial","saved":false}
 
 func set_cell(params: Dictionary) -> Dictionary:
 	var raw := params.duplicate(true)
