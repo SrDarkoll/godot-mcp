@@ -15,6 +15,8 @@ import {discoverGodotExecutable} from './setup/godot-discovery.js';
 import {upgradeProject,existingInstallation} from './upgrade/upgrade-project.js';
 import {prepareCodexUpgrade} from './setup/codex-upgrade.js';
 import {makeClientLaunchEntry} from './setup/client-config.js';
+import {readCodexConfig} from './setup/codex-config.js';
+import {previewUpgrade,renderUpgradePreview} from './upgrade/upgrade-preview.js';
 
 async function confirm(question:string):Promise<boolean>{
  const readline=createInterface({input:process.stdin,output:process.stderr});
@@ -49,13 +51,19 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    return 0;
   }
   const cliGodot=args.godotBin?path.resolve(args.godotBin):null;
-  const executeUpgrade=async()=>{
+  const executeUpgrade=async(requireConfirmation=false)=>{
+   const previewOptions={projectRoot:root,...(args.client==='codex'?{client:'codex' as const}:{}),...(args.toolProfile?{toolProfile:args.toolProfile}:{})};
+   if(args.dryRun){
+    const preview=await previewUpgrade(previewOptions);
+    emit({...preview,dryRun:true,filesChanged:false},renderUpgradePreview(preview)+'\nPreview only: no files or sessions were changed.\nFrom '+root+', approval command: '+preview.nextCommand);
+    return 0;
+   }
    const godot=await resolveGodot(root,cliGodot);
    if(!godot)throw Object.assign(new Error('Godot could not be found. Pass --godot with its executable path; no files were changed.'),{code:'GODOT_NOT_FOUND'});
-   const interactive=!args.json&&process.stdin.isTTY&&process.stderr.isTTY;
-   const result=await upgradeProject({projectRoot:root,godotBin:godot,...(args.client==='codex'?{client:'codex' as const}:{}),
-    ...(args.toolProfile?{toolProfile:args.toolProfile}:{}),yes:args.yes===true,
-    ...(interactive?{confirmStop:async(status:Exclude<Awaited<ReturnType<typeof serverStatus>>,{state:'offline'}>)=>confirm(`Stop Godot MCP session ${status.sessionId}${status.runtimeConnected?' and its owned game':''} to update this project?`)}:{}),
+   const interactive=!args.json&&!!process.stdin.isTTY;
+   const result=await upgradeProject({...previewOptions,godotBin:godot,yes:args.yes===true,replaceLauncher:args.replaceLauncher===true,requireConfirmation,
+    ...(interactive?{confirmUpgrade:async()=>confirm('Apply this upgrade, including the launcher and session changes shown above?')}:{}),
+    onPreview:preview=>{if(!args.json)console.error(renderUpgradePreview(preview));},
     onProgress:stage=>{if(!args.json)console.error(stage);}});
    emit(result,[`Godot MCP ${result.toVersion} installed in ${root}`,`Backup: ${result.backupPath}`,
     ...(result.client?[`Codex configuration ${result.client.migrated?'migrated':'verified'}: ${result.client.path}`]:[]),
@@ -84,15 +92,15 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    case 'init':case 'addon.install':case 'addon.update':{
     if(args.command==='init'&&(!args.client||args.client==='codex')){
      let existing=await existingInstallation(root);
-     if(args.client==='codex'){
+     if(args.client==='codex'||await readCodexConfig(path.join(root,'.codex/config.toml'))!==null){
       const config=await readProjectConfig(root);
       const plan=await prepareCodexUpgrade(path.join(root,'.codex/config.toml'),makeClientLaunchEntry(root,args.toolProfile??config.toolProfile,`@srdarkx/godot-mcp@${SERVER_VERSION}`));
       existing ||= plan.kind!=='new';
      }
      if(existing){
       if(!args.yes){
-       if(args.json||!process.stdin.isTTY||!process.stderr.isTTY)throw Object.assign(new Error('Existing Godot MCP installation detected. Run upgrade for backup, Codex migration and verification, or init --yes to select that flow.'),{code:'UPGRADE_AVAILABLE',details:{command:'npx --yes @srdarkx/godot-mcp@latest upgrade '+JSON.stringify(root)}});
-       if(!await confirm('An existing Godot MCP installation was found. Upgrade it with backup and verification?'))throw Object.assign(new Error('Initialization cancelled; existing files were preserved'),{code:'UPGRADE_CANCELLED'});
+       if(args.json||!process.stdin.isTTY)throw Object.assign(new Error('Existing Godot MCP installation detected. Run upgrade from this project for backup, Codex migration and verification, or init --yes to select that flow.'),{code:'UPGRADE_AVAILABLE',details:{command:'npx --yes @srdarkx/godot-mcp@latest upgrade .',projectRoot:root}});
+       return await executeUpgrade(true);
       }
       return await executeUpgrade();
      }

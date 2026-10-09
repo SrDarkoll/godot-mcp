@@ -44,6 +44,25 @@ assert(codexConfig.includes('[mcp_servers.godot-mcp]'));
 assert(codexConfig.includes('command = "npx"'));
 assert.deepEqual(JSON.parse(codexConfig.match(/^args = (.+)$/m)?.[1]??'null'),
  ['--yes',`@srdarkx/godot-mcp@${packed.pkg.version}`,'start',project,'--tool-profile','2d']);
+const wrapper=path.join(project,'retry.mjs'),wrapperBytes='throw new Error("Upgrade inspection must not execute a custom launcher");\n';
+await fs.writeFile(wrapper,wrapperBytes);
+const bundledServer=path.join(publicRoot,'node_modules/@godot-mcp/server/dist/index.js');
+const legacy=`[mcp_servers.godot-mcp]\ncommand = ${JSON.stringify(process.execPath)}\nargs = ${JSON.stringify([wrapper,bundledServer,'--project',project,'--tool-profile','2d'])}\nrequired = true\nstartup_timeout_sec = 45\n`;
+await fs.writeFile(codexInit.client.path,legacy);
+const preview=JSON.parse(cli(['upgrade',project,'--dry-run','--yes','--json']));
+assert.equal(preview.dryRun,true);assert.equal(preview.filesChanged,false);
+assert.equal(preview.requires.replaceLauncher,true);assert.equal(preview.client.launcherReplacement.kind,'wrapper');
+assert.equal(await fs.readFile(codexInit.client.path,'utf8'),legacy);
+const unapproved=spawnSync(process.execPath,[entry,'upgrade',project,'--yes','--json'],{cwd:consumer,encoding:'utf8',windowsHide:true,timeout:40000});
+assert.equal(unapproved.status,1,unapproved.stderr||unapproved.stdout);
+assert.equal(JSON.parse(unapproved.stdout).error.code,'LAUNCHER_REPLACEMENT_REQUIRED');
+assert.equal(await fs.readFile(codexInit.client.path,'utf8'),legacy);
+const migrated=JSON.parse(cli(['upgrade',project,'--replace-launcher','--yes','--json']));
+assert.equal(migrated.doctor.ok,true);assert.equal(migrated.client.launcherReplaced,true);
+assert.equal(await fs.readFile(path.join(migrated.backupPath,'before/.codex/config.toml'),'utf8'),legacy);
+assert.equal(await fs.readFile(wrapper,'utf8'),wrapperBytes);
+const migratedCodex=await fs.readFile(codexInit.client.path,'utf8');
+assert(migratedCodex.includes('required = true'));assert(migratedCodex.includes('startup_timeout_sec = 45'));
 const recipe=JSON.parse(cli(['setup','codex',project,'--json']));
 assert.equal(recipe.changedProfile,false);
 const publicReal=await fs.realpath(publicRoot);
@@ -73,6 +92,9 @@ await fs.writeFile(path.join(packed.out,'consumer-validation.json'),JSON.stringi
   'bundled addon plugin',
   'bundled runtime logger',
   'CLI help',
+  'upgrade preview without writes',
+  'explicit wrapper migration consent',
+  'exact custom configuration backup and retained wrapper',
   'addon init',
   'scoped client bootstrap',
   'tool profile persistence',

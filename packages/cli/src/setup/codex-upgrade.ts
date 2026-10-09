@@ -4,9 +4,10 @@ import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
 import {parse} from 'smol-toml';
-import {SERVER_VERSION,ToolProfileSchema} from '@godot-mcp/protocol';
+import {SERVER_VERSION} from '@godot-mcp/protocol';
 import type {ClientLaunchEntry} from './client-config.js';
 import {BEGIN,END,readCodexConfig,renderCodexServer} from './codex-config.js';
+import {normalizeCodexLaunch,type LauncherReplacement} from './codex-launch.js';
 
 const PACKAGE='@srdarkx/godot-mcp';
 const fail=(message:string)=>Object.assign(new Error(message),{code:'UPGRADE_CONFIG_UNRECOGNIZED'});
@@ -14,51 +15,14 @@ const object=(value:unknown):value is Record<string,any>=>!!value&&typeof value=
 const toml=(text:string)=>parse(text,{integersAsBigInt:'asNeeded',unsafeKeyBehaviour:'throw'});
 export function hasCodexServer(text:string):boolean{return (toml(text) as any).mcp_servers?.['godot-mcp']!==undefined;}
 
-export interface CodexUpgradePlan {file:string;before:string|null;after:string;changed:boolean;kind:'new'|'managed'|'legacy';entry:ClientLaunchEntry;}
-
-async function launch(entry:ClientLaunchEntry,root:string):Promise<{args:string[];profile:string|null;packageSpec:string}>{
- const executable=path.basename(entry.command.replaceAll('\\','/')).toLowerCase();
- let tail:string[],spec:string;
- if(['npx','npx.cmd','npx.exe'].includes(executable)){
-  let index=0;while(['--yes','-y'].includes(entry.args[index]??''))index++;
-  const packageOption=['--package','-p'].includes(entry.args[index]??'');
-  if(packageOption)index++;
-  spec=entry.args[index++]??'';
-  if(!/^@srdarkx\/godot-mcp(?:@[a-zA-Z0-9.^~*<>=_-]+)?$/.test(spec))throw fail('Codex server does not launch the Godot MCP npm package; its configuration was preserved');
-  tail=entry.args.slice(index);
-  if(packageOption){if(tail.shift()!=='godot-mcp')throw fail('Unrecognized npm launch command');}
- }else if(['node','node.exe'].includes(executable)){
-  const file=entry.args[0]??'';if(!path.isAbsolute(file)||!/[\\/]dist[\\/]index\.js$/.test(file))throw fail('Unrecognized node server recipe');
-  const server=path.dirname(path.dirname(file)),bundle=path.resolve(server,'../../..');
-  for(const [directory,name] of [[server,'@godot-mcp/server'],[bundle,PACKAGE]] as const){
-   const manifest=path.join(directory,'package.json');const stat=await fs.lstat(manifest);
-   if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1||stat.size>65536)throw fail('Unsafe bundled server manifest');
-   if(JSON.parse(await fs.readFile(manifest,'utf8')).name!==name)throw fail('Node server does not belong to the public Godot MCP bundle');
-  }
-  spec=PACKAGE;tail=['start',...entry.args.slice(1)];
- }else throw fail('Codex server uses an unrelated command; its configuration was preserved');
- if(['start','run'].includes(tail[0]??''))tail.shift();
- let target:string|undefined,profile:string|null=null;const flags:string[]=[];
- for(let index=0;index<tail.length;index++){
-  const item=tail[index]!;
-  if(['--project','-p'].includes(item)){if(target!==undefined)throw fail('Duplicate project arguments');target=tail[++index];}
-  else if(item==='--tool-profile'){
-   const value=tail[++index];if(profile!==null||!ToolProfileSchema.safeParse(value).success)throw fail('Invalid or duplicate tool profile');
-   profile=value!;flags.push(item,value!);
-  }else if(item==='--bridge-port'){
-   const value=tail[++index];if(flags.includes(item)||!value||!/^\d+$/.test(value)||Number(value)>65535)throw fail('Invalid bridge port');flags.push(item,value);
-  }else if(item.startsWith('-')||target!==undefined)throw fail('Unrecognized launch arguments; configuration was preserved');
-  else target=item;
- }
- if(!target||path.resolve(root,target).toLowerCase()!==path.resolve(root).toLowerCase())throw fail('Codex server targets a different or unknown project; configuration was preserved');
- return {args:['--yes',`${PACKAGE}@${SERVER_VERSION}`,'start',root,...flags],profile,packageSpec:spec};
-}
+export interface CodexUpgradePlan {file:string;before:string|null;after:string;changed:boolean;kind:'new'|'managed'|'legacy';entry:ClientLaunchEntry;previousEntry?:ClientLaunchEntry;launcherReplacement?:LauncherReplacement;}
 
 export async function managedCodexLaunchMatches(text:string,expected:ClientLaunchEntry):Promise<boolean>{
  try{
   const data=toml(text) as any,server=data.mcp_servers?.['godot-mcp'];
   if(!object(server)||typeof server.command!=='string'||!Array.isArray(server.args)||!server.args.every((v:unknown)=>typeof v==='string'))return false;
-  const root=expected.args[3]!,actual=await launch({command:server.command,args:server.args},root);
+  const root=expected.args[3]!,actual=await normalizeCodexLaunch({command:server.command,args:server.args},root);
+  if(actual.launcherReplacement)return false;
   const expectedProfile=expected.args[expected.args.indexOf('--tool-profile')+1];
   if(actual.profile!==expectedProfile)return false;
   return actual.packageSpec===PACKAGE||actual.packageSpec===`${PACKAGE}@${SERVER_VERSION}`||actual.packageSpec===`${PACKAGE}@latest`;
@@ -87,14 +51,16 @@ export async function prepareCodexUpgrade(file:string,entry:ClientLaunchEntry,op
  const server=parsed.mcp_servers?.['godot-mcp'];
  const begin=text.indexOf(BEGIN),end=text.indexOf(END);
  if((begin<0)!==(end<0)||(begin>=0&&(begin!==text.lastIndexOf(BEGIN)||end!==text.lastIndexOf(END)||end<begin)))throw fail('Incomplete or duplicate Codex management markers');
- const eol=text.includes('\r\n')?'\r\n':'\n';let after:string,kind:CodexUpgradePlan['kind'],effective=entry;
+ const eol=text.includes('\r\n')?'\r\n':'\n';let after:string,kind:CodexUpgradePlan['kind'],effective=entry,previousEntry:ClientLaunchEntry|undefined,launcherReplacement:LauncherReplacement|undefined;
  if(server===undefined){
   if(begin>=0)throw fail('Managed Codex markers do not contain a server');
   const block=`${BEGIN}\n${renderCodexServer(entry)}${END}\n`.replaceAll('\n',eol);
   after=text+(text&&!text.endsWith('\n')?eol:'')+(text?eol:'')+block;kind='new';
  }else{
   if(!object(server)||typeof server.command!=='string'||!Array.isArray(server.args)||!server.args.every((v:unknown)=>typeof v==='string'))throw fail('Invalid Codex server launch');
-  const normalized=await launch({command:server.command,args:server.args},entry.args[3]!);
+  previousEntry={command:server.command,args:[...server.args]};
+  const normalized=await normalizeCodexLaunch(previousEntry,entry.args[3]!);
+  launcherReplacement=normalized.launcherReplacement;
   effective={command:'npx',args:normalized.args};
   if(options.overrideProfile&&normalized.profile!==null)effective.args[effective.args.indexOf('--tool-profile')+1]=entry.args[entry.args.indexOf('--tool-profile')+1]!;
   if(normalized.profile===null)effective.args.push('--tool-profile',entry.args[entry.args.indexOf('--tool-profile')+1]!);
@@ -120,10 +86,11 @@ export async function prepareCodexUpgrade(file:string,entry:ClientLaunchEntry,op
  expected.mcp_servers??=Object.create(null);expected.mcp_servers['godot-mcp']??=Object.create(null);
  expected.mcp_servers['godot-mcp'].command=effective.command;expected.mcp_servers['godot-mcp'].args=effective.args;
  if(!isDeepStrictEqual(toml(after),expected))throw fail('Codex migration would change unrelated settings; original files were preserved');
- return {file,before,after,changed:before!==after,kind,entry:effective};
+ return {file,before,after,changed:before!==after,kind,entry:effective,...(previousEntry?{previousEntry}:{}),...(launcherReplacement?{launcherReplacement}:{})};
 }
 
-export async function applyCodexUpgrade(plan:CodexUpgradePlan):Promise<{changed:boolean;backupPath?:string}>{
+export async function applyCodexUpgrade(plan:CodexUpgradePlan,options:{replaceLauncher?:boolean}={}):Promise<{changed:boolean;backupPath?:string}>{
+ if(plan.launcherReplacement&&!options.replaceLauncher)throw Object.assign(new Error('Replacing this custom or source-checkout launcher requires explicit consent. Original configuration was preserved.'),{code:'LAUNCHER_REPLACEMENT_REQUIRED'});
  if(await readCodexConfig(plan.file)!==plan.before)throw fail('Codex configuration changed after upgrade preview');
  if(!plan.changed)return {changed:false};
  await fs.mkdir(path.dirname(plan.file),{recursive:true});

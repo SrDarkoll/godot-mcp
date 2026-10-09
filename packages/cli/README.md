@@ -96,6 +96,8 @@ It preflights the installation, asks before stopping an active project session, 
 
 Use `--yes` after `upgrade` to explicitly approve stopping the project session in automation, and `--client codex` to create Codex configuration if none exists. Reload an open Godot project and reconnect the client after success.
 
+Starting with 0.6.2, `upgrade . --dry-run` previews the version, launcher and session changes without writing files or stopping the server. Verified source-checkout servers and Node scripts followed by a verified Godot MCP server entry can be migrated with one interactive confirmation. For automation, `--replace-launcher` separately approves replacing custom launcher behavior; `--yes` alone does not. See the [upgrade guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/upgrading.md#custom-launchers-and-upgrade-preview).
+
 ### `godot-mcp run [options]`
 Launches the MCP server over stdio for AI client consumption.
 

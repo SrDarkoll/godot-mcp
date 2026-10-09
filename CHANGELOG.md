@@ -2,6 +2,14 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.6.2] - 2026-10-09
+
+- Preview an upgrade with `--dry-run`, including the installed version, Codex launcher change, session impact and backup location, without writing files or stopping the server.
+- Recognize verified source-checkout servers and local Node scripts followed by a verified Godot MCP server entry. Replacing these launchers requires explicit confirmation or `--replace-launcher`; the script file is kept.
+- Use one interactive confirmation for launcher replacement and session shutdown, including upgrades offered by `init`. Allow questions when input is interactive and output is redirected.
+- Keep `--yes` scoped to session shutdown, provide actionable approval commands, preserve edits made during confirmation and report when a session remains stopped after maintenance fails.
+- Compare canonical project paths so another filesystem spelling of the same folder is not treated as a different project.
+
 ## [0.6.1] - 2026-10-08
 
 - Add `upgrade` with installation preflight, confirmed authenticated shutdown, retained backups, doctor verification and rollback/recovery.

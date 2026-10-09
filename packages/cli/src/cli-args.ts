@@ -1,13 +1,13 @@
 import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 import {CLIENT_NAMES,type ClientName} from './setup/client-config.js';
 export type Command='help'|'version'|'init'|'upgrade'|'doctor'|'start'|'stop'|'status'|'config'|'permissions'|'sessions.list'|'sessions.inspect'|'addon.install'|'addon.update'|'setup.codex';
-export interface ParsedCommand {command:Command;projectRoot:string;godotBin:string|null;bridgePort?:number;toolProfile?:ToolProfile;client?:ClientName;json:boolean;limit:number;before?:string;sessionId?:string;repair?:boolean;yes?:boolean;}
+export interface ParsedCommand {command:Command;projectRoot:string;godotBin:string|null;bridgePort?:number;toolProfile?:ToolProfile;client?:ClientName;json:boolean;limit:number;before?:string;sessionId?:string;repair?:boolean;yes?:boolean;dryRun?:boolean;replaceLauncher?:boolean;}
 export const SESSION_ID=/^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}$/;
 export function usage():string{return [
  'Usage: godot-mcp <command> [path] [options]',
- '  init [--godot <exe>] [--client <antigravity|cursor|claude|codex>] [--tool-profile <profile>] [--json]',
- '  upgrade [--godot <exe>] [--client codex] [--tool-profile <profile>] [--yes] [--json]',
- '    backs up, migrates project-local Codex, updates and verifies; --yes approves stopping the project session',
+ '  init [--godot <exe>] [--client <antigravity|cursor|claude|codex>] [--tool-profile <profile>] [--yes] [--replace-launcher] [--json]',
+ '  upgrade [--godot <exe>] [--client codex] [--tool-profile <profile>] [--dry-run] [--yes] [--replace-launcher] [--json]',
+ '    --dry-run previews without changes; --yes approves session shutdown; --replace-launcher approves replacing a custom/source launcher',
  '  addon install | addon update [--godot <exe>] [--json]',
  '  doctor [--godot <exe>] [--json]',
  '  start [--bridge-port <0..65535>] [--tool-profile <profile>]  MCP stdio, no CLI output',
@@ -37,6 +37,8 @@ export function parseCliArgs(argv:string[]):ParsedCommand{
   if(arg==='--json'){if(name==='start')throw new Error('start uses MCP stdio and cannot use --json');parsed.json=true;continue;}
   if(arg==='--repair'&&name==='config'){parsed.repair=true;continue;}
   if(arg==='--yes'&&['init','upgrade'].includes(name)){parsed.yes=true;continue;}
+  if(arg==='--dry-run'&&name==='upgrade'){parsed.dryRun=true;continue;}
+  if(arg==='--replace-launcher'&&['init','upgrade'].includes(name)){parsed.replaceLauncher=true;continue;}
   const value=argv[++index];if(!value||value.startsWith('--'))throw new Error(`${arg} requires a value`);
   if((arg==='--project'||arg==='-p')&&name==='start'){parsed.projectRoot=value;continue;}
   if(arg==='--godot'&&['init','upgrade','doctor','config','addon.install','addon.update'].includes(name)){parsed.godotBin=value;continue;}
