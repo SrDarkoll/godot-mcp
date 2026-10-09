@@ -2,6 +2,14 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.6.1] - 2026-10-08
+
+- Add `upgrade` with installation preflight, confirmed authenticated shutdown, retained backups, doctor verification and rollback/recovery.
+- Migrate recognized project-local Codex npm launches and bundled-server recipes while preserving unrelated MCPs and custom options.
+- Make `init` offer the safe upgrade flow for an existing Codex installation before modifying files.
+- Pin generated client launchers to the installed package version so the server and addon stay aligned.
+- Reject unrelated configurations, conflicting external edits and changed session identities before overwriting or stopping them.
+
 ## [0.6.0] - 2026-10-08
 
 ### Added

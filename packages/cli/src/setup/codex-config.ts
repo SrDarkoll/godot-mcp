@@ -2,9 +2,10 @@ import { constants } from 'node:fs';
 import { copyFile, lstat, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { ClientLaunchEntry } from './client-config.js';
+import {managedCodexLaunchMatches,hasCodexServer} from './codex-upgrade.js';
 
-const BEGIN = '# godot-mcp: begin managed Codex MCP server';
-const END = '# godot-mcp: end managed Codex MCP server';
+export const BEGIN = '# godot-mcp: begin managed Codex MCP server';
+export const END = '# godot-mcp: end managed Codex MCP server';
 const SERVER_TABLE = '[mcp_servers.godot-mcp]';
 const MAX_CONFIG_BYTES = 1024 * 1024;
 const EXISTING_SERVER = /^\s*\[\[?\s*mcp_servers\s*\.\s*(?:godot-mcp|"godot-mcp"|'godot-mcp')(?:\s*\.|\s*\])/m;
@@ -34,7 +35,7 @@ function backupStamp(now: Date): string {
   return now.toISOString().replace(/[:.]/g, '-');
 }
 
-async function readCodexConfig(file: string): Promise<string | null> {
+export async function readCodexConfig(file: string): Promise<string | null> {
   try {
     const stat = await lstat(file);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || stat.size > MAX_CONFIG_BYTES) {
@@ -57,8 +58,8 @@ export async function inspectManagedCodexConfig(file: string, entry: ClientLaunc
   if (begin < 0 && end < 0) return null;
   return begin >= 0 && end > begin &&
     begin === text.lastIndexOf(BEGIN) && end === text.lastIndexOf(END) &&
-    text.slice(begin, end + END.length) === managedBlock(entry) &&
-    !definesGodotServer(text.slice(0, begin) + text.slice(end + END.length));
+    await managedCodexLaunchMatches(text,entry) &&
+    !hasCodexServer(text.slice(0, begin) + text.slice(end + END.length));
 }
 
 export async function configureCodexConfig(

@@ -84,6 +84,18 @@ npx @srdarkx/godot-mcp init . --client antigravity --tool-profile 2d
 
 ---
 
+### `godot-mcp upgrade [project-path]`
+
+Version 0.6.1 adds a safe upgrade flow for existing installations:
+
+```powershell
+npx --yes @srdarkx/godot-mcp@latest upgrade .
+```
+
+It preflights the installation, asks before stopping an active project session, backs up changes, migrates recognized project-local Codex launchers, installs the addon and runs `doctor`. Verification failures restore the earlier files. Other MCP entries and custom options are preserved. The command is not available in npm 0.6.0; see the [upgrade guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/upgrading.md).
+
+Use `--yes` after `upgrade` to explicitly approve stopping the project session in automation, and `--client codex` to create Codex configuration if none exists. Reload an open Godot project and reconnect the client after success.
+
 ### `godot-mcp run [options]`
 Launches the MCP server over stdio for AI client consumption.
 

@@ -42,8 +42,9 @@ export async function serverStatus(root:string):Promise<ManagementStatus|{state:
  catch(error){if(error instanceof BridgeRpcError)throw error;throw new BridgeRpcError('INVALID_MANAGEMENT_RESPONSE','Invalid server status');}
 }
 
-export async function stopServer(root:string):Promise<{stopped:boolean;sessionId:string|null}>{
+export async function stopServer(root:string,options:{expectedSessionId?:string}={}):Promise<{stopped:boolean;sessionId:string|null}>{
  const descriptor=await readDescriptor(root);if(!descriptor)return {stopped:false,sessionId:null};
+ if(options.expectedSessionId!==undefined&&descriptor.sessionId!==options.expectedSessionId)throw new BridgeRpcError('SESSION_CHANGED','Project session changed after confirmation; shutdown was not sent');
  const response=await request(root,descriptor,'shutdown');
  if(response.accepted!==true)throw new BridgeRpcError('INVALID_MANAGEMENT_RESPONSE','Shutdown was not accepted');
  const deadline=Date.now()+30000;

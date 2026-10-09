@@ -1,7 +1,7 @@
 import {copyFile,mkdir,readFile,writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import type {ToolProfile} from '@godot-mcp/protocol';
+import {SERVER_VERSION,type ToolProfile} from '@godot-mcp/protocol';
 import {configureCodexConfig} from './codex-config.js';
 
 export const CLIENT_NAMES=['antigravity','cursor','claude','codex'] as const;
@@ -49,7 +49,7 @@ function backupStamp(now:Date):string{
  return now.toISOString().replace(/[:.]/g,'-');
 }
 
-export function makeClientLaunchEntry(projectRoot:string,toolProfile:ToolProfile,npxPackage=DEFAULT_NPX_PACKAGE):ClientLaunchEntry{
+export function makeClientLaunchEntry(projectRoot:string,toolProfile:ToolProfile,npxPackage=`${DEFAULT_NPX_PACKAGE}@${SERVER_VERSION}`):ClientLaunchEntry{
  return {command:'npx',args:['--yes',npxPackage,'start',projectRoot,'--tool-profile',toolProfile]};
 }
 
