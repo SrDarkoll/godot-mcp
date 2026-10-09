@@ -2,6 +2,7 @@
 extends RefCounted
 
 var _editor_interface
+const NativeDiagnostics = preload("res://addons/godot_mcp/serialization/native_diagnostics.gd")
 
 func _init(editor_interface) -> void:
 	_editor_interface = editor_interface
@@ -184,22 +185,27 @@ func inspect(params: Dictionary) -> Dictionary:
 
 func validate(params: Dictionary) -> Dictionary:
 	var content: String = params.get("content", "")
+	var source_path: String = params.get("path", "")
+	if not source_path.is_empty() and (not source_path.begins_with("res://") or not source_path.ends_with(".gd") or source_path.contains("..") or source_path.contains("\\") or source_path.substr(6).contains(":")):
+		return _error("INVALID_ARGUMENT", "Validation path must be a project GDScript path")
 	var script: GDScript = GDScript.new()
+	var base := source_path.get_base_dir() if not source_path.is_empty() else "res://"
+	var validation_path := base.path_join("__godot_mcp_validate_" + str(script.get_instance_id()) + ".gd")
+	script.resource_path = validation_path
 	script.source_code = content
+	var scope := NativeDiagnostics.begin()
 	var err = script.reload()
-	if err == OK:
-		return {
-			"valid": true,
-			"errors": []
-		}
-
-	return {
-		"valid": false,
-		"errors": [
-			{
-				"line": 1,
-				"column": 0,
-				"message": "GDScript compilation failed with error code %d" % err
-			}
-		]
-	}
+	var captured := NativeDiagnostics.finish(scope)
+	var errors: Array = []
+	for entry in captured.entries:
+		if entry.kind != "error": continue
+		var file := str(entry.file) if entry.file != null else ""
+		var script_location := file.ends_with(".gd")
+		var display_path = (source_path if not source_path.is_empty() else null) if file == validation_path else (file if script_location else null)
+		errors.append({"path":display_path,"line":int(entry.line) if script_location and int(entry.line)>0 else null,
+			"column":null,"severity":"error","message":entry.message})
+	if err != OK and errors.is_empty():
+		errors.append({"path":source_path if not source_path.is_empty() else null,"line":null,"column":null,
+			"severity":"error","message":"GDScript compilation failed with error code %d; native diagnostic location is unavailable" % err})
+	return {"valid":err == OK and errors.is_empty(),"errors":errors,"error_code":err,
+		"diagnostics_available":captured.available,"diagnostics_truncated":captured.dropped>0}

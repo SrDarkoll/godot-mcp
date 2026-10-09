@@ -66,7 +66,9 @@ it('does not transfer ownership to a later manual game after an owned run stops'
 it('distinguishes debugger break from SceneTree pause and still permits stop',async()=>{
  const h=await runtimeHarness({breakAfterReady:true});
  try{
-  const start=await h.client.callTool({name:'project.run',arguments:{}});expect(start.isError).not.toBe(true);
+  const start=await h.client.callTool({name:'project.run',arguments:{}});expect(start.isError,JSON.stringify(start.structuredContent??start.content)+h.logs()).not.toBe(true);
+  expect(start.structuredContent).toMatchObject({state:'running',connected:true});
+  await writeFile(path.join(h.root,'.godot-mcp/break-test-game'),'break');
   await waitFor(async()=>(await h.client.callTool({name:'runtime.status',arguments:{}})).structuredContent?.state==='breaked');
   const read=await h.client.callTool({name:'runtime.get_property',arguments:{node_path:'/root/Main',property:'counter'}});
   expect(read.structuredContent).toMatchObject({error:{code:'RUNTIME_BREAKED'}});

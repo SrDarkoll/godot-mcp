@@ -2,6 +2,28 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.6.0] - 2026-10-08
+
+### Added
+
+- Native compiler diagnostics with original messages, source paths and real line numbers; unknown locations remain null.
+- Snapshot-bound, byte-bounded pagination for TileMap reads, including total counts and stale-cursor detection.
+- Retained startup logs and observed launch phases for games that fail before the runtime agent becomes ready.
+- Optional project-test contracts in `workflow.run_check`, with separate runtime, engine, project-test and visual-review checks.
+
+### Fixed
+
+- Large TileMap requests no longer hit the default 64 KiB WebSocket input buffer. Encoded requests above the finite 8 MiB limit are rejected before sending.
+- Property writes validate types, resource subclasses and safe conversions before mutation; failed loads and conversions preserve the previous value.
+- RPC errors distinguish requests that were not applied from mutations with an unknown outcome, retain transport close codes and never replay unconfirmed writes.
+- Workflow snapshots and diffs retain diagnostics after failed launches; a healthy runtime no longer implies that configured project tests passed.
+
+### Upgrade notes
+
+- Enumerate `tilemap.get_cells` using `has_more` and `next_cursor`; one page does not represent the entire map.
+- Update the server and addon together with `init`. The 194-tool catalog is unchanged.
+- Details and measured validation are recorded in [the 0.6.0 release notes](docs/releases/0.6.0.md).
+
 ## [0.5.3] - 2026-10-04
 
 - Put a prominent GitHub repository link and invitation to star the project at the top of the npm README.

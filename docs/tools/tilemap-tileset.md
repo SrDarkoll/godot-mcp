@@ -9,15 +9,35 @@ This slice is `TileMapLayer`-first. The deprecated `TileMap` node is not given a
 | Tool | Purpose |
 | --- | --- |
 | `tilemap.inspect` | Inspect layer state, TileSet presence, tile size, used-cell count/bounds, and collision/navigation flags. |
-| `tilemap.get_cells` | Inspect selected cells or enumerate up to 4096 used cells in deterministic row-major order. |
+| `tilemap.get_cells` | Read snapshot-bound, byte-bounded pages in deterministic row-major order. |
 | `tilemap.set_cell` | Set one cell using `source_id`, `atlas_coords`, and `alternative_tile`. |
-| `tilemap.set_cells` | Atomically validate and set up to 4096 cells in one Undo/Redo action. |
-| `tilemap.erase_cells` | Atomically erase up to 4096 cells with exact previous-cell restoration on Undo. |
+| `tilemap.set_cells` | Prevalidate up to 4096 cells, apply one Undo/Redo action and verify the applied count. |
+| `tilemap.erase_cells` | Prevalidate and erase up to 4096 cells with exact previous-cell restoration on Undo. |
 | `tilemap.clear` | Clear a layer containing at most 4096 used cells with exact Undo. |
 | `tilemap.map_to_local` | Convert map coordinates to the local pixel-space cell center. |
 | `tilemap.local_to_map` | Convert a local pixel-space position to map coordinates. |
 
 Map coordinates are bounded to `-32768..32767` on both axes because that is the range serialized by `TileMapLayer`. Batch mutations reject duplicate cell coordinates and validate the full batch before changing the scene.
+
+### Complete cell enumeration
+
+Use `tilemap.inspect.used_cell_count` when only a count is needed. For cell data, request a page:
+
+```json
+{"node_path":"/Main/Ground","limit":128,"max_bytes":229376}
+```
+
+The result includes `count` for this page, `total_count` for the selection, `has_more`, `next_cursor`, `snapshot` and `complete`. The conservative serialization budget may reduce the page below `limit`. Repeat with `cursor` set to `next_cursor` and the same `node_path` and `coords` selection until `has_more` is false. Do not treat the first page as the full map.
+
+`limit` is 1..512, `max_bytes` is 16,384..229,376, and a full-layer inspection is bounded to 100,000 cells. Explicit coordinate selections retain their 4,096-coordinate bound. A cursor is bound to the layer instance and inspected cell values. `TILEMAP_CURSOR_STALE` means the scene or selection changed; restart enumeration.
+
+### Write confirmation
+
+`tilemap.set_cells` returns `requestId`, `requested_count`, `applied_count` and `confirmation` (`applied`, `partial` or `unknown`). Applied counts are checked against the layer after the operation. `saved: false` describes an in-memory editor change.
+
+The request envelope is bounded to 8 MiB of encoded JSON and 50,000 native serialization items; native byte accounting is conservative. The 4,096-cell handler limit is an upper bound, so batches can still hit the input budget first. Split a rejected batch into smaller requests. Decoded `value`, `args`, `properties` and `binds` retain their stricter budgets.
+
+Transport errors identify the request and distinguish `executionOutcome: not_applied` when it was never sent or native validation rejected it before dispatch, from `unknown` when a response was lost. Rejections before dispatch report `appliedCount: 0`. Disconnects include `transportCloseCode` and `transportCloseReason` when available. A timeout does not prove that no cells changed. Inspect the layer before retrying; the server does not replay the mutation automatically.
 
 Example:
 

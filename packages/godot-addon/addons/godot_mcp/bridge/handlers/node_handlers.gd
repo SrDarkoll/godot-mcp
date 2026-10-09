@@ -3,6 +3,7 @@ extends RefCounted
 
 var _editor_interface
 var _variant_serializer = preload("res://addons/godot_mcp/serialization/variant_serializer.gd")
+const PropertyValue = preload("res://addons/godot_mcp/serialization/property_value.gd")
 
 func _init(editor_interface) -> void:
 	_editor_interface = editor_interface
@@ -367,8 +368,12 @@ func set_property(params: Dictionary) -> Dictionary:
 	if not node:
 		return _error("NODE_NOT_FOUND", "Node not found: %s" % node_path)
 
+	if not params.has("value"):
+		return _error("INVALID_ARGUMENT", "value is required; send null explicitly to clear a nullable property")
+	var prepared := PropertyValue.prepare(node,prop,params.value)
+	if prepared.has("__error"): return prepared
 	var prev = node.get(prop)
-	var decoded = _variant_serializer.decode(params.get("value"))
+	var decoded = prepared.value
 
 	var undo_redo = _editor_interface.get_editor_undo_redo()
 	if undo_redo:
@@ -382,7 +387,10 @@ func set_property(params: Dictionary) -> Dictionary:
 	return {
 		"property": prop,
 		"previous_value": _variant_serializer.encode(prev),
-		"new_value": _variant_serializer.encode(node.get(prop))
+		"new_value": _variant_serializer.encode(node.get(prop)),
+		"expected_type": prepared.expectedType,
+		"matches_requested": PropertyValue.equal(decoded,node.get(prop)),
+		"applied":true,"saved":false
 	}
 
 func get_properties(params: Dictionary) -> Dictionary:

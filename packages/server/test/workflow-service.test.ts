@@ -17,6 +17,22 @@ it('returns the newest bounded diagnostic tail with the true cursor',async()=>{
   expect(store.tail(runId,2)).toMatchObject({nextCursor:5,entries:[{sequence:4},{sequence:5}]});
 });
 
+it('includes retained boot-log diagnostics in a workflow diff without a connected runtime agent',async()=>{
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-workflow-boot-diff-'));
+  const session=createSession(root),sessions=new SessionStore(root);await sessions.create(session);
+  const runId='123e4567-e89b-42d3-a456-426614174050';
+  let status:RuntimeStatus={state:'stopped',runId:null,scenePath:null,connected:false,ownership:'none',features:{...NO_RUNTIME_FEATURES},errorCode:null};
+  let tail:any=null;
+  const runtime={status:async()=>status,tailDiagnostics:async()=>tail} as any;
+  const workflow=new WorkflowService(session,sessions,{connected:false,rpc:{call:async()=>null}} as any,runtime,{capture:async()=>null} as any);
+  const before=await workflow.snapshot({capture:'none'});
+  status={...status,state:'failed',runId,ownership:'session',errorCode:'RUNTIME_START_FAILED'};
+  const entry:DiagnosticEntry={sequence:1,runId,timestamp:new Date().toISOString(),kind:'output',stream:null,message:'BOOT_EARLY_EXIT',file:null,line:null,frames:[],truncated:false,source:'startup_log'};
+  tail={runId,entries:[entry],nextCursor:1,oldestAvailable:1,dropped:0,truncated:false,errorCount:0,warningCount:0,outputCount:1};
+  const diff=await workflow.diffSince({snapshot_id:before.snapshot.id});
+  expect(diff.diagnostics).toMatchObject({entries:[entry],runChanged:true,outputCount:1});
+});
+
 it('persists a baseline and returns only post-baseline workflow changes',async()=>{
   const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-workflow-service-'));
   const session=createSession(root);const sessions=new SessionStore(root);await sessions.create(session);

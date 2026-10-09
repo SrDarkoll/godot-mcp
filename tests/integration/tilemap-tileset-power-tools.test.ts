@@ -1,5 +1,5 @@
 import {spawn,type ChildProcess} from 'node:child_process';
-import {cp,mkdtemp,rm,writeFile} from 'node:fs/promises';
+import {cp,mkdir,mkdtemp,rm,writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {Client} from '@modelcontextprotocol/client';
@@ -198,6 +198,34 @@ describe('Godot TileMapLayer and TileSet power tools',()=>{
       expect((await call('tileset.inspect',{node_path:'/Main/Ground'})).structuredContent).toMatchObject({source_count:0});
       expect((await confirmFixtureOperation(client,'editor.undo',{})).structuredContent).toMatchObject({performed:true});
       expect((await call('tileset.inspect',{node_path:'/Main/Ground'})).structuredContent).toMatchObject({source_count:1});
+      const bulkEvidence:Array<Record<string,unknown>>=[];
+      for(const count of [128,512,1285,1907]){
+        expect((await call('tilemap.clear',{node_path:'/Main/Ground'})).isError).not.toBe(true);
+        const batch=Array.from({length:count},(_,index)=>({coords:{x:index%64,y:Math.floor(index/64)},source_id:0,atlas_coords:{x:0,y:0},alternative_tile:0}));
+        const result=await call('tilemap.set_cells',{node_path:'/Main/Ground',cells:batch});
+        expect(result.isError,`bulk ${count}: ${JSON.stringify(result.structuredContent)}`).not.toBe(true);
+        expect(result.structuredContent).toMatchObject({confirmation:'applied',requested_count:count,applied_count:count,requestId:expect.any(String)});
+        const status=await call('session.status');
+        expect(status.structuredContent).toMatchObject({editorConnected:true});
+        const seen=new Set<string>();let cursor:string|undefined;
+        do{
+          const page=await call('tilemap.get_cells',{node_path:'/Main/Ground',limit:128,...(cursor?{cursor}:{})});
+          expect(page.isError,JSON.stringify(page.structuredContent)).not.toBe(true);
+          const value=page.structuredContent as any;
+          expect(value.total_count).toBe(count);
+          for(const cell of value.cells){const key=`${cell.coords.x}:${cell.coords.y}`;expect(seen.has(key)).toBe(false);seen.add(key);}
+          cursor=value.has_more?value.next_cursor:undefined;
+        }while(cursor);
+        expect(seen.size).toBe(count);
+        bulkEvidence.push({requested:count,result:result.structuredContent,editorConnected:true,readback:seen.size});
+      }
+      const evidenceDirectory=path.resolve('.godot-mcp/feedback-test-runs');await mkdir(evidenceDirectory,{recursive:true});
+      await writeFile(path.join(evidenceDirectory,'bulk-'+Date.now()+'.json'),JSON.stringify(bulkEvidence,null,2));
+      const rejectedValue=await call('node.set_property',{node_path:'/Main/Ground',property:'position',value:Array.from({length:1000},()=> 'x'.repeat(40))});
+      expect(rejectedValue.isError).toBe(true);
+      expect(rejectedValue.structuredContent).toMatchObject({error:{code:'ARGUMENT_TOO_LARGE',details:{field:'value',executionOutcome:'not_applied',appliedCount:0}}});
+      expect((await call('node.get_property',{node_path:'/Main/Ground',property:'position'})).structuredContent).toMatchObject({value:{x:0,y:0}});
+      expect((await call('session.status')).structuredContent).toMatchObject({editorConnected:true});
     }finally{
       await client.close().catch(()=>undefined);
       await stopProcess(godot);

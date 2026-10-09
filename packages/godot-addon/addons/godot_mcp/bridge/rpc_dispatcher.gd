@@ -55,6 +55,7 @@ func _init(editor_interface, runtime = null) -> void:
     _navigation_handlers = preload("res://addons/godot_mcp/bridge/handlers/navigation_handlers.gd").new(editor_interface, _compatibility)
 
 const SerializationBudget = preload("res://addons/godot_mcp/serialization/serialization_budget.gd")
+const INPUT_LIMITS = {"depth":64, "items":50000, "bytes":8*1024*1024, "string":1024*1024, "container":50000}
 
 func compatibility_manifest() -> Dictionary:
     return _compatibility.manifest()
@@ -85,15 +86,16 @@ func dispatch(raw_text: String) -> Dictionary:
 
     var method: String = request.method
     var params: Dictionary = request.get("params", {})
-    var input_issue = SerializationBudget.check(params, {"bytes":8*1024*1024, "string":1024*1024})
+    # Bulk requests have the server's bounded envelope; decoded values keep their stricter limits below.
+    var input_issue = SerializationBudget.check(params, INPUT_LIMITS)
     if not input_issue.is_empty():
-        return _failure(request_id, "ARGUMENT_TOO_LARGE", input_issue)
+        return _failure(request_id, "ARGUMENT_TOO_LARGE", input_issue, {"applied":false, "limits":INPUT_LIMITS})
     # Validate fields that handlers will decode before any editor mutation.
     for field in ["value", "args", "properties", "binds"]:
         if params.has(field):
             var value_issue = SerializationBudget.check(params[field])
             if not value_issue.is_empty():
-                return _failure(request_id, "ARGUMENT_TOO_LARGE", value_issue)
+                return _failure(request_id, "ARGUMENT_TOO_LARGE", value_issue, {"applied":false, "field":field})
     var result
     match method:
         "geometry.validate_walkways":

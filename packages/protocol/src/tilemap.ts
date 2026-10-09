@@ -41,8 +41,8 @@ export interface TilemapInspectResult{
   collision_enabled:boolean;
   navigation_enabled:boolean;
 }
-export interface TilemapCellsResult{node_path:string;count:number;cells:TileCellResult[];}
-export interface TilemapMutationResult{node_path:string;changed_count:number;}
+export interface TilemapCellsResult{node_path:string;count:number;cells:TileCellResult[];total_count?:number;has_more?:boolean;next_cursor?:string|null;snapshot?:string;complete?:boolean;}
+export interface TilemapMutationResult{node_path:string;changed_count:number;requestId?:string;requested_count?:number|null;applied_count?:number|null;confirmation?:'applied'|'partial'|'unknown';}
 export interface TilemapMapToLocalResult{node_path:string;coords:TileMapCoordinate;position:TileVector2;}
 export interface TilemapLocalToMapResult{node_path:string;position:TileVector2;coords:TileMapCoordinate;}
 
