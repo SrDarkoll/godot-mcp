@@ -2,21 +2,22 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createRequire} from 'node:module';
 import {SERVER_VERSION,type ToolProfile} from '@godot-mcp/protocol';
-import {resolveProjectRoot} from '@godot-mcp/server/project-root';
 import {readProjectConfig,ensureProjectDirectory} from '@godot-mcp/server/project-config';
 import {ProjectLease,requireNoRecoveryJournal} from '@godot-mcp/server/project-lease';
-import {serverStatus,stopServer} from '@godot-mcp/server/management';
+import {stopServer} from '@godot-mcp/server/management';
 import {doctor,type DoctorReport} from '../doctor/doctor.js';
 import {ordinaryBytes,AddonJournal} from '../init/addon-journal.js';
-import {makeClientLaunchEntry} from '../setup/client-config.js';
 import {prepareCodexUpgrade} from '../setup/codex-upgrade.js';
+import {readCodexConfig} from '../setup/codex-config.js';
 import {runCommand} from '../process/run-command.js';
 import {UpgradeJournal,type UpgradeChange} from './upgrade-journal.js';
+import {inspectUpgrade,statusForUpgrade,type UpgradeStatus,type UpgradePreview} from './upgrade-preview.js';
 
-type Status=Awaited<ReturnType<typeof serverStatus>>;
 export interface UpgradeOptions {
- projectRoot:string;godotBin:string;client?:'codex';toolProfile?:ToolProfile;yes?:boolean;
- confirmStop?:(status:Exclude<Status,{state:'offline'}>)=>Promise<boolean>;
+ projectRoot:string;godotBin:string;client?:'codex';toolProfile?:ToolProfile;yes?:boolean;replaceLauncher?:boolean;requireConfirmation?:boolean;
+ confirmStop?:(status:Exclude<UpgradeStatus,{state:'offline'}>)=>Promise<boolean>;
+ confirmUpgrade?:(preview:UpgradePreview)=>Promise<boolean>;
+ onPreview?:(preview:UpgradePreview)=>void;
  onProgress?:(stage:string)=>void;
  verify?:typeof doctor;
 }
@@ -36,38 +37,45 @@ async function templateFiles(template:string,relative=''):Promise<Array<{relativ
  return result;
 }
 
-async function statusForUpgrade(root:string):Promise<Status>{
- try{return await serverStatus(root);}catch(error){
-  if((error as any).code==='SERVER_UNAVAILABLE')return {state:'offline',projectRoot:root,editorConnected:false,runtimeConnected:false};
-  throw error;
- }
-}
-
 export async function upgradeProject(options:UpgradeOptions){
  if(process.platform!=='win32')throw Object.assign(new Error('Project upgrades currently require Windows; no files or sessions were changed'),{code:'UNSUPPORTED_PLATFORM'});
- const root=await resolveProjectRoot(options.projectRoot);
  const progress=options.onProgress??(()=>{});progress('Inspecting the installed addon and client configuration');
- let config=await readProjectConfig(root);
- const codexFile=path.join(root,'.codex/config.toml');
- const useCodex=options.client==='codex'||await ordinaryBytes(codexFile)!==null;
- const entry=makeClientLaunchEntry(root,options.toolProfile??config.toolProfile,`@srdarkx/godot-mcp@${SERVER_VERSION}`);
- // No shutdown or installation changes until the client plan is known to be safe.
- let clientPlan=useCodex?await prepareCodexUpgrade(codexFile,entry,{overrideProfile:options.toolProfile!==undefined}):null;
- const status=await statusForUpgrade(root);let serverStopped=false;
- if(status.state!=='offline'){
-  if(!options.yes&&!options.confirmStop)throw Object.assign(new Error('An active Godot MCP session must be stopped. Run upgrade again with --yes to approve stopping this project session.'),{code:'CONFIRMATION_REQUIRED',details:{sessionId:status.sessionId}});
-  if(!options.yes&&!await options.confirmStop!(status))throw Object.assign(new Error('Upgrade cancelled; the session and files were preserved'),{code:'UPGRADE_CANCELLED'});
-  progress('Stopping the authenticated project session');
-  serverStopped=(await stopServer(root,{expectedSessionId:status.sessionId})).stopped;
+ const inspected=await inspectUpgrade(options),{root,codexFile,useCodex,entry,status,preview}=inspected;
+ let {config,clientPlan}=inspected;let serverStopped=false;
+ options.onPreview?.(preview);
+ const needsReplacement=preview.requires.replaceLauncher&&!options.replaceLauncher;
+ const needsStop=preview.requires.stopSession&&!options.yes;
+ // Neither --yes nor JSON mode implicitly discards a custom launcher's behavior.
+ if(needsReplacement||needsStop||options.requireConfirmation){
+  if(options.confirmUpgrade){
+   if(!await options.confirmUpgrade(preview))throw Object.assign(new Error('Upgrade cancelled; the session and files were preserved'),{code:'UPGRADE_CANCELLED'});
+  }else if(needsReplacement){
+   throw Object.assign(new Error('Codex uses a custom or source-checkout launcher. Replacing it with the npm launcher requires confirmation; the script file will be kept. No files or sessions were changed.\nRun interactively to review the change, or approve it from '+root+' with:\n'+preview.nextCommand),{code:'LAUNCHER_REPLACEMENT_REQUIRED',details:{preview,command:preview.nextCommand,projectRoot:root}});
+  }else if(status.state!=='offline'){
+   if(!options.confirmStop)throw Object.assign(new Error('An active Godot MCP session must be stopped. No files or sessions were changed.\nApprove the update from '+root+' with:\n'+preview.nextCommand),{code:'CONFIRMATION_REQUIRED',details:{sessionId:status.sessionId,preview,command:preview.nextCommand,projectRoot:root}});
+   if(!await options.confirmStop(status))throw Object.assign(new Error('Upgrade cancelled; the session and files were preserved'),{code:'UPGRADE_CANCELLED'});
+  }else throw Object.assign(new Error('Review and approve the existing installation upgrade from '+root+' with:\n'+preview.nextCommand),{code:'CONFIRMATION_REQUIRED',details:{preview,command:preview.nextCommand,projectRoot:root}});
  }
- const lease=await ProjectLease.acquire(root,{operation:'addon_update',waitMs:5000});
+ const approvedPlan=clientPlan;
+ const approvedCodex=clientPlan?.before??null;
+ if(await readCodexConfig(codexFile)!==approvedCodex)throw Object.assign(new Error('Codex configuration changed after the preview. Run upgrade again to review the new plan; no files or sessions were changed.'),{code:'UPGRADE_PLAN_CHANGED'});
+ let lease:ProjectLease|undefined;
  let journal:UpgradeJournal|undefined;
  try{
+  if(status.state!=='offline'){
+   progress('Stopping the authenticated project session');
+   serverStopped=(await stopServer(root,{expectedSessionId:status.sessionId})).stopped;
+  }
+  lease=await ProjectLease.acquire(root,{operation:'addon_update',waitMs:5000});
   if((await statusForUpgrade(root)).state!=='offline')throw Object.assign(new Error('A project server restarted during upgrade. Stop it and retry; no files were changed.'),{code:'PROJECT_BUSY'});
   const recovered=await UpgradeJournal.recoverPending(root);
   await requireNoRecoveryJournal(root);await AddonJournal.recoverPending(root);
   config=await readProjectConfig(root);
-  if(useCodex)clientPlan=await prepareCodexUpgrade(codexFile,entry,{overrideProfile:options.toolProfile!==undefined});
+  if(await readCodexConfig(codexFile)!==approvedCodex)throw Object.assign(new Error('Codex configuration changed after the preview. Run upgrade again to review the new plan.'),{code:'UPGRADE_PLAN_CHANGED'});
+  if(useCodex){
+   clientPlan=await prepareCodexUpgrade(codexFile,entry,{overrideProfile:options.toolProfile!==undefined});
+   if(!approvedPlan||clientPlan.before!==approvedPlan.before||clientPlan.after!==approvedPlan.after)throw Object.assign(new Error('Codex configuration changed after the preview. Run upgrade again to review the new plan.'),{code:'UPGRADE_PLAN_CHANGED'});
+  }
   const profile=options.toolProfile??(clientPlan?.entry.args.includes('--tool-profile')?clientPlan.entry.args[clientPlan.entry.args.indexOf('--tool-profile')+1] as ToolProfile:config.toolProfile);
   const require=createRequire(import.meta.url),template=path.join(path.dirname(require.resolve('@godot-mcp/godot-addon/package.json')),'addons/godot_mcp');
   const changes:UpgradeChange[]=[];
@@ -79,7 +87,7 @@ export async function upgradeProject(options:UpgradeOptions){
   };
   for(const file of await templateFiles(template))await add('addons/godot_mcp/'+file.relative,file.bytes);
   const beforeSettings=await ordinaryBytes(path.join(root,'project.godot'));if(beforeSettings===null)throw new Error('Project settings disappeared');
-  const fromVersion=(await ordinaryBytes(path.join(root,'addons/godot_mcp/plugin.cfg')))?.toString().match(/^version="([^"]+)"/m)?.[1]??null;
+  const fromVersion=preview.fromVersion;
   progress('Preparing settings and the addon without changing the saved project');
   const stage=await UpgradeJournal.stagingDirectory(root);
   const stagedSettings=path.join(stage,'project.godot'),stagedLogger=path.join(stage,'runtime_logger.gd');
@@ -104,7 +112,7 @@ export async function upgradeProject(options:UpgradeOptions){
   if(!report.ok)throw Object.assign(new Error('Doctor found an installation problem'),{code:'UPGRADE_VALIDATION_FAILED',details:{checks:report.checks.filter(c=>!c.ok&&c.required!==false).map(c=>({id:c.id,detail:c.detail}))}});
   await journal.commit();
   return {projectRoot:root,fromVersion,toVersion:SERVER_VERSION,changed:changes.length>0,backupPath:journal.backupPath,serverStopped,recovered,doctor:report,
-   client:clientPlan?{client:'codex',path:codexFile,migrated:clientPlan.kind==='legacy',changed:clientPlan.changed}:null,
+   client:clientPlan?{client:'codex',path:codexFile,migrated:clientPlan.kind==='legacy',changed:clientPlan.changed,launcherReplaced:!!clientPlan.launcherReplacement}:null,
    warnings:['Reload or rescan an open Godot project to activate the updated addon. Reconnect the MCP in your client to start the updated server.']};
  }catch(error){
   if(journal){
@@ -114,7 +122,7 @@ export async function upgradeProject(options:UpgradeOptions){
    throw Object.assign(new Error(cause.message+'. Previous files restored. Backup: '+journal.backupPath+(serverStopped?'. The MCP session remains stopped; reconnect your client.':'')),
     {code:(error as any).code??'UPGRADE_FAILED',details:{...((error as any).details??{}),restored:true,backupPath:journal.backupPath,serverStopped},cause});
   }
-  if(serverStopped)throw Object.assign(new Error((error as Error).message+'. No installation files were changed; the MCP session remains stopped. Reconnect your client.'),{code:(error as any).code??'UPGRADE_FAILED',details:{serverStopped:true,filesChanged:false},cause:error});
+  if(serverStopped)throw Object.assign(new Error((error as Error).message+'. No new installation was applied; the MCP session remains stopped. Reconnect your client.'),{code:(error as any).code??'UPGRADE_FAILED',details:{serverStopped:true,installationApplied:false},cause:error});
   throw error;
- }finally{await lease.release();}
+ }finally{await lease?.release();}
 }
