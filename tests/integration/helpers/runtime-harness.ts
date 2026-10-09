@@ -43,7 +43,8 @@ export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:b
   }
   if(options.breakAfterReady){
     const file=path.join(root,'main.gd');const source=await readFile(file,'utf8');
-    await writeFile(file,source.replace('push_error("RUNTIME_ERROR")','push_error("RUNTIME_ERROR")\n    get_tree().create_timer(0.5).timeout.connect(func(): EngineDebugger.debug(true))'));
+    if(!source.includes('counter += 1'))throw new Error('Runtime break fixture process seam changed');
+    await writeFile(file,source.replace('counter += 1','counter += 1\n    var marker := "res://.godot-mcp/break-test-game"\n    if FileAccess.file_exists(marker):\n        DirAccess.remove_absolute(ProjectSettings.globalize_path(marker))\n        EngineDebugger.debug(true)'));
   }
   if(options.slowCapture){
     const file=path.join(root,'addons/godot_mcp/runtime/runtime_capture.gd');const source=await readFile(file,'utf8');

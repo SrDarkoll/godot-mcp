@@ -24,6 +24,7 @@ Revisión realizada el 8 de octubre de 2026 sobre la rama local `fix/feedback-20
 - Las pruebas del router cubrieron petición no enviada, desconexión, timeout y confirmaciones totales/parciales. No se introdujeron reintentos automáticos de mutaciones.
 - TypeScript compiló y pasó el chequeo de tipos. Pasaron 388 pruebas unitarias distintas: protocolo 56, servidor 306 y CLI 26. La última suite completa del servidor pasó 305; después, la nueva regresión del diff de arranque y las otras 11 pruebas de workflow pasaron juntas. El test temporal de long-poll falló durante una ejecución con carga simultánea y pasó tanto focalizado como en las ejecuciones seriales completas del servidor, sin cambiar su timeout ni su implementación.
 - La suite general previa pasó 20 pruebas; las regresiones previas de runtime pasaron 11. Tras los ajustes finales, pasaron las dos fixtures de celdas/propiedades y las cuatro pruebas de feedback de runtime, handshake y batch. También pasaron el chequeo de 41 scripts del addon y Logger generado, y los enlaces de 80 documentos Markdown.
+- La validación de publicación detectó que la fixture `breakAfterReady` interrumpía el depurador mediante un temporizador de 0.5 segundos, sin barrera de readiness. La prueba ahora confirma primero `running` y `connected`, dispara una interrupción mediante un marcador y comprueba `breaked`, rechazo de lectura y parada permitida. La regresión focalizada pasó con Godot real; no se ampliaron timeouts ni se omitió esa comprobación.
 
 ## Límites
 
