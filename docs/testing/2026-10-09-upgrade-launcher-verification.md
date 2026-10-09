@@ -10,7 +10,7 @@ Completed checks on Windows with Node 24.21.0 and Godot 4.6.3.stable.official.7d
 | --- | --- |
 | Protocol unit suite | 56 passed |
 | Server unit suite | 307 passed |
-| CLI unit suite | 48 passed |
+| CLI unit suite | 49 passed |
 | General Godot integration | 28 passed across 20 files |
 | Upgrade integration subset | 8 passed, including live wrapper migration, rollback, existing/absent config edits and post-shutdown lease failure |
 | Addon compilation | 42 scripts plus generated logger passed |

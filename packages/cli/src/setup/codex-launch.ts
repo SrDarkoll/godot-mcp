@@ -86,6 +86,13 @@ export async function normalizeCodexLaunch(entry:ClientLaunchEntry,root:string):
   }else if(item.startsWith('-')||target!==undefined)throw fail('Unrecognized launch arguments; configuration was preserved');
   else target=item;
  }
- if(!target||path.resolve(root,target).toLowerCase()!==path.resolve(root).toLowerCase())throw fail('Codex server targets a different or unknown project; configuration was preserved');
+ let sameProject=false;
+ if(target){
+  try{
+   const [actual,expected]=await Promise.all([fs.realpath(path.resolve(root,target)),fs.realpath(path.resolve(root))]);
+   sameProject=process.platform==='win32'?actual.toLowerCase()===expected.toLowerCase():actual===expected;
+  }catch{}
+ }
+ if(!sameProject)throw fail('Codex server targets a different or unknown project; configuration was preserved');
  return {args:['--yes',`${PACKAGE}@${SERVER_VERSION}`,'start',root,...flags],profile,packageSpec:spec,...(launcherReplacement?{launcherReplacement}:{})};
 }

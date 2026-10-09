@@ -57,7 +57,8 @@ it('accepts upgrade preview and explicit replacement options only for the applic
 
 it('previews the wrapper migration without Godot discovery, writes, backups or executing the launcher',async()=>{
  const h=await wrapperFixture(),before=await snapshot(h.root),messages:string[]=[];vi.spyOn(console,'log').mockImplementation(v=>messages.push(String(v)));
- expect(await runCli(['upgrade',h.root,'--dry-run','--yes','--replace-launcher','--godot',path.join(h.root,'missing-godot.exe'),'--json'])).toBe(0);
+ const code=await runCli(['upgrade',h.root,'--dry-run','--yes','--replace-launcher','--godot',path.join(h.root,'missing-godot.exe'),'--json']);
+ expect(code,messages.at(-1)).toBe(0);
  expect(JSON.parse(messages.at(-1)!)).toMatchObject({dryRun:true,filesChanged:false,requires:{replaceLauncher:true,stopSession:false},client:{launcherReplacement:{kind:'wrapper',wrapperPath:h.wrapper},proposedLaunch:{command:'npx'}}});
  expect(await snapshot(h.root)).toEqual(before);
 });

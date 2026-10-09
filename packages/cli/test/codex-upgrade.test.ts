@@ -1,4 +1,4 @@
-import {mkdtemp,mkdir,readFile,writeFile,link} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,writeFile,link,symlink} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {expect,it} from 'vitest';
@@ -121,6 +121,15 @@ it('rejects a server targeting another project and preserves a concurrent edit',
  await writeFile(h.file,'model = "before"\n');const plan=await prepareCodexUpgrade(h.file,h.entry);
  await writeFile(h.file,'model = "human-edit"\n');await expect(applyCodexUpgrade(plan)).rejects.toThrow(/changed/i);
  expect(await readFile(h.file,'utf8')).toBe('model = "human-edit"\n');
+});
+
+it('recognizes another filesystem spelling of the same project without accepting another project',async()=>{
+ const h=await fixture(),alias=path.join(path.dirname(h.root),path.basename(h.root)+'-alias');
+ await symlink(h.root,alias,'junction');
+ await writeFile(h.file,`[mcp_servers.godot-mcp]\ncommand = "npx"\nargs = ${JSON.stringify(['@srdarkx/godot-mcp@0.6.1','start',alias,'--tool-profile','2d'])}\n`);
+ const plan=await prepareCodexUpgrade(h.file,h.entry);expect(plan.entry.args[3]).toBe(h.root);
+ const other=await fixture();await writeFile(h.file,`[mcp_servers.godot-mcp]\ncommand = "npx"\nargs = ${JSON.stringify(['@srdarkx/godot-mcp','start',other.root])}\n`);
+ await expect(prepareCodexUpgrade(h.file,h.entry)).rejects.toMatchObject({code:'UPGRADE_CONFIG_UNRECOGNIZED'});
 });
 
 it('rejects linked configs and preserves literal fake headers in multiline strings',async()=>{
