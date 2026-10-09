@@ -7,6 +7,7 @@ import {StdioClientTransport} from '@modelcontextprotocol/client/stdio';
 import {expect,it} from 'vitest';
 import {initProject} from '../../packages/cli/src/init/init-project.js';
 import {confirmFixtureOperation} from './helpers/confirm-fixture-operation.js';
+import {waitFor} from './helpers/visual-harness.js';
 it('prevalidates a scene/resource batch, rejects stale state, and undoes/redoes it as one action',async()=>{
  const godot=process.env.GODOT_BIN;if(!godot)throw new Error('GODOT_BIN required');
  const parent=path.resolve('.godot-mcp/recovery-test-runs');await mkdir(parent,{recursive:true});const root=await mkdtemp(path.join(parent,'batch-'));
@@ -28,8 +29,18 @@ it('prevalidates a scene/resource batch, rejects stale state, and undoes/redoes 
   }expect(ready,errors).toBe(true);
   const eventPage=await call('project.events');
   expect(eventPage.events.some((e:any)=>e.event==='editor.connected')).toBe(true);
-  const sceneEvents=eventPage.events.some((e:any)=>e.event==='scene.changed')?eventPage:await call('project.events',{after:eventPage.nextCursor,wait_ms:2000});
-  expect(sceneEvents.events.some((e:any)=>e.event==='scene.changed')).toBe(true);
+  // Trigger a transition after the subscription cursor instead of assuming
+  // the editor restored its initial scene after the plugin subscribed.
+  await writeFile(path.join(root,'event_probe.tscn'),'[gd_scene format=3]\n[node name="EventProbe" type="Node2D"]\n');
+  await call('scene.open',{path:'res://event_probe.tscn'});
+  await call('scene.open',{path:'res://main.tscn'});
+  let cursor=eventPage.nextCursor;const received:any[]=[];
+  await waitFor(async()=>{
+   const page=await call('project.events',{after:cursor,wait_ms:500});
+   expect(page.gap,JSON.stringify(page)).toBe(false);
+   received.push(...page.events);cursor=page.nextCursor;
+   return received.some(e=>e.event==='scene.changed'&&e.data.path==='res://main.tscn');
+  },5000).catch(error=>{throw new Error(`Expected scene.changed for the reopened fixture; received ${JSON.stringify(received)}`,{cause:error});});
   await call('node.create',{parent_path:'/Main',type:'Node2D',name:'Existing'});
   await call('node.create',{parent_path:'/Main',type:'Node2D',name:'ToDelete'});
   await call('node.create',{parent_path:'/Main/ToDelete',type:'Node2D',name:'Nested'});
