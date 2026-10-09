@@ -16,6 +16,7 @@ The new CLI preflights Codex before shutdown or installation. `upgrade` migrates
 - A separate external-consumer validation installed the authentic 0.5.3 public tarball, initialized a project with its old CLI, started its actual MCP server, and ran the 0.6.1 candidate's upgrade. It confirmed 0.5.3 to 0.6.1, exact TOML backup, preserved other MCP configuration, passed doctor and a newly started 0.6.1 server.
 - The single-tarball consumer smoke test passed with `upgrade --client codex`, version-pinned configuration, public-package Codex setup, MCP status and authenticated shutdown.
 - TypeScript/typecheck passed, Godot parsed 42 addon scripts plus the generated logger, 16 release-script tests passed, and documentation links passed.
+- The graphical CI fixture connected to the editor but did not have its initial scene open. The test now explicitly opens that scene through MCP before checking its pixels; both graphical tests passed locally without extending timeouts or skipping checks.
 
 Evidence artifacts stay in ignored `.godot-mcp/feedback-test-runs/` and `.godot-mcp/cli-test-runs/` directories. The Campus project was not changed or stopped.
 
