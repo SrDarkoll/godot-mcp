@@ -3,6 +3,11 @@ import {randomUUID} from 'node:crypto';
 import {expect,it} from 'vitest';
 import {BridgeServer} from '../src/bridge/bridge-server.js';
 import {createSession} from '../src/session/session.js';
+import {mkdtemp,readFile} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {BridgeDescriptorStore} from '../src/session/bridge-descriptor.js';
+import {stopServer} from '../src/management/client.js';
 async function request(port:number,token:string,projectRoot='C:/Games/Test'){
  const ws=new WebSocket(`ws://127.0.0.1:${port}`);
  await new Promise<void>((resolve,reject)=>{ws.once('open',resolve);ws.once('error',reject);});
@@ -22,3 +27,11 @@ it('reports authenticated status without displacing an editor and rejects wrong 
   expect((await request(port,'a'.repeat(64),'C:/Other')).error.code).toBe('PROJECT_MISMATCH');
  }finally{editor.close();await bridge.stop();}
 },10000);
+
+it('refuses shutdown if the session identity changed after upgrade confirmation',async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'management-upgrade-'));
+ const store=new BridgeDescriptorStore(root);const current=createSession(root).id;
+ await store.write({port:61337,token:'a'.repeat(64),sessionId:current});
+ await expect(stopServer(root,{expectedSessionId:'2026-09-05T12-00-00-000Z_1234abcd'})).rejects.toMatchObject({code:'SESSION_CHANGED'});
+ expect(JSON.parse(await readFile(path.join(root,'.godot-mcp/runtime/bridge.json'),'utf8')).sessionId).toBe(current);
+});

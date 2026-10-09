@@ -19,6 +19,8 @@ it('captures real 2D and 3D pixels, checkpoints and persistent session closure t
       const r=await h.client.callTool({name:'session.status',arguments:{}});
       return r.structuredContent?.editorConnected===true;
     });
+    const initialScene=await h.client.callTool({name:'scene.open',arguments:{path:'res://main_2d.tscn'}});
+    expect(initialScene.isError,JSON.stringify(initialScene.structuredContent)+h.logs()).not.toBe(true);
     await waitFor(async()=>!!(await h.client.callTool({name:'scene.get_tree',arguments:{}})).structuredContent?.root);
     const capture=async(name:string,label:string)=>{
       const r=await h.client.callTool({name,arguments:{label,checkpoint:true}});

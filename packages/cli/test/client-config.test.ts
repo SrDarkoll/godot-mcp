@@ -3,6 +3,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {expect,it} from 'vitest';
 import {clientConfigPath,configureClient} from '../src/setup/client-config.js';
+import {SERVER_VERSION} from '@godot-mcp/protocol';
 
 async function tempRoot():Promise<string>{return await mkdtemp(path.join(tmpdir(),'godot-mcp-client-'));}
 
@@ -17,7 +18,7 @@ it('creates project-local Cursor config and preserves unrelated MCP state with o
  const parsed=JSON.parse(await readFile(file,'utf8'));
  expect(parsed.theme).toBe('dark');
  expect(parsed.mcpServers.other).toEqual({command:'other'});
- expect(parsed.mcpServers['godot-mcp']).toEqual({command:'npx',args:['--yes','@srdarkx/godot-mcp','start',path.resolve(root),'--tool-profile','2d']});
+ expect(parsed.mcpServers['godot-mcp']).toEqual({command:'npx',args:['--yes',`@srdarkx/godot-mcp@${SERVER_VERSION}`,'start',path.resolve(root),'--tool-profile','2d']});
  const second=await configureClient({client:'cursor',projectRoot:root,toolProfile:'2d',now:()=>new Date('2026-09-07T12:00:01.000Z')});
  expect(second.changed).toBe(false);
  const backups=(await readdir(path.dirname(file))).filter(name=>name.includes('.godot-mcp-')&&name.endsWith('.bak'));
@@ -55,7 +56,7 @@ it('creates and updates a project-local Codex MCP table without changing user se
   homeDir:path.dirname(path.dirname(userFile)),env:{},platform:'win32' as const};
  const first=await configureClient({...options,now:()=>new Date('2026-09-27T12:00:00.000Z')});
  expect(first).toMatchObject({client:'codex',path:file,changed:true,entry:{
-  command:'npx',args:['--yes','@srdarkx/godot-mcp','start',path.resolve(root),'--tool-profile','2d']
+  command:'npx',args:['--yes',`@srdarkx/godot-mcp@${SERVER_VERSION}`,'start',path.resolve(root),'--tool-profile','2d']
  }});
  expect(first.backupPath).toBeTruthy();
  const written=await readFile(file,'utf8');

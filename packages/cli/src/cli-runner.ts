@@ -1,4 +1,5 @@
 import path from 'node:path';
+import {createInterface} from 'node:readline/promises';
 import {SERVER_VERSION,DEFAULT_PERMISSIONS} from '@godot-mcp/protocol';
 import {runServer} from '@godot-mcp/server';
 import {resolveProjectRoot} from '@godot-mcp/server/project-root';
@@ -11,6 +12,14 @@ import {doctor} from './doctor/doctor.js';
 import {codexRecipe} from './setup/codex-recipe.js';
 import {configureClient} from './setup/client-config.js';
 import {discoverGodotExecutable} from './setup/godot-discovery.js';
+import {upgradeProject,existingInstallation} from './upgrade/upgrade-project.js';
+import {prepareCodexUpgrade} from './setup/codex-upgrade.js';
+import {makeClientLaunchEntry} from './setup/client-config.js';
+
+async function confirm(question:string):Promise<boolean>{
+ const readline=createInterface({input:process.stdin,output:process.stderr});
+ try{return /^(y|yes|s|si|sí)$/i.test((await readline.question(question+' [y/N] ')).trim());}finally{readline.close();}
+}
 
 async function resolveGodot(projectRoot:string,cliGodot:string|null):Promise<string|null>{
  if(cliGodot)return cliGodot;
@@ -40,7 +49,20 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    return 0;
   }
   const cliGodot=args.godotBin?path.resolve(args.godotBin):null;
+  const executeUpgrade=async()=>{
+   const godot=await resolveGodot(root,cliGodot);
+   if(!godot)throw Object.assign(new Error('Godot could not be found. Pass --godot with its executable path; no files were changed.'),{code:'GODOT_NOT_FOUND'});
+   const interactive=!args.json&&process.stdin.isTTY&&process.stderr.isTTY;
+   const result=await upgradeProject({projectRoot:root,godotBin:godot,...(args.client==='codex'?{client:'codex' as const}:{}),
+    ...(args.toolProfile?{toolProfile:args.toolProfile}:{}),yes:args.yes===true,
+    ...(interactive?{confirmStop:async(status:Exclude<Awaited<ReturnType<typeof serverStatus>>,{state:'offline'}>)=>confirm(`Stop Godot MCP session ${status.sessionId}${status.runtimeConnected?' and its owned game':''} to update this project?`)}:{}),
+    onProgress:stage=>{if(!args.json)console.error(stage);}});
+   emit(result,[`Godot MCP ${result.toVersion} installed in ${root}`,`Backup: ${result.backupPath}`,
+    ...(result.client?[`Codex configuration ${result.client.migrated?'migrated':'verified'}: ${result.client.path}`]:[]),
+    'Doctor: passed',...result.warnings].join('\n'));return 0;
+  };
   switch(args.command){
+   case 'upgrade':return await executeUpgrade();
    case 'status':emit(await serverStatus(root));return 0;
    case 'stop':emit(await stopServer(root));return 0;
    case 'permissions':{
@@ -60,6 +82,21 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
     return report.ok?0:1;
    }
    case 'init':case 'addon.install':case 'addon.update':{
+    if(args.command==='init'&&(!args.client||args.client==='codex')){
+     let existing=await existingInstallation(root);
+     if(args.client==='codex'){
+      const config=await readProjectConfig(root);
+      const plan=await prepareCodexUpgrade(path.join(root,'.codex/config.toml'),makeClientLaunchEntry(root,args.toolProfile??config.toolProfile,`@srdarkx/godot-mcp@${SERVER_VERSION}`));
+      existing ||= plan.kind!=='new';
+     }
+     if(existing){
+      if(!args.yes){
+       if(args.json||!process.stdin.isTTY||!process.stderr.isTTY)throw Object.assign(new Error('Existing Godot MCP installation detected. Run upgrade for backup, Codex migration and verification, or init --yes to select that flow.'),{code:'UPGRADE_AVAILABLE',details:{command:'npx --yes @srdarkx/godot-mcp@latest upgrade '+JSON.stringify(root)}});
+       if(!await confirm('An existing Godot MCP installation was found. Upgrade it with backup and verification?'))throw Object.assign(new Error('Initialization cancelled; existing files were preserved'),{code:'UPGRADE_CANCELLED'});
+      }
+      return await executeUpgrade();
+     }
+    }
     const godot=await resolveGodot(root,cliGodot);
     const result=await initProject({projectRoot:root,godotBin:godot,enable:true,
       operation:args.command==='init'?'project_init':args.command==='addon.install'?'addon_install':'addon_update'});
@@ -82,7 +119,8 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
  }catch(error){
   const code=error&&typeof error==='object'&&'code' in error&&typeof error.code==='string'?error.code:'OPERATION_FAILED';
   const message=(error instanceof Error?error.message:'Operation failed').slice(0,2000);
-  if(args.json)emit({ok:false,error:{code,message}});else console.error(message);
+  const details=error&&typeof error==='object'&&'details' in error?error.details:undefined;
+  if(args.json)emit({ok:false,error:{code,message,...(details&&typeof details==='object'?{details}:{})}});else console.error(message);
   return 1;
  }
 }
