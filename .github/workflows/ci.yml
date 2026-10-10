@@ -8,7 +8,7 @@ permissions:
   contents: read
 jobs:
   validate:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.node == '22' && 'windows-2022' || 'windows-latest' }}
     timeout-minutes: 40
     strategy:
       fail-fast: false
