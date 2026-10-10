@@ -5,6 +5,15 @@ import {runtimeHarness,waitFor} from './helpers/runtime-harness.js';
 
 function imageContent(result:any){return result.content.find((entry:any)=>entry.type==='image');}
 
+it('opens the expected runtime fixture when the editor starts without a selected scene',async()=>{
+  const h=await runtimeHarness({noRuntimeError:true,openSceneOnStartup:false});
+  try{
+    const scene=await h.client.callTool({name:'editor.get_active_scene',arguments:{}});
+    expect(scene.isError,JSON.stringify(scene.structuredContent)).not.toBe(true);
+    expect(JSON.stringify(scene.structuredContent)).toContain('res://main.tscn');
+  }finally{await h.close();}
+},60000);
+
 it('runs, sees, persists a baseline, and diffs a second owned run through one workflow primitive',async()=>{
   const h=await runtimeHarness({noRuntimeError:true});
   try{

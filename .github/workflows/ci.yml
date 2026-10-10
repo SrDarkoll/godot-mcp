@@ -31,6 +31,18 @@ jobs:
         run: ./scripts/ci-install-godot.ps1 -Destination "$env:RUNNER_TEMP/godot-mcp-engine"
       - run: npm run check:godot
       - run: npm run test:integration
+      - name: Enable native crash dumps for graphical fixtures
+        if: matrix.node == '22'
+        shell: pwsh
+        run: |
+          $dumpDirectory = (New-Item -ItemType Directory -Force -Path '.godot-mcp/native-crash-test-runs').FullName
+          $engineName = Split-Path -Leaf $env:GODOT_BIN
+          $dumpKey = "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\$engineName"
+          New-Item -Path $dumpKey -Force | Out-Null
+          New-ItemProperty -Path $dumpKey -Name DumpFolder -Value $dumpDirectory -PropertyType ExpandString -Force | Out-Null
+          New-ItemProperty -Path $dumpKey -Name DumpType -Value 1 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $dumpKey -Name DumpCount -Value 4 -PropertyType DWord -Force | Out-Null
+          'GODOT_TEST_NATIVE_CRASH_DIAGNOSTICS=1' | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Verify running-game capture and runtime behavior
         if: matrix.node == '22'
         env:
@@ -42,6 +54,23 @@ jobs:
           GODOT_VISUAL_INTEGRATION: '1'
         run: npm run test:integration:visual
       - run: npm run test:distribution
+      - name: Retain native crash diagnostics
+        if: failure()
+        shell: pwsh
+        run: |
+          $evidenceDirectory = '.godot-mcp/native-crash-test-runs'
+          New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+          try {
+            $events = @(Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000,1001; StartTime=(Get-Date).AddMinutes(-40)} -ErrorAction Stop |
+              Where-Object { $_.Message -match 'Godot' } |
+              Select-Object TimeCreated, Id, ProviderName, Message)
+            ConvertTo-Json -InputObject $events -Depth 3 | Set-Content -Path "$evidenceDirectory/events.json"
+            $events | ForEach-Object { Write-Output $_.Message }
+          } catch {
+            @{diagnosticError=$_.Exception.Message} | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/events.json"
+            Write-Output "Native crash events unavailable: $($_.Exception.Message)"
+          }
+          node tests/integration/helpers/summarize_minidumps.mjs $evidenceDirectory
       - name: Retain test and package evidence
         if: always()
         uses: actions/upload-artifact@v4

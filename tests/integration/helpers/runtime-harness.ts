@@ -18,7 +18,7 @@ async function allocateLoopbackPort(excluded:number|null=null):Promise<number>{
   throw new Error('Unable to allocate distinct loopback debugger ports');
 }
 
-export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:boolean;breakAfterReady?:boolean;slowCapture?:boolean;failFramedCapture?:boolean;sceneCamera?:boolean;noRuntimeError?:boolean;manualBreakpoint?:boolean}={}) {
+export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:boolean;breakAfterReady?:boolean;slowCapture?:boolean;failFramedCapture?:boolean;sceneCamera?:boolean;noRuntimeError?:boolean;manualBreakpoint?:boolean;openSceneOnStartup?:boolean}={}) {
   const manual=options.manual??false;
   if(options.manualBreakpoint&&(manual||options.manualAfterStop))throw new Error('manualBreakpoint fixture cannot be combined with manual runtime launch fixtures');
   const godot=process.env.GODOT_BIN;
@@ -26,6 +26,10 @@ export async function runtimeHarness(options:{manual?:boolean;manualAfterStop?:b
   const parent=path.resolve('.godot-mcp/runtime-test-runs');await mkdir(parent,{recursive:true});
   const root=await mkdtemp(path.join(parent,'runtime-'));
   await cp(path.resolve('fixtures/runtime-project'),root,{recursive:true});
+  if(options.openSceneOnStartup===false){
+    const settings=path.join(root,'project.godot');
+    await writeFile(settings,(await readFile(settings,'utf8')).replace(/^run\/main_scene=.*\r?\n/m,''));
+  }
   if(options.sceneCamera){
     const scene=path.join(root,'main.tscn');
     await writeFile(scene,(await readFile(scene,'utf8'))+'\n[node name="AuditCamera" type="Camera2D" parent="."]\nposition = Vector2(120, 100)\n');
@@ -131,19 +135,27 @@ func _test_set_manual_breakpoint(breakpoint_path: String, line: int, enabled: bo
   const client=await startClient(root);
   const debugServer=`tcp://127.0.0.1:${debugPort}`;
   const child=spawn(godot,[
-    '--editor','--dap-port',String(dapPort),'--debug-server',debugServer,'--path',root,'res://main.tscn',
+    ...(process.env.GODOT_TEST_NATIVE_CRASH_DIAGNOSTICS==='1'?['--disable-crash-handler']:[]),
+    '--editor','--dap-port',String(dapPort),'--debug-server',debugServer,'--path',root,...(options.openSceneOnStartup===false?[]:['res://main.tscn']),
     '--',`--godot-mcp-dap-port=${dapPort}`,`--godot-mcp-debug-server=${debugServer}`
   ],{windowsHide:true});let logs='';
   child.stdout.on('data',d=>logs+=d);child.stderr.on('data',d=>logs+=d);
+  let readinessPhase='editor connection';
   try {
     await waitFor(async()=>(await client.callTool({name:'session.status',arguments:{}})).structuredContent?.editorConnected===true,25000);
+    readinessPhase='opening fixture scene';
+    const opened=await client.callTool({name:'scene.open',arguments:{path:'res://main.tscn'}});
+    if(opened.isError)throw new Error(`Fixture scene could not be opened: ${JSON.stringify(opened.structuredContent)}`);
+    readinessPhase='fixture scene tree';
     await waitFor(async()=>!!(await client.callTool({name:'scene.get_tree',arguments:{}})).structuredContent?.root,25000);
   } catch (error) {
     await client.close().catch(()=>{});
     await stopProcess(child).catch(()=>{});
     const logPath=path.join(root,'engine.log');
     await writeFile(logPath,logs).catch(()=>{});
-    throw new Error(`Runtime editor did not become ready; see ${logPath}`,{cause:error});
+    const evidence={phase:readinessPhase,exitCode:child.exitCode,signalCode:child.signalCode,logPath};
+    await writeFile(path.join(root,'readiness-error.json'),JSON.stringify(evidence,null,2)).catch(()=>{});
+    throw new Error(`Runtime editor did not become ready during ${readinessPhase}; see ${logPath}. Process: ${JSON.stringify(evidence)}\nEngine log tail:\n${logs.slice(-3000)}`,{cause:error});
   }
   let clientClosed=false;let editorClosed=false;
   const closeClient=async()=>{if(clientClosed)return;clientClosed=true;await client.close().catch(()=>{});};

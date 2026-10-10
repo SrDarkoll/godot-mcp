@@ -42,7 +42,7 @@ export async function visualHarness(godotBin: string, openScene = true) {
         throw new Error(`Noise fixture failed: ${generated.stderr}`);
     await initProject({ projectRoot: root, godotBin, enable: true });
     const client = await startClient(root);
-    const child = spawn(godotBin, ['--editor', '--path', root, '--rendering-method', 'gl_compatibility', ...(openScene ? ['res://main_2d.tscn'] : [])], { windowsHide: true });
+    const child = spawn(godotBin, [...(process.env.GODOT_TEST_NATIVE_CRASH_DIAGNOSTICS === '1' ? ['--disable-crash-handler'] : []), '--editor', '--path', root, '--rendering-method', 'gl_compatibility', ...(openScene ? ['res://main_2d.tscn'] : [])], { windowsHide: true });
     let logs = '';
     child.stdout.on('data', d => logs += d);
     child.stderr.on('data', d => logs += d);

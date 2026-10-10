@@ -1,0 +1,22 @@
+# Main CI readiness failures, 2026-10-09
+
+The pull-request checks for 0.6.2 passed, but the subsequent `main` push run `37969620787` failed two independent integration assertions on the same source tree.
+
+- Node 24 failed `scene-batch.test.ts:32`: the test expected `scene.changed` in the first long-poll response. `project.events` correctly wakes on any new event, and initial scene restoration can occur before the plugin subscribes.
+- Node 22 failed the first workflow test while the runtime harness waited for a scene tree. The editor connection had succeeded; the helper relied on the positional CLI scene being restored and did not explicitly select its fixture.
+
+The scene-batch fixture now opens a separate probe scene and returns to `main.tscn` after taking its event cursor. It advances that cursor across intervening pages and waits for `scene.changed` with the expected path, while still rejecting history gaps. This verifies a real scene transition rather than depending on startup signal order.
+
+The runtime harness now opens `main.tscn` through MCP after the editor connects. A regression fixture removes the startup main-scene setting and omits the CLI scene argument. Before the fix it reproduced the scene-tree readiness timeout; after the fix it opens the expected scene and passes. Readiness failures now retain their phase, process state and bounded engine-log tail in the error output as well as local evidence files.
+
+Local validation: the scene-batch case passed five consecutive fresh fixtures; all 13 runtime cases passed, including ownership, pause, debugger break, capture, stop and workflow checks. No assertions were removed, no checks were disabled, and no readiness timeout was increased.
+
+The first remote validation of this fix (`38001191567`) passed Node 24 and 12 of 13 runtime cases on Node 22. The remaining case failed while opening its scene: Godot exited with code `3221225501` and the bridge disconnected before confirming the operation. Its engine log included WASAPI initialization failures and automatic fallback to Dummy audio. This does not establish that audio caused the native exit. Both graphical test projects now explicitly select the [documented Dummy driver](https://docs.godotengine.org/en/4.6/classes/class_projectsettings.html), avoiding physical audio initialization in the editor and game. The CI job also retains Windows Application Error and Windows Error Reporting events for Godot after a failed job, where available. Graphics, debugger and capture assertions remain active.
+
+With that setting, windowed Godot probes returned `AudioServer.get_driver_name() == "Dummy"` for both projects; all 13 runtime and both graphical editor capture cases passed locally. The retained native-crash PowerShell block also passed a syntax check. These results validate the isolated test environment; they do not identify the cause of the earlier native exit.
+
+Remote run `38021687182` still saw exit `3221225501`, this time during scene-tree readiness in the stdin-closure fixture. Its log no longer contained WASAPI failures, ruling out removal of audio initialization as a sufficient fix. The Windows event query returned no useful crash events. The next diagnostic run enables [per-engine WER minidumps](https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps) on the disposable CI runner and disables Godot's custom crash handler only for opted-in graphical test editors. Exception code, faulting module and offset are summarized in job output so diagnosis does not depend on downloading a large artifact. No setting on a user's Windows installation is changed.
+
+The changes are confined to integration fixtures and diagnostics. Product code, package versions, the published 0.6.2 archive and release tags are unchanged. Remote validation must cover both the pull request and a fresh `main` push; a green pull request alone is not reported as a green main commit.
+
+The initial code graph refresh was unavailable (`Transport closed`); a later refresh succeeded. Coverage still reported changed or untracked metadata for the relevant files, so exact source reads supplemented graph discovery. Investigation used failed job logs and executable Godot reproduction. Retained GitHub artifact downloads also timed out at their storage endpoint; the local reproduction and improved failure output avoid relying on unavailable downloads.
