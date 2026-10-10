@@ -42,6 +42,21 @@ jobs:
           GODOT_VISUAL_INTEGRATION: '1'
         run: npm run test:integration:visual
       - run: npm run test:distribution
+      - name: Retain native crash diagnostics
+        if: failure()
+        shell: pwsh
+        run: |
+          $evidenceDirectory = '.godot-mcp/native-crash-test-runs'
+          New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+          try {
+            $events = @(Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000,1001; StartTime=(Get-Date).AddMinutes(-40)} -ErrorAction Stop |
+              Where-Object { $_.Message -match 'Godot' } |
+              Select-Object TimeCreated, Id, ProviderName, Message)
+            ConvertTo-Json -InputObject $events -Depth 3 | Set-Content -Path "$evidenceDirectory/events.json"
+            $events | ForEach-Object { Write-Output $_.Message }
+          } catch {
+            @{diagnosticError=$_.Exception.Message} | ConvertTo-Json | Set-Content -Path "$evidenceDirectory/events.json"
+          }
       - name: Retain test and package evidence
         if: always()
         uses: actions/upload-artifact@v4

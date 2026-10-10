@@ -4,5 +4,8 @@ config_version=5
 config/name="Godot MCP Visual Fixture"
 run/main_scene="res://main_2d.tscn"
 
+[audio]
+driver/driver="Dummy"
+
 [rendering]
 renderer/rendering_method="gl_compatibility"
