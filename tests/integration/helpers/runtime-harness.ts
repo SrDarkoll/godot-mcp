@@ -135,6 +135,7 @@ func _test_set_manual_breakpoint(breakpoint_path: String, line: int, enabled: bo
   const client=await startClient(root);
   const debugServer=`tcp://127.0.0.1:${debugPort}`;
   const child=spawn(godot,[
+    ...(process.env.GODOT_TEST_NATIVE_CRASH_DIAGNOSTICS==='1'?['--disable-crash-handler']:[]),
     '--editor','--dap-port',String(dapPort),'--debug-server',debugServer,'--path',root,...(options.openSceneOnStartup===false?[]:['res://main.tscn']),
     '--',`--godot-mcp-dap-port=${dapPort}`,`--godot-mcp-debug-server=${debugServer}`
   ],{windowsHide:true});let logs='';
