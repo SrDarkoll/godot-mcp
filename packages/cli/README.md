@@ -82,7 +82,7 @@ npx --yes @srdarkx/godot-mcp@latest init . --client antigravity --tool-profile 2
 | `--godot <path>` | Path to Godot 4.x executable | Auto-discovered |
 | `--client <name>` | Target AI client: `codex`, `cursor`, `claude`, or `antigravity`; omit for none | None |
 | `--tool-profile <profile>` | Default tool profile (`minimal`, `core`, `2d`, `3d`, `full`) | `full` |
-| `--port <number>` | Custom WebSocket bridge port | `0` (dynamic loopback) |
+| `--bridge-port <number>` | Custom WebSocket bridge port for start/init/upgrade; use `0` to select a free port | `0` (dynamic loopback) |
 
 ---
 
@@ -100,8 +100,20 @@ Use `--yes` after `upgrade` to explicitly approve stopping the project session i
 
 Starting with 0.6.2, `upgrade . --dry-run` previews the version, launcher and session changes without writing files or stopping the server. Verified source-checkout servers and Node scripts followed by a verified Godot MCP server entry can be migrated with one interactive confirmation. For automation, `--replace-launcher` separately approves replacing custom launcher behavior; `--yes` alone does not. See the [upgrade guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/upgrading.md#custom-launchers-and-upgrade-preview).
 
+### Update reminders
+
+Starting with 0.6.3, Windows CRLF launcher migration, linked CLI/server startup, incomplete addon detection and invalid configuration fields are handled directly. New installations use automatic loopback ports; `upgrade . --bridge-port 0` explicitly changes an older fixed-port project with backup/rollback. For non-Git Godot projects, `setup codex . --register-project-root` adds the Godot root marker to Codex user settings while retaining other configuration. Plain `setup codex` stays read-only.
+
+Starting with 0.6.3, automatic update notices appear on CLI stderr without changing JSON output, at most once a day per installed/latest version pair. MCP callers receive one notice per new version in the next tool response after the background check finishes; the assistant can relay it to the user. Versions 0.6.2 and earlier need one initial upgrade before they can provide these notices.
+
+The notice includes `npx --yes @srdarkx/godot-mcp@latest upgrade .` for the Godot project, plus `npm install -g @srdarkx/godot-mcp@latest` for a global CLI or `npm install @srdarkx/godot-mcp@latest` for a local dependency. Updating npm alone does not update an addon or a pinned client launcher. Reload the addon and reconnect after upgrading each project; recognized project-local Codex entries are migrated automatically.
+
+Checks use anonymous public npm metadata, a one-second request deadline and a daily cache. Offline failures are ignored, with a one-hour retry interval. Nothing updates automatically. Set `GODOT_MCP_UPDATE_CHECK=0` to disable notices; CI, Vitest and npm offline mode also disable them. See [update notices](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/upgrading.md#update-notices) for cache locations and client configuration.
+
 ### `godot-mcp run [options]`
 Launches the MCP server over stdio for AI client consumption.
+
+Starting with 0.6.3, Codex tool discovery and multiple chats can connect to one project session. Clients share the editor bridge and runtime, with separate MCP connections, tool profiles and approvals. Closing one client leaves the others connected. An older running server needs one restart during upgrade to load this behavior.
 
 ```bash
 npx --yes @srdarkx/godot-mcp@latest run --project C:\Projects\MyGame --tool-profile full
@@ -153,7 +165,7 @@ npx --yes @srdarkx/godot-mcp@latest config . --repair
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp@0.6.2", "start", "C:/path/to/YourProject", "--tool-profile", "full"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.3", "start", "C:/path/to/YourProject", "--tool-profile", "full"]
 ```
 
 Trust the project in Codex and restart the local client after configuration changes. From that project, `codex mcp get godot-mcp --json` shows the configured launch command and project path; `/mcp` shows the active connection. The source checkout also offers `godot-mcp setup codex` as a read-only recipe for launching its compiled server during development. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) and [official Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
@@ -166,7 +178,7 @@ Trust the project in Codex and restart the local client after configuration chan
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp@0.6.2",
+        "@srdarkx/godot-mcp@0.6.3",
         "run",
         "--project",
         "C:/path/to/YourProject"
@@ -184,7 +196,7 @@ Trust the project in Codex and restart the local client after configuration chan
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp@0.6.2",
+        "@srdarkx/godot-mcp@0.6.3",
         "run",
         "--project",
         "C:\\path\\to\\YourProject",

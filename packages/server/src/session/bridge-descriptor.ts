@@ -7,6 +7,8 @@ export interface BridgeDescriptorInput {
   port: number;
   token: string;
   sessionId: string;
+  mcpPipe?: string;
+  serverVersion?: string;
 }
 
 export function createBridgeToken(): string {
@@ -32,7 +34,8 @@ export class BridgeDescriptorStore {
       port: input.port,
       token: input.token,
       pid: process.pid,
-      protocol: 1
+      protocol: 1,
+      ...(input.mcpPipe ? { mcpPipe: input.mcpPipe, serverVersion: input.serverVersion } : {})
     };
     await writeFile(this.tempPath, `${JSON.stringify(descriptor, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
     await rename(this.tempPath, this.descriptorPath);

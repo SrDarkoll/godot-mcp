@@ -2,6 +2,15 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.6.3] - 2026-10-12
+
+- Share one project server across Codex tool discovery and multiple chats, with authenticated local connections, independent tool profiles and approval state. Closing one client leaves the others connected; closing the last finishes the session.
+- Show passive update notices in CLI output and MCP responses, including commands for upgrading npm installations and each project. Keep checks bounded, cached and optional.
+- Add `setup codex . --register-project-root` for trusted Godot projects without Git, with an exact Codex configuration backup. Doctor checks the client configuration actually selected from the requested folder.
+- Fix Windows CRLF launcher migration and CLI/server startup through linked paths. Verify all bundled addon files and the full project configuration schema in doctor.
+- Select free loopback ports for new installations; allow explicit port migration in `init` and `upgrade` with preview, backup and rollback. Avoid querying stale descriptor ports when their owner has exited.
+- Keep addon maintenance exclusive and preserve confirmation before replacing a source or custom launcher. An older running server needs one restart to load the shared connection transport.
+
 ## [0.6.2] - 2026-10-09
 
 - Preview an upgrade with `--dry-run`, including the installed version, Codex launcher change, session impact and backup location, without writing files or stopping the server.

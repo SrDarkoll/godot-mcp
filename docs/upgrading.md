@@ -14,6 +14,43 @@ If a project session is active, it asks before stopping it through authenticated
 
 The updater then holds the project maintenance lease, prepares Godot settings without saving the original, backs up changed files, installs the addon and configuration, and runs `doctor`. On verification failure it restores the earlier bytes. Backups are retained under `.godot-mcp/upgrade-backups/`; an interrupted update keeps a recovery marker so another server cannot start against a partial installation. Run `upgrade` again to recover and retry. Conflicting human edits are preserved and reported instead of being overwritten.
 
+## Update notices
+
+Starting with 0.6.3, a passive update checker is included. Versions 0.6.2 and earlier need one initial upgrade before they can notify you about later releases.
+
+Valid CLI commands check the public npm `latest` dist-tag and print an available update to stderr, separately from normal output and `--json`. A cached reminder appears at most once per installed/latest version pair per day. During MCP use the check runs in the background, and the next completed tool response after a newer version is known includes one notice per new version in that session. Structured results, error flags and approval requests retain their existing format. The assistant can share the notice with you; the client decides how tool content is displayed.
+
+The notice gives the installed and latest versions, the project folder, the `upgrade` command above, and instructions for global or local npm installations. `npx ...@latest` already selects the current package. Updating only a global npm installation does not migrate a project addon or a version-pinned client launcher: run `upgrade` for each Godot project, then reload the addon and reconnect the client. Recognized project-local Codex launchers are migrated; other clients and global/custom entries may still need their launcher version updated.
+
+Registry requests have a one-second deadline and an 8 KiB response limit. Successful checks are cached for 24 hours; failed checks are retried after one hour. Network and cache failures do not change command exit codes. Only public version metadata is fetched, with no npm token or project content. The checker never installs a package, edits a project, or stops a session.
+
+Cache location: `%LOCALAPPDATA%\godot-mcp\update-check.json` on Windows, `$XDG_CACHE_HOME/godot-mcp/update-check.json` on other systems, or `~/.cache/godot-mcp/update-check.json` when that base directory is unavailable. The file contains package versions and check/reminder timestamps.
+
+To disable checking in PowerShell:
+
+```powershell
+$env:GODOT_MCP_UPDATE_CHECK = '0'
+```
+
+For an MCP process, set `GODOT_MCP_UPDATE_CHECK=0` in its client environment configuration and reconnect. Checks are also disabled in CI, Vitest, npm offline mode, or when `NO_UPDATE_NOTIFIER` is enabled.
+
+## Windows and multiple projects
+
+Starting with 0.6.3, CRLF Codex launch fields are handled, including multiline arrays and disabled aliases. Linked CLI/server entry paths are resolved before starting, every bundled addon file is verified with SHA-256, and all project configuration fields are validated with the same schema used by the server.
+
+The launcher also shares a project session across multiple MCP clients, including Codex tool discovery and chats. Only one process owns the editor bridge and maintenance lease; clients authenticate to that process and retain separate MCP approval state. An older active server still needs one controlled restart to load this transport. See the [Codex connection guide](tools/codex.md#multiple-codex-connections-to-one-project).
+
+New installations select a free loopback port by default (`bridgePort: 0`). Existing explicit port settings are preserved. To move an older fixed-port project to automatic selection, preview and apply it explicitly:
+
+```powershell
+npx --yes @srdarkx/godot-mcp@latest upgrade . --bridge-port 0 --dry-run
+npx --yes @srdarkx/godot-mcp@latest upgrade . --bridge-port 0
+```
+
+This setting is included in the upgrade backup and rollback. Dead descriptor owners are treated as offline without connecting to their old port; a reused port can belong to another project. Live or unverifiable owners still require authenticated management, and confirmation identity checks remain in place.
+
+For a non-Git Godot project that Codex ignores from a subfolder, use the [project root registration command](tools/codex.md#godot-projects-without-git-and-commands-from-subfolders). It changes only the user root marker setting with a backup; the ordinary upgrade does not edit the Codex user profile.
+
 ## Options
 
 ```powershell

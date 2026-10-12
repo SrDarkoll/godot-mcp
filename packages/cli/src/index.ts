@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-import {pathToFileURL} from "node:url";
+import {isMainModule} from '@godot-mcp/server/entry-point';
 import {runCli} from "./cli-runner.js";
 export {runCli} from "./cli-runner.js";
 export {parseCliArgs} from "./cli-args.js";
-const entry=process.argv[1];
-if(entry&&import.meta.url===pathToFileURL(entry).href){
+if(isMainModule(import.meta.url)){
  void runCli().then(code=>{process.exitCode=code;}).catch(()=>{console.error("CLI failed");process.exitCode=1;});
 }

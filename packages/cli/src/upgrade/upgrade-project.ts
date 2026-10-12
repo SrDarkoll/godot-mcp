@@ -14,7 +14,7 @@ import {UpgradeJournal,type UpgradeChange} from './upgrade-journal.js';
 import {inspectUpgrade,statusForUpgrade,type UpgradeStatus,type UpgradePreview} from './upgrade-preview.js';
 
 export interface UpgradeOptions {
- projectRoot:string;godotBin:string;client?:'codex';toolProfile?:ToolProfile;yes?:boolean;replaceLauncher?:boolean;requireConfirmation?:boolean;
+ projectRoot:string;godotBin:string;client?:'codex';toolProfile?:ToolProfile;bridgePort?:number;yes?:boolean;replaceLauncher?:boolean;requireConfirmation?:boolean;
  confirmStop?:(status:Exclude<UpgradeStatus,{state:'offline'}>)=>Promise<boolean>;
  confirmUpgrade?:(preview:UpgradePreview)=>Promise<boolean>;
  onPreview?:(preview:UpgradePreview)=>void;
@@ -96,7 +96,7 @@ export async function upgradeProject(options:UpgradeOptions){
   if(!(await ordinaryBytes(path.join(root,'project.godot')))?.equals(beforeSettings))throw new Error('Project settings changed during upgrade preparation');
   const settings=await ordinaryBytes(stagedSettings);if(settings===null)throw new Error('Staged project settings are missing');await add('project.godot',settings);
   const logger=await ordinaryBytes(stagedLogger);if(logger)await add('.godot-mcp/generated/runtime_logger.gd',logger);
-  await add('.godot-mcp/config.json',Buffer.from(JSON.stringify({...config,godotBin:options.godotBin,toolProfile:profile},null,2)+'\n'));
+  await add('.godot-mcp/config.json',Buffer.from(JSON.stringify({...config,godotBin:options.godotBin,toolProfile:profile,...(options.bridgePort===undefined?{}:{bridgePort:options.bridgePort})},null,2)+'\n'));
   if(clientPlan){
    const currentCodex=await ordinaryBytes(codexFile);
    if(currentCodex===null?clientPlan.before!==null:currentCodex.toString().replace(/^\uFEFF/,'')!==clientPlan.before)throw new Error('Codex config changed during upgrade preparation');

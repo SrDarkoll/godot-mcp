@@ -1,12 +1,12 @@
 import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 import {CLIENT_NAMES,type ClientName} from './setup/client-config.js';
 export type Command='help'|'version'|'init'|'upgrade'|'doctor'|'start'|'stop'|'status'|'config'|'permissions'|'sessions.list'|'sessions.inspect'|'addon.install'|'addon.update'|'setup.codex';
-export interface ParsedCommand {command:Command;projectRoot:string;godotBin:string|null;bridgePort?:number;toolProfile?:ToolProfile;client?:ClientName;json:boolean;limit:number;before?:string;sessionId?:string;repair?:boolean;yes?:boolean;dryRun?:boolean;replaceLauncher?:boolean;}
+export interface ParsedCommand {command:Command;projectRoot:string;godotBin:string|null;bridgePort?:number;toolProfile?:ToolProfile;client?:ClientName;json:boolean;limit:number;before?:string;sessionId?:string;repair?:boolean;yes?:boolean;dryRun?:boolean;replaceLauncher?:boolean;registerProjectRoot?:boolean;}
 export const SESSION_ID=/^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}$/;
 export function usage():string{return [
  'Usage: godot-mcp <command> [path] [options]',
- '  init [--godot <exe>] [--client <antigravity|cursor|claude|codex>] [--tool-profile <profile>] [--yes] [--replace-launcher] [--json]',
- '  upgrade [--godot <exe>] [--client codex] [--tool-profile <profile>] [--dry-run] [--yes] [--replace-launcher] [--json]',
+ '  init [--godot <exe>] [--client <antigravity|cursor|claude|codex>] [--tool-profile <profile>] [--bridge-port <0..65535>] [--yes] [--replace-launcher] [--json]',
+ '  upgrade [--godot <exe>] [--client codex] [--tool-profile <profile>] [--bridge-port <0..65535>] [--dry-run] [--yes] [--replace-launcher] [--json]',
  '    --dry-run previews without changes; --yes approves session shutdown; --replace-launcher approves replacing a custom/source launcher',
  '  addon install | addon update [--godot <exe>] [--json]',
  '  doctor [--godot <exe>] [--json]',
@@ -16,6 +16,7 @@ export function usage():string{return [
  '  sessions list [--limit <1..200>] [--before <id>] [--json]',
  '  sessions inspect <id> [path] [--json]',
  '  setup codex [path] [--json]            print recipe; do not change profile',
+ '    --register-project-root              add project.godot to Codex user root markers with backup',
  '  --help | --version'
 ].join('\n');}
 export function parseCliArgs(argv:string[]):ParsedCommand{
@@ -36,13 +37,14 @@ export function parseCliArgs(argv:string[]):ParsedCommand{
   if(seen.has(arg))throw new Error(`Repeated option: ${arg}`);seen.add(arg);
   if(arg==='--json'){if(name==='start')throw new Error('start uses MCP stdio and cannot use --json');parsed.json=true;continue;}
   if(arg==='--repair'&&name==='config'){parsed.repair=true;continue;}
+  if(arg==='--register-project-root'&&name==='setup.codex'){parsed.registerProjectRoot=true;continue;}
   if(arg==='--yes'&&['init','upgrade'].includes(name)){parsed.yes=true;continue;}
   if(arg==='--dry-run'&&name==='upgrade'){parsed.dryRun=true;continue;}
   if(arg==='--replace-launcher'&&['init','upgrade'].includes(name)){parsed.replaceLauncher=true;continue;}
   const value=argv[++index];if(!value||value.startsWith('--'))throw new Error(`${arg} requires a value`);
   if((arg==='--project'||arg==='-p')&&name==='start'){parsed.projectRoot=value;continue;}
   if(arg==='--godot'&&['init','upgrade','doctor','config','addon.install','addon.update'].includes(name)){parsed.godotBin=value;continue;}
-  if(arg==='--bridge-port'&&['config','start'].includes(name)){if(!/^\d+$/.test(value)||Number(value)>65535)throw new Error('Invalid bridge port');parsed.bridgePort=Number(value);continue;}
+  if(arg==='--bridge-port'&&['init','upgrade','config','start'].includes(name)){if(!/^\d+$/.test(value)||Number(value)>65535)throw new Error('Invalid bridge port');parsed.bridgePort=Number(value);continue;}
   if(arg==='--tool-profile'&&['init','upgrade','config','start'].includes(name)){const profile=ToolProfileSchema.safeParse(value);if(!profile.success)throw new Error('Invalid tool profile');parsed.toolProfile=profile.data;continue;}
   if(arg==='--client'&&['init','upgrade'].includes(name)){if(!CLIENT_NAMES.includes(value as ClientName)||(name==='upgrade'&&value!=='codex'))throw new Error(name==='upgrade'?'upgrade supports project-local Codex configuration; omit --client to update the addon':'Invalid MCP client');parsed.client=value as ClientName;continue;}
   if(arg==='--limit'&&name==='sessions.list'){if(!/^\d+$/.test(value)||Number(value)<1||Number(value)>200)throw new Error('Invalid session limit');parsed.limit=Number(value);continue;}

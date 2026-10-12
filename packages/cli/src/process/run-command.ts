@@ -1,7 +1,7 @@
 import {spawn} from 'node:child_process';
-export async function runCommand(executable:string,args:string[],options:{timeoutMs:number;maxOutputBytes:number}):Promise<{code:number|null;stdout:string;stderr:string}>{
+export async function runCommand(executable:string,args:string[],options:{timeoutMs:number;maxOutputBytes:number;cwd?:string;env?:NodeJS.ProcessEnv}):Promise<{code:number|null;stdout:string;stderr:string}>{
  return await new Promise((resolve,reject)=>{
-  const child=spawn(executable,args,{windowsHide:true});
+  const child=spawn(executable,args,{windowsHide:true,...(options.cwd?{cwd:options.cwd}:{}),...(options.env?{env:options.env}:{})});
   let stdout='';let stderr='';let bytes=0;let settled=false;
   const fail=(code:string,message:string)=>{if(settled)return;settled=true;clearTimeout(timer);child.kill();reject(Object.assign(new Error(message),{code}));};
   const timer=setTimeout(()=>fail('PROCESS_TIMEOUT','Configured executable exceeded its time limit'),options.timeoutMs);

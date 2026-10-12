@@ -5,7 +5,7 @@ import {expect,it} from 'vitest';
 import {readProjectConfig,writeProjectConfig,repairProjectConfig} from '../src/project/project-config.js';
 it('defaults config, preserves custom keys and persists explicit settings',async()=>{
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-config-'));
- expect(await readProjectConfig(root)).toMatchObject({protocol:1,bridgePort:61337,godotBin:null,toolProfile:'full'});
+ expect(await readProjectConfig(root)).toMatchObject({protocol:1,bridgePort:0,godotBin:null,toolProfile:'full'});
  await fs.mkdir(path.join(root,'.godot-mcp'));await fs.writeFile(path.join(root,'.godot-mcp/config.json'),JSON.stringify({custom:true,bridgePort:9999}));
  await writeProjectConfig(root,{godotBin:'C:/Tools/Godot.exe',toolProfile:'3d'});
  expect(await readProjectConfig(root)).toMatchObject({custom:true,bridgePort:9999,godotBin:'C:/Tools/Godot.exe',toolProfile:'3d'});

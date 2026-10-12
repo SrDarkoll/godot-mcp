@@ -192,7 +192,7 @@ Add Godot MCP to your preferred AI assistant configuration:
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp@0.6.2", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.3", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
 ```
 
 Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project and restart Codex after configuration changes. From that project, `codex mcp get godot-mcp --json` shows the configured launch command and project path; `/mcp` shows the active connection. The local `setup codex` recipe in the [Codex guide](docs/tools/codex.md) is also available for source development. See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
@@ -208,7 +208,7 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp@0.6.2",
+        "@srdarkx/godot-mcp@0.6.3",
         "run",
         "--project",
         "C:\\path\\to\\YourGodotProject",
@@ -231,7 +231,7 @@ In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp@0.6.2",
+        "@srdarkx/godot-mcp@0.6.3",
         "run",
         "--project",
         "C:/path/to/YourGodotProject"

@@ -1,6 +1,6 @@
 {
   "name": "@godot-mcp/server",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -14,12 +14,20 @@
     "test": "vitest run --passWithNoTests --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.6.2",
+    "@godot-mcp/protocol": "0.6.3",
     "ws": "^8.18.0",
     "zod": "^4.0.0",
     "@modelcontextprotocol/server": "^2.0.0"
   },
   "exports": {
+    "./entry-point": {
+      "types": "./dist/process/entry-point.d.ts",
+      "import": "./dist/process/entry-point.js"
+    },
+    "./updates": {
+      "types": "./dist/updates/update-checker.d.ts",
+      "import": "./dist/updates/update-checker.js"
+    },
     "./project-lease": {
       "types": "./dist/project/project-lease.d.ts",
       "import": "./dist/project/project-lease.js"

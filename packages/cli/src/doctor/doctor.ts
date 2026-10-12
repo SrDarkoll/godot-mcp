@@ -6,11 +6,14 @@ import {serverStatus} from '@godot-mcp/server/management';
 import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 import { makeClientLaunchEntry } from '../setup/client-config.js';
 import { inspectManagedCodexConfig } from '../setup/codex-config.js';
+import {inspectEffectiveCodex,type CodexInvocation} from './codex-effective.js';
+import {inspectAddonIntegrity} from './addon-integrity.js';
+import {readProjectConfig} from '@godot-mcp/server/project-config';
 
-export type DoctorCheckId = 'node' | 'project' | 'addon' | 'godot' | 'protocol' | 'runtime' | 'bridge' | 'runtimeConnection' | 'codex';
+export type DoctorCheckId = 'node' | 'project' | 'addon' | 'godot' | 'protocol' | 'runtime' | 'bridge' | 'runtimeConnection' | 'codex' | 'codexEffective';
 export interface DoctorCheck { id: DoctorCheckId; ok: boolean; detail: string; required?:boolean; }
 export interface DoctorReport { ok: boolean; checks: DoctorCheck[]; }
-export interface DoctorOptions { projectRoot: string; godotBin?: string | null; }
+export interface DoctorOptions { projectRoot: string; godotBin?: string | null; codexCwd?:string; codexEnv?:NodeJS.ProcessEnv; codexCommand?:CodexInvocation; }
 
 async function exists(file: string): Promise<boolean> {
   try { await access(file); return true; } catch { return false; }
@@ -40,7 +43,13 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
     const cfg = path.join(projectRoot, 'addons', 'godot_mcp', 'plugin.cfg');
     const gd = path.join(projectRoot, 'addons', 'godot_mcp', 'plugin.gd');
     const addonOk = await exists(cfg) && await exists(gd);
-    checks.push({ id: 'addon', ok: addonOk, detail: addonOk ? 'Godot MCP addon installed' : 'Missing addons/godot_mcp/plugin.cfg or plugin.gd' });
+    if(addonOk){
+      try{
+        const integrity=await inspectAddonIntegrity(projectRoot);
+        checks.push({id:'addon',ok:integrity.ok,detail:integrity.ok?`Godot MCP addon verified (${integrity.filesChecked} bundled files, SHA-256)`:
+          `Addon integrity failed: ${integrity.issues.slice(0,5).map(issue=>`${issue.path}: ${issue.reason}`).join('; ')}. Run upgrade with the desired CLI version.`});
+      }catch{checks.push({id:'addon',ok:false,detail:'Unable to verify addon integrity against the bundled files'});}
+    }else checks.push({id:'addon',ok:false,detail:'Missing addons/godot_mcp/plugin.cfg or plugin.gd'});
     const settings=await readFile(path.join(projectRoot,'project.godot'),'utf8');
     const autoload=settings.match(/\[autoload\]([^]*?)(?=\n\[|$)/)?.[1]??'';
     const runtimeOk=/GodotMcpRuntime\s*=\s*"\*res:\/\/addons\/godot_mcp\/runtime\/runtime_agent\.gd"/.test(autoload)&&await exists(path.join(projectRoot,'addons/godot_mcp/runtime/runtime_agent.gd'));
@@ -50,7 +59,7 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
     const configPath = path.join(projectRoot, '.godot-mcp', 'config.json');
     if (await exists(configPath)) {
       try {
-        const config = JSON.parse(await readFile(configPath, 'utf8'));
+        const config = await readProjectConfig(projectRoot);
         const ok = config?.protocol === 1;
         const parsedProfile = ToolProfileSchema.safeParse(config?.toolProfile);
         if (parsedProfile.success) toolProfile = parsedProfile.data;
@@ -68,6 +77,10 @@ export async function doctor(options: DoctorOptions): Promise<DoctorReport> {
         checks.push({ id: 'codex', ok: matches, detail: matches
           ? 'Managed project-local Codex MCP server matches this project and tool profile'
           : 'Managed Codex MCP server differs from this project or tool profile; run init --client codex again' });
+        if(options.codexCwd){
+          const effective=await inspectEffectiveCodex({projectRoot,cwd:options.codexCwd,toolProfile,...(options.codexEnv?{env:options.codexEnv}:{}),...(options.codexCommand?{command:options.codexCommand}:{})});
+          checks.push({id:'codexEffective',ok:effective.matches,...(!effective.available?{required:false}:{}),detail:effective.detail});
+        }
       }
     } catch (error) {
       checks.push({ id: 'codex', ok: false, detail: `Unable to inspect managed Codex config: ${error instanceof Error ? error.message : String(error)}` });

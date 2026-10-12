@@ -2,6 +2,7 @@ import path from 'node:path';
 import {createInterface} from 'node:readline/promises';
 import {SERVER_VERSION,DEFAULT_PERMISSIONS} from '@godot-mcp/protocol';
 import {runServer} from '@godot-mcp/server';
+import {UpdateChecker,formatUpdateNotice,type UpdateCheck} from '@godot-mcp/server/updates';
 import {resolveProjectRoot} from '@godot-mcp/server/project-root';
 import {readProjectConfig,writeProjectConfig,repairProjectConfig} from '@godot-mcp/server/project-config';
 import {serverStatus,stopServer} from '@godot-mcp/server/management';
@@ -17,6 +18,7 @@ import {prepareCodexUpgrade} from './setup/codex-upgrade.js';
 import {makeClientLaunchEntry} from './setup/client-config.js';
 import {readCodexConfig} from './setup/codex-config.js';
 import {previewUpgrade,renderUpgradePreview} from './upgrade/upgrade-preview.js';
+import {registerCodexProjectRoot} from './setup/codex-project-roots.js';
 
 async function confirm(question:string):Promise<boolean>{
  const readline=createInterface({input:process.stdin,output:process.stderr});
@@ -33,7 +35,8 @@ async function resolveGodot(projectRoot:string,cliGodot:string|null):Promise<str
  return await discoverGodotExecutable();
 }
 
-export async function runCli(argv=process.argv.slice(2)):Promise<number>{
+export interface CliRunOptions {updateChecker?:UpdateCheck;}
+export async function runCli(argv=process.argv.slice(2),options:CliRunOptions={}):Promise<number>{
  let args;
  try{args=parseCliArgs(argv);}catch(error){
   const message=error instanceof Error?error.message:'Invalid arguments';
@@ -42,17 +45,21 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
   return 2;
  }
  const emit=(value:object,text?:string)=>console.log(args.json?JSON.stringify(value):text??JSON.stringify(value,null,2));
- if(args.command==='help'){emit({usage:usage()},usage());return 0;}
- if(args.command==='version'){emit({version:SERVER_VERSION},SERVER_VERSION);return 0;}
+ const checker=args.command==='start'?null:options.updateChecker??new UpdateChecker();
+ const update=checker?Promise.resolve().then(()=>checker.check()).catch(()=>null):null;
+ let updateRoot:string|undefined;
  try{
+  if(args.command==='help'){emit({usage:usage()},usage());return 0;}
+  if(args.command==='version'){emit({version:SERVER_VERSION},SERVER_VERSION);return 0;}
   const root=await resolveProjectRoot(args.projectRoot);
+  updateRoot=root;
   if(args.command==='start'){
    await runServer(['--project',root,...(args.bridgePort===undefined?[]:['--bridge-port',String(args.bridgePort)]),...(args.toolProfile===undefined?[]:['--tool-profile',args.toolProfile])]);
    return 0;
   }
   const cliGodot=args.godotBin?path.resolve(args.godotBin):null;
   const executeUpgrade=async(requireConfirmation=false)=>{
-   const previewOptions={projectRoot:root,...(args.client==='codex'?{client:'codex' as const}:{}),...(args.toolProfile?{toolProfile:args.toolProfile}:{})};
+   const previewOptions={projectRoot:root,...(args.client==='codex'?{client:'codex' as const}:{}),...(args.toolProfile?{toolProfile:args.toolProfile}:{}),...(args.bridgePort===undefined?{}:{bridgePort:args.bridgePort})};
    if(args.dryRun){
     const preview=await previewUpgrade(previewOptions);
     emit({...preview,dryRun:true,filesChanged:false},renderUpgradePreview(preview)+'\nPreview only: no files or sessions were changed.\nFrom '+root+', approval command: '+preview.nextCommand);
@@ -80,12 +87,16 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
    case 'sessions.list':emit(await listSessions(root,args.limit,args.before));return 0;
    case 'sessions.inspect':emit(await readSessionManifest(root,args.sessionId!));return 0;
    case 'setup.codex':{
+    if(args.registerProjectRoot){
+     const registration=await registerCodexProjectRoot();
+     emit({projectRoot:root,rootDiscovery:registration},`Codex Godot project root discovery ${registration.changed?'registered':'already configured'}: ${registration.path}\nMarkers: ${registration.markers.join(', ')}${registration.backupPath?'\nBackup: '+registration.backupPath:''}\nOther Codex settings and MCP launchers were preserved. Reconnect Codex to reload configuration.`);return 0;
+    }
     const recipe=codexRecipe(root);
     emit(recipe,'Codex configuration recipe (profile not modified):\n\n'+recipe.toml+'\nCommand arguments:\n'+JSON.stringify(recipe.command));return 0;
    }
    case 'doctor':{
     const godot=await resolveGodot(root,cliGodot);
-    const report=await doctor({projectRoot:root,godotBin:godot});
+    const report=await doctor({projectRoot:root,godotBin:godot,codexCwd:args.projectRoot});
     emit(report,report.checks.map(c=>`${c.ok?'OK':c.required===false?'INFO':'FAIL'} ${c.id}: ${c.detail}`).join('\n'));
     return report.ok?0:1;
    }
@@ -109,6 +120,7 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
     const result=await initProject({projectRoot:root,godotBin:godot,enable:true,
       operation:args.command==='init'?'project_init':args.command==='addon.install'?'addon_install':'addon_update'});
     let config=await readProjectConfig(root);
+    if(args.command==='init'&&args.bridgePort!==undefined)config=await writeProjectConfig(root,{bridgePort:args.bridgePort});
     if(args.command==='init'&&args.toolProfile)config=await writeProjectConfig(root,{toolProfile:args.toolProfile});
     const client=args.command==='init'&&args.client?await configureClient({client:args.client,projectRoot:root,toolProfile:config.toolProfile}):null;
     const output={...result,godotBin:godot,...(client?{client}:{})};
@@ -124,11 +136,18 @@ export async function runCli(argv=process.argv.slice(2)):Promise<number>{
     emit({protocol:value.protocol,bridgePort:value.bridgePort,godotBin:value.godotBin,toolProfile:value.toolProfile,saved,restartRequired:saved,...(repaired?.backupPath?{backupPath:repaired.backupPath}:{})});return 0;
    }
   }
+  throw new Error('Unsupported command: '+args.command);
  }catch(error){
   const code=error&&typeof error==='object'&&'code' in error&&typeof error.code==='string'?error.code:'OPERATION_FAILED';
   const message=(error instanceof Error?error.message:'Operation failed').slice(0,2000);
   const details=error&&typeof error==='object'&&'details' in error?error.details:undefined;
   if(args.json)emit({ok:false,error:{code,message,...(details&&typeof details==='object'?{details}:{})}});else console.error(message);
   return 1;
+ }finally{
+  const available=await update;
+  if(available&&checker){
+   const notify=await checker.claimCliNotice?.(available).catch(()=>true)??true;
+   if(notify)console.error(formatUpdateNotice(available,updateRoot));
+  }
  }
 }

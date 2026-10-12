@@ -9,13 +9,14 @@ import {prepareCodexUpgrade} from '../setup/codex-upgrade.js';
 import type {LauncherReplacement} from '../setup/codex-launch.js';
 
 export type UpgradeStatus=Awaited<ReturnType<typeof serverStatus>>;
-export interface PreviewOptions {projectRoot:string;client?:'codex';toolProfile?:ToolProfile;}
+export interface PreviewOptions {projectRoot:string;client?:'codex';toolProfile?:ToolProfile;bridgePort?:number;}
 export interface UpgradePreview {
  projectRoot:string;fromVersion:string|null;toVersion:string;
  client:{path:string;changed:boolean;kind:'new'|'managed'|'legacy';previousLaunch:ClientLaunchEntry|null;proposedLaunch:ClientLaunchEntry;launcherReplacement:LauncherReplacement|null}|null;
  session:{sessionId:string;ownedGameMayStop:boolean}|null;
  requires:{stopSession:boolean;replaceLauncher:boolean};
  backupDirectory:string;nextCommand:string;
+ bridgePort?:{from:number;to:number};
 }
 
 export async function statusForUpgrade(root:string):Promise<UpgradeStatus>{
@@ -36,11 +37,13 @@ export async function inspectUpgrade(options:PreviewOptions){
  const stopSession=status.state!=='offline',replaceLauncher=!!clientPlan?.launcherReplacement;
  const nextCommand=['npx --yes',`@srdarkx/godot-mcp@${SERVER_VERSION}`,'upgrade','.',
   ...(options.client?['--client codex']:[]),...(options.toolProfile?['--tool-profile '+options.toolProfile]:[]),
+  ...(options.bridgePort===undefined?[]:['--bridge-port '+options.bridgePort]),
   ...(replaceLauncher?['--replace-launcher']:[]),...(stopSession?['--yes']:[])].join(' ');
  const preview:UpgradePreview={projectRoot:root,fromVersion,toVersion:SERVER_VERSION,
   client:clientPlan?{path:codexFile,changed:clientPlan.changed,kind:clientPlan.kind,previousLaunch:clientPlan.previousEntry??null,proposedLaunch:clientPlan.entry,launcherReplacement:clientPlan.launcherReplacement??null}:null,
   session:status.state==='offline'?null:{sessionId:status.sessionId,ownedGameMayStop:status.runtimeConnected},
-  requires:{stopSession,replaceLauncher},backupDirectory:path.join(root,'.godot-mcp/upgrade-backups'),nextCommand};
+  requires:{stopSession,replaceLauncher},backupDirectory:path.join(root,'.godot-mcp/upgrade-backups'),nextCommand,
+  ...(options.bridgePort===undefined?{}:{bridgePort:{from:config.bridgePort,to:options.bridgePort}})};
  return {root,config,codexFile,useCodex,entry,clientPlan,status,preview};
 }
 
@@ -52,6 +55,7 @@ export function renderUpgradePreview(preview:UpgradePreview):string{
  return [
   `Godot MCP upgrade: ${preview.fromVersion??'not installed'} -> ${preview.toVersion}`,
   `Project: ${preview.projectRoot}`,
+  ...(preview.bridgePort?[`Bridge port: ${preview.bridgePort.from} -> ${preview.bridgePort.to===0?'automatic free loopback port':preview.bridgePort.to}`]:[]),
   ...(client?[`Codex configuration: ${client.path}`,
    ...(replacement?[`Current launcher: ${replacement.kind==='wrapper'?'custom script '+path.basename(replacement.wrapperPath!):'local source checkout'}`,
     `Proposed launcher: npm @srdarkx/godot-mcp@${preview.toVersion}`,

@@ -22,7 +22,7 @@ export async function managedCodexLaunchMatches(text:string,expected:ClientLaunc
   const data=toml(text) as any,server=data.mcp_servers?.['godot-mcp'];
   if(!object(server)||typeof server.command!=='string'||!Array.isArray(server.args)||!server.args.every((v:unknown)=>typeof v==='string'))return false;
   const root=expected.args[3]!,actual=await normalizeCodexLaunch({command:server.command,args:server.args},root);
-  if(actual.launcherReplacement)return false;
+  if(actual.launcherReplacement?.kind==='wrapper')return false;
   const expectedProfile=expected.args[expected.args.indexOf('--tool-profile')+1];
   if(actual.profile!==expectedProfile)return false;
   return actual.packageSpec===PACKAGE||actual.packageSpec===`${PACKAGE}@${SERVER_VERSION}`||actual.packageSpec===`${PACKAGE}@latest`;
@@ -36,7 +36,8 @@ function assignment(body:string,key:'command'|'args',value:unknown):string{
  let end=lineEnd<0?body.length:lineEnd;
  for(let attempts=0;;attempts++){
   if(attempts>1024||end-start>65536)throw fail('Codex launch field exceeds the supported migration size');
-  try{const parsed=toml(body.slice(start,end));if(Object.keys(parsed).length===1&&Object.hasOwn(parsed,key))break;}catch{}
+  // A fragment ending before LF must not retain a bare CR from a CRLF line.
+  try{const parsed=toml(body.slice(start,end).replace(/\r$/,''));if(Object.keys(parsed).length===1&&Object.hasOwn(parsed,key))break;}catch{}
   if(end===body.length)throw fail('Unable to identify Codex launch field safely');
   const next=body.indexOf('\n',end+1);end=next<0?body.length:next;
  }

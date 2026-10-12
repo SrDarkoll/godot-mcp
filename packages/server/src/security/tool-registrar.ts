@@ -52,7 +52,7 @@ class ConsumedApprovalStore {
     }
 }
 
-export function guardedRegistrar(server: McpServer, policy: ToolPolicy, approvalState: RiskApprovalStateCodec): ToolRegistrar {
+export function guardedRegistrar(server: ToolRegistrar, policy: ToolPolicy, approvalState: RiskApprovalStateCodec): ToolRegistrar {
     const consumedApprovals = new ConsumedApprovalStore();
     type GuardedToolResult = CallToolResult | InputRequiredResult;
     type GuardedHandler = (args: Record<string, unknown>, context: ServerContext) => GuardedToolResult | Promise<GuardedToolResult>;

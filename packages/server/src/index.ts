@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { pathToFileURL } from 'node:url';
+import { isMainModule } from './process/entry-point.js';
 import { ToolProfileSchema, type ToolProfile } from '@godot-mcp/protocol';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import { BridgeServer } from './bridge/bridge-server.js';
@@ -17,6 +17,9 @@ import {RecoveryService} from './recovery/recovery-service.js';
 import {ToolPolicy} from './security/tool-policy.js';
 import {readProjectConfig} from './project/project-config.js';
 import {ProjectLease, requireNoAddonJournal} from './project/project-lease.js';
+import { SERVER_VERSION } from '@godot-mcp/protocol';
+import { runProjectClient } from './mcp/project-client.js';
+import { SharedMcpServer } from './mcp/shared-server.js';
 
 interface ServerArgs {
   project?: string;
@@ -58,6 +61,13 @@ export function parseServerArgs(argv: string[]): ServerArgs {
 export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   const args = parseServerArgs(argv);
   const projectRoot = await resolveProjectRoot(args.project ?? process.cwd());
+  await runProjectClient(projectRoot, args);
+}
+
+/** Exclusive stdio ownership retained for controlled fault injection. */
+export async function runExclusiveServer(argv = process.argv.slice(2)): Promise<void> {
+  const args = parseServerArgs(argv);
+  const projectRoot = await resolveProjectRoot(args.project ?? process.cwd());
   const lease = await ProjectLease.acquire(projectRoot, { operation: 'server' });
   try {
     await startOwnedServer(projectRoot, args, lease);
@@ -67,7 +77,7 @@ export async function runServer(argv = process.argv.slice(2)): Promise<void> {
   }
 }
 
-async function startOwnedServer(projectRoot: string, args: ServerArgs, lease: ProjectLease): Promise<void> {
+async function startOwnedServer(projectRoot: string, args: ServerArgs, lease: ProjectLease, shared = false): Promise<void> {
   await requireNoAddonJournal(projectRoot);
   const config = await readProjectConfig(projectRoot);
   const toolProfile = args.toolProfile ?? config.toolProfile;
@@ -97,9 +107,12 @@ async function startOwnedServer(projectRoot: string, args: ServerArgs, lease: Pr
   policy = new ToolPolicy(session, sessions, recovery, () => headless.status());
   const descriptor = new BridgeDescriptorStore(projectRoot);
   const { port } = await bridge.start();
-  await descriptor.write({ port, token, sessionId: session.id });
+  const context = { session, bridge, sessions, visual, runtime, debugger: debuggerService, recovery, headless, policy, toolProfile };
+  const peers = shared ? new SharedMcpServer(context, token, () => requestShutdown()) : null;
+  const mcpPipe = peers ? await peers.start() : undefined;
+  await descriptor.write({ port, token, sessionId: session.id, ...(mcpPipe ? { mcpPipe, serverVersion: SERVER_VERSION } : {}) });
 
-  const stdio = serveStdio(() => createMcpServer({ session, bridge, sessions, visual, runtime, debugger: debuggerService, recovery, headless, policy, toolProfile }), {
+  const stdio = shared ? null : serveStdio(() => createMcpServer(context), {
     onerror: error => console.error(`[godot-mcp] MCP error: ${error.message}`)
   });
 
@@ -118,8 +131,9 @@ async function startOwnedServer(projectRoot: string, args: ServerArgs, lease: Pr
       () => sessions.finish(session.id, new Date().toISOString()),
       () => sessions.flush(),
       () => descriptor.remove(),
-      () => stdio.close(),
-      () => lease.release()
+      () => stdio?.close(),
+      () => lease.release(),
+      () => peers?.close()
     ];
     for (const step of steps) {
       try { await step(); }
@@ -131,14 +145,32 @@ async function startOwnedServer(projectRoot: string, args: ServerArgs, lease: Pr
   process.once('SIGINT', () => { void shutdown(0); });
   requestShutdown = () => shutdown(0);
   process.once('SIGTERM', () => { void shutdown(0); });
-  process.stdin.once('end', () => { void shutdown(0); });
-  process.stdin.once('close', () => { void shutdown(0); });
-  process.stdin.resume();
+  if (shared) {
+    process.send?.({ ok: true });
+    peers?.armStartupTimeout();
+  } else {
+    process.stdin.once('end', () => { void shutdown(0); });
+    process.stdin.once('close', () => { void shutdown(0); });
+    process.stdin.resume();
+  }
 }
 
-const entry = process.argv[1];
-if (entry && import.meta.url === pathToFileURL(entry).href) {
-  void runServer().catch(error => {
+if (isMainModule(import.meta.url)) {
+  const owned = process.argv[2] === '--project-owner' && !!process.send;
+  const start = async () => {
+    if (!owned) { await runServer(); return; }
+    const args = parseServerArgs(process.argv.slice(3));
+    const root = await resolveProjectRoot(args.project ?? process.cwd());
+    const lease = await ProjectLease.acquire(root, { operation: 'server' });
+    try { await startOwnedServer(root, args, lease, true); }
+    catch (error) { await lease.release(); throw error; }
+  };
+  void start().catch(error => {
+    if (owned) {
+      const failure = error as { code?: string; message?: string; details?: unknown };
+      process.send?.({ ok: false, error: { code: failure.code ?? 'SERVER_START_FAILED', message: failure.message ?? 'Project server failed to start', details: failure.details } }, () => process.exit(1));
+      return;
+    }
     console.error(`[godot-mcp] ${error instanceof Error ? error.stack ?? error.message : String(error)}`);
     process.exitCode = 1;
   });

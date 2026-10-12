@@ -47,6 +47,8 @@ import { registerDependencyTools } from '../tools/dependency-tools.js';
 import { VisualComparisonService } from '../visual/visual-comparison.js';
 import { registerVisualComparisonTools } from '../tools/visual-comparison-tools.js';
 import { registerGeometryTools } from './register-geometry-tools.js';
+import { UpdateChecker, type UpdateCheck } from '../updates/update-checker.js';
+import { withUpdateNotice } from '../updates/update-notice.js';
 export interface McpServerContext {
     session: Session;
     bridge: BridgeServer;
@@ -58,6 +60,7 @@ export interface McpServerContext {
     headless?: HeadlessProcessManager;
     policy?: ToolPolicy;
     toolProfile?: ToolProfile;
+    updateChecker?: UpdateCheck;
 }
 export function createMcpServer(ctx: McpServerContext): McpServer {
     const approvalState = createRequestStateCodec<{
@@ -79,7 +82,8 @@ export function createMcpServer(ctx: McpServerContext): McpServer {
     const visual = ctx.visual ?? new VisualTools(ctx.session, ctx.sessions, ctx.bridge, runtime);
     const workflow = new WorkflowService(ctx.session, ctx.sessions, ctx.bridge, runtime, visual);
     const registry = new ToolRegistry(ctx.toolProfile ?? 'full');
-    const registrar = registry.registeringRegistrar(guardedRegistrar(server, policy, approvalState));
+    const updateRegistrar = withUpdateNotice(server, ctx.updateChecker ?? new UpdateChecker(), ctx.session.projectRoot);
+    const registrar = registry.registeringRegistrar(guardedRegistrar(updateRegistrar, policy, approvalState));
     const rpc = ctx.bridge.rpc;
     registerRuntimeTools(registrar, runtime);
     registerHeadlessTools(registrar, headless);

@@ -86,9 +86,11 @@ it('accepts synchronous operations as well as promises', async () => {
 it('does not let a project event long-poll block the mutation that produces its event', async () => {
     const { session, policy } = await setup();
     const events = new ProjectEvents(session.id);
-    const waiting = policy.execute('project.events', { after: 0, limit: 1, wait_ms: 2000 },
-        () => events.read(0, 1, 2000));
-    await new Promise(resolve => setTimeout(resolve, 20));
+    let started!:()=>void;
+    const subscribed=new Promise<void>(resolve=>{started=resolve;});
+    const waiting = policy.execute('project.events', { after: 0, limit: 1, wait_ms: 10000 },
+        () => {started();return events.read(0, 1, 10000);});
+    await subscribed;
     const mutation = policy.execute('node.create', {}, async () => {
         events.append('scene.changed', { path: 'res://main.tscn' });
         return { created: true };
@@ -97,7 +99,7 @@ it('does not let a project event long-poll block the mutation that produces its 
     try {
         const completed = await Promise.race([
             mutation.then(() => true),
-            new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 300); })
+            new Promise<false>(resolve => { timer = setTimeout(() => resolve(false), 3000); })
         ]);
         expect(completed).toBe(true);
         expect((await waiting).events[0]?.event).toBe('scene.changed');

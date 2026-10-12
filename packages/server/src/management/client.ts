@@ -35,9 +35,13 @@ async function request(root:string,descriptor:BridgeDescriptor,command:'status'|
  });
 }
 
+function descriptorOwnerAlive(pid:number):boolean{
+ try{process.kill(pid,0);return true;}catch(error){return (error as NodeJS.ErrnoException).code!=='ESRCH';}
+}
+
 export async function serverStatus(root:string):Promise<ManagementStatus|{state:'offline';projectRoot:string;editorConnected:false;runtimeConnected:false}>{
  const descriptor=await readDescriptor(root);
- if(!descriptor)return {state:'offline',projectRoot:root,editorConnected:false,runtimeConnected:false};
+ if(!descriptor||!descriptorOwnerAlive(descriptor.pid))return {state:'offline',projectRoot:root,editorConnected:false,runtimeConnected:false};
  try{return ManagementStatusSchema.parse(await request(root,descriptor,'status'));}
  catch(error){if(error instanceof BridgeRpcError)throw error;throw new BridgeRpcError('INVALID_MANAGEMENT_RESPONSE','Invalid server status');}
 }
@@ -45,6 +49,7 @@ export async function serverStatus(root:string):Promise<ManagementStatus|{state:
 export async function stopServer(root:string,options:{expectedSessionId?:string}={}):Promise<{stopped:boolean;sessionId:string|null}>{
  const descriptor=await readDescriptor(root);if(!descriptor)return {stopped:false,sessionId:null};
  if(options.expectedSessionId!==undefined&&descriptor.sessionId!==options.expectedSessionId)throw new BridgeRpcError('SESSION_CHANGED','Project session changed after confirmation; shutdown was not sent');
+ if(!descriptorOwnerAlive(descriptor.pid))return {stopped:false,sessionId:descriptor.sessionId};
  const response=await request(root,descriptor,'shutdown');
  if(response.accepted!==true)throw new BridgeRpcError('INVALID_MANAGEMENT_RESPONSE','Shutdown was not accepted');
  const deadline=Date.now()+30000;

@@ -7,7 +7,7 @@ import {secureDirectory} from '../recovery/project-files.js';
 
 const ConfigSchema=z.object({
  protocol:z.literal(1).default(1),
- bridgePort:z.number().int().min(0).max(65535).default(61337),
+ bridgePort:z.number().int().min(0).max(65535).default(0),
  godotBin:z.string().min(1).nullable().default(null),
  toolProfile:ToolProfileSchema.default('full')
 }).passthrough();
