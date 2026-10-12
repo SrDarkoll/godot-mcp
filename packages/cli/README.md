@@ -25,21 +25,23 @@ Open a terminal in your project directory and run the command for your AI editor
 
 Codex setup is available in npm versions 0.5.1 and newer. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) for project trust and configuration details.
 
+Use `@latest` in the setup commands below. Without a version, npx can select an older local installation; check `npx --yes @srdarkx/godot-mcp@latest --version` if a supported client is rejected.
+
 
 ```bash
 # For Codex
-npx @srdarkx/godot-mcp init . --client codex
+npx --yes @srdarkx/godot-mcp@latest init . --client codex
 
 # For Google Antigravity / Gemini
-npx @srdarkx/godot-mcp init . --client antigravity
+npx --yes @srdarkx/godot-mcp@latest init . --client antigravity
 
 # For Cursor
-npx @srdarkx/godot-mcp init . --client cursor
+npx --yes @srdarkx/godot-mcp@latest init . --client cursor
 
 # For Claude Desktop
-npx @srdarkx/godot-mcp init . --client claude
+npx --yes @srdarkx/godot-mcp@latest init . --client claude
 ```
-*(Tip: You can also pass a full path instead of `.`, e.g. `npx @srdarkx/godot-mcp init C:\Projects\MyGame --client antigravity`)*
+*(Tip: You can also pass a full path instead of `.`, e.g. `npx --yes @srdarkx/godot-mcp@latest init C:\Projects\MyGame --client antigravity`)*
 
 #### What the setup command does:
 1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x binary across standard Windows and system paths.
@@ -66,13 +68,13 @@ Initializes a Godot project for MCP connectivity.
 
 ```bash
 # Auto-detect Godot and configure for Cursor
-npx @srdarkx/godot-mcp init . --client cursor
+npx --yes @srdarkx/godot-mcp@latest init . --client cursor
 
 # Specify custom Godot executable and Claude Desktop
-npx @srdarkx/godot-mcp init C:\Projects\MyGame --godot C:\Tools\Godot_v4.6.3.exe --client claude
+npx --yes @srdarkx/godot-mcp@latest init C:\Projects\MyGame --godot C:\Tools\Godot_v4.6.3.exe --client claude
 
 # Specify tool profile
-npx @srdarkx/godot-mcp init . --client antigravity --tool-profile 2d
+npx --yes @srdarkx/godot-mcp@latest init . --client antigravity --tool-profile 2d
 ```
 
 | Flag | Description | Default |
@@ -102,7 +104,7 @@ Starting with 0.6.2, `upgrade . --dry-run` previews the version, launcher and se
 Launches the MCP server over stdio for AI client consumption.
 
 ```bash
-npx @srdarkx/godot-mcp run --project C:\Projects\MyGame --tool-profile full
+npx --yes @srdarkx/godot-mcp@latest run --project C:\Projects\MyGame --tool-profile full
 ```
 
 | Flag | Description | Default |
@@ -116,7 +118,7 @@ npx @srdarkx/godot-mcp run --project C:\Projects\MyGame --tool-profile full
 Runs comprehensive diagnostic checks on your environment, permissions, Godot executable, and bridge status.
 
 ```bash
-npx @srdarkx/godot-mcp doctor .
+npx --yes @srdarkx/godot-mcp@latest doctor .
 ```
 
 Verifies:
@@ -134,10 +136,10 @@ Inspects or repairs the `.godot-mcp/config.json` project configuration.
 
 ```bash
 # Inspect current configuration
-npx @srdarkx/godot-mcp config .
+npx --yes @srdarkx/godot-mcp@latest config .
 
 # Repair corrupted or invalid configuration
-npx @srdarkx/godot-mcp config . --repair
+npx --yes @srdarkx/godot-mcp@latest config . --repair
 ```
 
 ---
@@ -151,10 +153,10 @@ npx @srdarkx/godot-mcp config . --repair
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp", "start", "C:/path/to/YourProject", "--tool-profile", "full"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.2", "start", "C:/path/to/YourProject", "--tool-profile", "full"]
 ```
 
-Trust the project in Codex and restart the local client. `codex mcp list` or `/mcp` shows the connection. The source checkout also offers `godot-mcp setup codex` as a read-only recipe for launching its compiled server during development. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) and [official Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
+Trust the project in Codex and restart the local client after configuration changes. From that project, `codex mcp get godot-mcp --json` shows the configured launch command and project path; `/mcp` shows the active connection. The source checkout also offers `godot-mcp setup codex` as a read-only recipe for launching its compiled server during development. See the [Codex setup guide](https://github.com/SrDarkoll/godot-mcp/blob/main/docs/tools/codex.md) and [official Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
 
 ### Cursor (`.cursor/mcp.json`)
 ```json
@@ -164,7 +166,7 @@ Trust the project in Codex and restart the local client. `codex mcp list` or `/m
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp",
+        "@srdarkx/godot-mcp@0.6.2",
         "run",
         "--project",
         "C:/path/to/YourProject"
@@ -182,7 +184,7 @@ Trust the project in Codex and restart the local client. `codex mcp list` or `/m
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp",
+        "@srdarkx/godot-mcp@0.6.2",
         "run",
         "--project",
         "C:\\path\\to\\YourProject",

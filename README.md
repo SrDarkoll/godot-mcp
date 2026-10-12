@@ -124,21 +124,23 @@ Open a terminal in your project directory and run the command for your AI editor
 
 Codex setup is available in npm versions 0.5.1 and newer. See the [Codex setup guide](docs/tools/codex.md) for project trust and configuration details.
 
+Use `@latest` in the setup commands below. Without a version, npx can select an older local installation; check `npx --yes @srdarkx/godot-mcp@latest --version` if a supported client is rejected.
+
 
 ```powershell
 # For Codex
-npx @srdarkx/godot-mcp init . --client codex
+npx --yes @srdarkx/godot-mcp@latest init . --client codex
 
 # For Google Antigravity / Gemini
-npx @srdarkx/godot-mcp init . --client antigravity
+npx --yes @srdarkx/godot-mcp@latest init . --client antigravity
 
 # For Cursor
-npx @srdarkx/godot-mcp init . --client cursor
+npx --yes @srdarkx/godot-mcp@latest init . --client cursor
 
 # For Claude Desktop
-npx @srdarkx/godot-mcp init . --client claude
+npx --yes @srdarkx/godot-mcp@latest init . --client claude
 ```
-*(Tip: You can also pass a full path instead of `.`, e.g. `npx @srdarkx/godot-mcp init C:\Projects\MyGame --client antigravity`)*
+*(Tip: You can also pass a full path instead of `.`, e.g. `npx --yes @srdarkx/godot-mcp@latest init C:\Projects\MyGame --client antigravity`)*
 
 #### What the setup command does:
 1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x executable across standard Windows and system paths.
@@ -163,7 +165,7 @@ npx @srdarkx/godot-mcp init . --client claude
 Ensure your environment, permissions, and Godot executable are properly configured at any time:
 
 ```powershell
-npx @srdarkx/godot-mcp doctor .
+npx --yes @srdarkx/godot-mcp@latest doctor .
 ```
 
 ---
@@ -190,10 +192,10 @@ Add Godot MCP to your preferred AI assistant configuration:
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.2", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
 ```
 
-Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project, restart Codex, then check `codex mcp list` or `/mcp`. The local `setup codex` recipe in the [Codex guide](docs/tools/codex.md) is also available for source development. See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
+Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project and restart Codex after configuration changes. From that project, `codex mcp get godot-mcp --json` shows the configured launch command and project path; `/mcp` shows the active connection. The local `setup codex` recipe in the [Codex guide](docs/tools/codex.md) is also available for source development. See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
 
 ### Claude Desktop
 
@@ -206,7 +208,7 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp",
+        "@srdarkx/godot-mcp@0.6.2",
         "run",
         "--project",
         "C:\\path\\to\\YourGodotProject",
@@ -229,7 +231,7 @@ In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp",
+        "@srdarkx/godot-mcp@0.6.2",
         "run",
         "--project",
         "C:/path/to/YourGodotProject"
@@ -244,7 +246,7 @@ In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
 Launch the server over stdio:
 
 ```powershell
-npx @srdarkx/godot-mcp run --project C:\path\to\YourGodotProject --tool-profile full
+npx --yes @srdarkx/godot-mcp@latest run --project C:\path\to\YourGodotProject --tool-profile full
 ```
 
 ---
