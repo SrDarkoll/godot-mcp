@@ -22,3 +22,7 @@ Five regression cases cover sequential clients with different profiles, concurre
 The tested development runtime was Windows, Node 24.21.0 and Godot 4.6.3. Remote release checks additionally cover the exact release commit on Node 22 and 24. Local engine logs retain deliberate negative fixtures, navigation warnings and dummy-renderer thumbnail errors; a passing suite is not a claim of zero engine log errors. One successful call per tool does not establish coverage of every argument combination. No personal game was used for destructive fixtures or executed by the audit.
 
 Doctor also accepts a verified direct source launcher for readiness while retaining the separate upgrade consent requirement for replacing it. CLI/server entry paths are canonicalized, CRLF fields migrate safely, all bundled addon files are compared by hash, and stale descriptor owners are checked before contacting an old port.
+
+## Direct publication to main
+
+The release workflow runs the existing Windows validation on pushes to `release/**`, as well as `main`. This provides eligible Node 22 and 24 checks on the exact commit before a direct protected-branch push. Manual `workflow_dispatch` checks passed on the same commit but did not satisfy GitHub's protected update requirement. The jobs, test commands and branch protections remain unchanged; no pull request is needed for this publication flow.
