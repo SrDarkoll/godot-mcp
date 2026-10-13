@@ -31,8 +31,9 @@ for(const name of internal){
  assert.equal(cli.dependencies?.[name],root.version,`${name} must be an exact runtime dependency`);
  assert(cli.bundleDependencies?.includes(name),`${name} must be bundled`);
 }
-assert.deepEqual(new Set(cli.bundleDependencies??[]),new Set(internal));
-assert.equal(cli.bundleDependencies?.length,internal.length);
+assert.deepEqual(new Set(cli.bundleDependencies??[]),new Set(Object.keys(cli.dependencies??{})),
+ 'Every production dependency must be explicitly bundled for Windows global installs');
+assert.equal(cli.bundleDependencies?.length,Object.keys(cli.dependencies??{}).length);
 
 requireQuotedVersion(protocolVersionSource,'SERVER_VERSION',/SERVER_VERSION\s*=\s*['"]([^'"]+)['"]/,root.version);
 requireQuotedVersion(protocolVersionSource,'ADDON_VERSION',/ADDON_VERSION\s*=\s*['"]([^'"]+)['"]/,root.version);

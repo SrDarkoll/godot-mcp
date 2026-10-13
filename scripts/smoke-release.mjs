@@ -27,6 +27,26 @@ function cli(args){
  return result.stdout;
 }
 assert(cli(['--help']).includes('--client <antigravity|cursor|claude|codex>'));
+const globalPrefix=path.join(consumer,'global-prefix');
+if(process.env.GODOT_MCP_PREVIOUS_TARBALL){
+ npm(['install','--global','--prefix',globalPrefix,'--ignore-scripts','--no-audit','--no-fund',process.env.GODOT_MCP_PREVIOUS_TARBALL],consumer);
+}
+npm(['install','--global','--prefix',globalPrefix,'--ignore-scripts','--no-audit','--no-fund',path.join(packed.out,packed.pkg.filename)],consumer);
+const globalRoot=path.join(globalPrefix,'node_modules/@srdarkx/godot-mcp');
+const globalEntry=path.join(globalRoot,'dist/index.js');
+function globalCli(args){
+ const result=spawnSync(process.execPath,[globalEntry,...args],{cwd:consumer,encoding:'utf8',windowsHide:true,timeout:40000});
+ assert.equal(result.status,0,result.stderr||result.stdout);
+ return result.stdout;
+}
+assert(globalCli(['--help']).includes('start'));
+assert(globalCli(['--version']).includes(packed.pkg.version));
+for(const name of ['@modelcontextprotocol/core','@modelcontextprotocol/server','zod','ws','smol-toml']){
+ await fs.stat(path.join(globalRoot,'node_modules',name,'package.json'));
+}
+// Updating the same installed artifact must retain a complete production tree.
+npm(['install','--global','--prefix',globalPrefix,'--ignore-scripts','--no-audit','--no-fund',path.join(packed.out,packed.pkg.filename)],consumer);
+assert(globalCli(['--help']).includes('start'));
 const initialized=JSON.parse(cli(['init',project,'--client','cursor','--tool-profile','2d','--json']));
 assert.equal(initialized.projectRoot,project);
 assert.equal(initialized.client.client,'cursor');
@@ -81,12 +101,52 @@ try{
 }finally{
  await client.close();
 }
+const otherProject=path.join(consumer,'Other Godot Project');
+await fs.mkdir(otherProject);
+await fs.writeFile(path.join(otherProject,'project.godot'),'config_version=5\n[application]\nconfig/name="Other package consumer"\n');
+const otherInit=JSON.parse(globalCli(['init',otherProject,'--client','codex','--tool-profile','full','--json']));
+assert.equal(otherInit.projectRoot,otherProject);
+const otherConfigFile=path.join(otherProject,'.codex/config.toml');
+const otherConfigBefore=await fs.readFile(otherConfigFile,'utf8');
+assert(otherConfigBefore.includes(JSON.stringify(otherProject)));
+async function connectProject(root){
+ const client=new Client({name:'global-multiroot-consumer',version:'1'});
+ try{
+  await client.connect(new StdioClientTransport({command:process.execPath,args:[globalEntry,'start',root],cwd:consumer}));
+  const status=await client.callTool({name:'session.status',arguments:{}});
+  assert.equal(status.isError,undefined);
+  assert.equal(status.structuredContent.projectRoot,root);
+  return client;
+ }catch(error){await client.close();throw error;}
+}
+let first,second,reopened;
+try{
+ first=await connectProject(project);
+ second=await connectProject(otherProject);
+ const secondSession=(await second.callTool({name:'session.status',arguments:{}})).structuredContent.sessionId;
+ await first.close();first=undefined;
+ assert.equal((await second.callTool({name:'session.status',arguments:{}})).structuredContent.sessionId,secondSession);
+ reopened=await connectProject(project);
+ assert.equal((await second.callTool({name:'session.status',arguments:{}})).structuredContent.projectRoot,otherProject);
+ const updated=JSON.parse(globalCli(['upgrade',project,'--client','codex','--yes','--json']));
+ assert.equal(updated.projectRoot,project);
+ assert.equal(updated.doctor.ok,true);
+ assert.equal(await fs.readFile(otherConfigFile,'utf8'),otherConfigBefore);
+ assert.equal((await second.callTool({name:'session.status',arguments:{}})).structuredContent.sessionId,secondSession);
+}finally{
+ await Promise.allSettled([first?.close(),second?.close(),reopened?.close()].filter(Boolean));
+}
 await fs.writeFile(path.join(packed.out,'consumer-validation.json'),JSON.stringify({
  passed:true,
  consumer,
  project,
  checks:[
   'one public tarball install',
+  'global install includes production manifests and starts CLI',
+  'global upgrade/reinstall preserves production imports',
+  'two simultaneous project roots with default bridge configuration',
+  'close and reopen A without interrupting B',
+  'upgrade A preserves B configuration and session',
   'bundled protocol entry',
   'bundled server entry',
   'bundled addon plugin',

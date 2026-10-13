@@ -55,3 +55,38 @@ test('cleanup preserves unrelated siblings in the package-local scope',async()=>
  await cleanup();
  assert.equal(await fs.readFile(path.join(sibling,'KEEP'),'utf8'),'untouched');
 });
+
+test('includes production dependency closure without dev dependencies and preserves original packages',async()=>{
+ const {root,packageDir}=await fixture();
+ const packages={
+  '@fixture/sdk':{dependencies:{'@fixture/core':'1'}},
+  '@fixture/core':{dependencies:{zod:'1'},devDependencies:{'dev-only':'1'}},
+  zod:{}
+ };
+ for(const [name,extra] of Object.entries(packages)){
+  const directory=path.join(root,'node_modules',name);
+  await fs.mkdir(directory,{recursive:true});
+  await fs.writeFile(path.join(directory,'package.json'),JSON.stringify({name,version:'1.0.0',...extra}));
+  await fs.writeFile(path.join(directory,'KEEP'),'original');
+ }
+ const cleanup=await materializeBundledWorkspaceLinks({root,packageDir,runtimeDependencies:['@fixture/sdk']});
+ for(const name of Object.keys(packages)){
+  assert.equal(await fs.realpath(path.join(packageDir,'node_modules',name)),await fs.realpath(path.join(root,'node_modules',name)));
+ }
+ assert.equal(await exists(path.join(packageDir,'node_modules/dev-only')),false);
+ await cleanup();
+ for(const name of Object.keys(packages)){
+  assert.equal(await exists(path.join(packageDir,'node_modules',name)),false);
+  assert.equal(await fs.readFile(path.join(root,'node_modules',name,'KEEP'),'utf8'),'original');
+ }
+});
+
+test('missing runtime dependency rolls back owned links without removing other files',async()=>{
+ const {root,packageDir}=await fixture();
+ const unrelated=path.join(packageDir,'node_modules/unrelated');
+ await fs.mkdir(unrelated,{recursive:true});
+ await fs.writeFile(path.join(unrelated,'KEEP'),'original');
+ await assert.rejects(materializeBundledWorkspaceLinks({root,packageDir,runtimeDependencies:['not-installed']}),/Missing installed production dependency/);
+ assert.equal(await fs.readFile(path.join(unrelated,'KEEP'),'utf8'),'original');
+ assert.equal(await exists(path.join(packageDir,'node_modules/@godot-mcp/protocol')),false);
+});

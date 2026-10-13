@@ -13,7 +13,7 @@ async function writeJson(file,value){
 }
 
 async function runCheckerWith({
- cliDependencies,protocolVersion='0.1.0',serverRuntimeVersion='0.1.0',
+ cliDependencies,cliBundled=Object.keys(cliDependencies),protocolVersion='0.1.0',serverRuntimeVersion='0.1.0',
  protocolAddonVersion='0.1.0',pluginVersion='0.1.0',bridgeAddonVersion='0.1.0'
 }){
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-public-check-'));
@@ -27,7 +27,7 @@ async function runCheckerWith({
    name:'@srdarkx/godot-mcp',version:'0.1.0',private:false,
    bin:{'godot-mcp':'dist/index.js'},
    dependencies:cliDependencies,
-   bundleDependencies:['@godot-mcp/protocol','@godot-mcp/server','@godot-mcp/godot-addon']
+   bundleDependencies:cliBundled
   });
   await writeJson(path.join(root,'packages','protocol','package.json'),{
    name:'@godot-mcp/protocol',version:protocolVersion,private:true,
@@ -66,6 +66,14 @@ const internal={
  '@godot-mcp/server':'0.1.0',
  '@godot-mcp/godot-addon':'0.1.0'
 };
+
+test('rejects a public bundle that leaves production dependencies outside the tarball',async()=>{
+ const result=await runCheckerWith({
+  cliDependencies:{...internal,'@modelcontextprotocol/server':'^2.0.0',ws:'^8.18.0',zod:'^4.0.0'},
+  cliBundled:Object.keys(internal)
+ });
+ assert.notEqual(result.status,0,'Incomplete production bundle must fail the release gate');
+});
 
 test('rejects a public package that omits a bundled workspace runtime dependency',async()=>{
  const result=await runCheckerWith({

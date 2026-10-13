@@ -3,10 +3,10 @@ import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {INTERNAL_BUNDLED_PACKAGES,materializeBundledWorkspaceLinks} from './package-local-bundles.mjs';
+import {RUNTIME_BUNDLED_PACKAGES,materializeBundledWorkspaceLinks} from './package-local-bundles.mjs';
 
 export const PUBLIC_PACKAGE='@srdarkx/godot-mcp';
-export const REQUIRED_BUNDLED=Object.freeze(INTERNAL_BUNDLED_PACKAGES.map(([name])=>name));
+export const REQUIRED_BUNDLED=RUNTIME_BUNDLED_PACKAGES;
 
 export function npm(args,cwd){
  const entry=process.env.npm_execpath;
@@ -35,7 +35,13 @@ const REQUIRED_FILES=Object.freeze([
  'node_modules/@godot-mcp/server/dist/index.js',
  'node_modules/@godot-mcp/godot-addon/package.json',
  'node_modules/@godot-mcp/godot-addon/addons/godot_mcp/plugin.gd',
- 'node_modules/@godot-mcp/godot-addon/addons/godot_mcp/runtime/runtime_logger_46.gd.txt'
+ 'node_modules/@godot-mcp/godot-addon/addons/godot_mcp/runtime/runtime_logger_46.gd.txt',
+ 'node_modules/@modelcontextprotocol/core/package.json',
+ 'node_modules/@modelcontextprotocol/server/package.json',
+ 'node_modules/smol-toml/package.json',
+ 'node_modules/ws/package.json',
+ 'node_modules/zod/package.json',
+ 'node_modules/zod/v4/index.js'
 ]);
 
 export function assertPackedFiles(files){
@@ -44,7 +50,7 @@ export function assertPackedFiles(files){
   if(!set.has(required))throw new Error(`Missing packaged runtime file: ${required}`);
  }
  for(const file of files){
-  const allowed=/^(?:package\.json|LICENSE|README\.md|dist\/.+|node_modules\/@godot-mcp\/(?:protocol|server)\/(?:package\.json|LICENSE|README\.md|dist\/.+)|node_modules\/@godot-mcp\/godot-addon\/(?:package\.json|LICENSE|README\.md|addons\/godot_mcp\/.+))$/.test(file);
+  const allowed=/^(?:package\.json|LICENSE|README\.md|dist\/.+|node_modules\/@godot-mcp\/(?:protocol|server)\/(?:package\.json|LICENSE|README\.md|dist\/.+)|node_modules\/@godot-mcp\/godot-addon\/(?:package\.json|LICENSE|README\.md|addons\/godot_mcp\/.+)|node_modules\/(?:@modelcontextprotocol\/(?:core|server)|smol-toml|ws|zod)\/.+)$/.test(file);
   if(!allowed||file.includes('..')||file.includes('.godot-mcp'))throw new Error(`Unexpected packaged file: ${file}`);
  }
 }
@@ -59,7 +65,7 @@ function parsePackJson(stdout){
 
 async function withManagedBundleLinks(root,action){
  const packageDir=path.join(root,'packages','cli');
- const cleanup=await materializeBundledWorkspaceLinks({root,packageDir});
+ const cleanup=await materializeBundledWorkspaceLinks({root,packageDir,runtimeDependencies:REQUIRED_BUNDLED});
  try{return await action();}finally{await cleanup();}
 }
 

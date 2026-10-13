@@ -1,8 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import {assertExactBundled,assertPackedFiles,publishDryRun} from './pack-release.mjs';
 
-const exact=['@godot-mcp/protocol','@godot-mcp/server','@godot-mcp/godot-addon'];
+const exact=['@godot-mcp/protocol','@godot-mcp/server','@godot-mcp/godot-addon',
+ '@modelcontextprotocol/core','@modelcontextprotocol/server','smol-toml','ws','zod'];
+async function runtimeFixture(root){
+ for(const name of exact.filter(name=>!name.startsWith('@godot-mcp/'))){
+  const directory=path.join(root,'node_modules',name);
+  await fs.mkdir(directory,{recursive:true});
+  await fs.writeFile(path.join(directory,'package.json'),JSON.stringify({name,version:'0.1.0',main:'index.js'}));
+  await fs.writeFile(path.join(directory,'index.js'),'module.exports={}\n');
+  if(name==='zod'){
+   await fs.mkdir(path.join(directory,'v4'));
+   await fs.writeFile(path.join(directory,'v4/index.js'),'export {}\n');
+  }
+ }
+}
 const requiredFiles=[
  'package.json',
  'LICENSE',
@@ -14,10 +29,16 @@ const requiredFiles=[
  'node_modules/@godot-mcp/server/dist/index.js',
  'node_modules/@godot-mcp/godot-addon/package.json',
  'node_modules/@godot-mcp/godot-addon/addons/godot_mcp/plugin.gd',
- 'node_modules/@godot-mcp/godot-addon/addons/godot_mcp/runtime/runtime_logger_46.gd.txt'
+ 'node_modules/@godot-mcp/godot-addon/addons/godot_mcp/runtime/runtime_logger_46.gd.txt',
+ 'node_modules/@modelcontextprotocol/core/package.json',
+ 'node_modules/@modelcontextprotocol/server/package.json',
+ 'node_modules/smol-toml/package.json',
+ 'node_modules/ws/package.json',
+ 'node_modules/zod/package.json',
+ 'node_modules/zod/v4/index.js'
 ];
 
-test('accepts only the exact internal bundled dependency set',()=>{
+test('accepts only the exact production bundled dependency set',()=>{
  assert.doesNotThrow(()=>assertExactBundled(exact));
  assert.doesNotThrow(()=>assertExactBundled([...exact].reverse()));
  assert.throws(()=>assertExactBundled([]),/Bundled dependency mismatch/);
@@ -47,7 +68,7 @@ test('packs one scoped tarball with all internal workspaces and cleans managed l
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'godot-mcp-pack-test-'));
  const previous=process.cwd();
  const manifests={
-  cli:{name:'@srdarkx/godot-mcp',version:'0.1.0',private:false,type:'module',main:'dist/index.js',bin:{'godot-mcp':'dist/index.js'},dependencies:{'@godot-mcp/protocol':'0.1.0','@godot-mcp/server':'0.1.0','@godot-mcp/godot-addon':'0.1.0'},bundleDependencies:exact,files:['dist','LICENSE','README.md']},
+  cli:{name:'@srdarkx/godot-mcp',version:'0.1.0',private:false,type:'module',main:'dist/index.js',bin:{'godot-mcp':'dist/index.js'},dependencies:Object.fromEntries(exact.map(name=>[name,'0.1.0'])),bundleDependencies:exact,files:['dist','LICENSE','README.md']},
   protocol:{name:'@godot-mcp/protocol',version:'0.1.0',private:true,main:'dist/index.js',files:['dist','LICENSE','README.md']},
   server:{name:'@godot-mcp/server',version:'0.1.0',private:true,main:'dist/index.js',files:['dist','LICENSE','README.md']},
   'godot-addon':{name:'@godot-mcp/godot-addon',version:'0.1.0',private:true,files:['addons/godot_mcp','LICENSE','README.md']}
@@ -70,6 +91,7 @@ test('packs one scoped tarball with all internal workspaces and cleans managed l
   await fs.mkdir(path.join(root,'packages/godot-addon/addons/godot_mcp/runtime'),{recursive:true});
   await fs.writeFile(path.join(root,'packages/godot-addon/addons/godot_mcp/plugin.gd'),'extends EditorPlugin\n');
   await fs.writeFile(path.join(root,'packages/godot-addon/addons/godot_mcp/runtime/runtime_logger_46.gd.txt'),'extends Node\n');
+  await runtimeFixture(root);
   process.chdir(root);
   const result=await packRelease();
   assert.equal(result.pkg.filename,'srdarkx-godot-mcp-0.1.0.tgz');
@@ -104,6 +126,7 @@ test('publish dry-run uses scoped public command and cleans managed links on npm
   }
   const fake=path.join(root,'fake-npm.mjs');
   await fs.writeFile(fake,"import fs from 'node:fs'; fs.writeFileSync(process.env.FAKE_NPM_LOG,JSON.stringify(process.argv.slice(2))); process.exit(9);\n");
+  await runtimeFixture(root);
   process.chdir(root);
   process.env.npm_execpath=fake;
   process.env.FAKE_NPM_LOG=log;
@@ -147,6 +170,7 @@ test('publish dry-run accepts npm 11 workspace-keyed JSON metadata',async()=>{
   };
   const fake=path.join(root,'fake-npm.mjs');
   await fs.writeFile(fake,"process.stdout.write(process.env.FAKE_NPM_OUTPUT);\n");
+  await runtimeFixture(root);
   process.chdir(root);
   process.env.npm_execpath=fake;
   process.env.FAKE_NPM_OUTPUT=JSON.stringify({'@srdarkx/godot-mcp':metadata});
