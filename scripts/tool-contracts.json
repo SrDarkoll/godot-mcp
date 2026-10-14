@@ -742,10 +742,12 @@
         "ui",
         "full"
       ],
-      "description": "editor.close_scene: declared on-disk file recovery with retained snapshots.",
+      "description": "Save and close the active named scene without discarding changes. Explicit discard_changes requires approval; unnamed scenes must be saved first.",
       "risk": {
-        "tags": [],
-        "dynamic": "none"
+        "tags": [
+          "normal_mutation"
+        ],
+        "dynamic": "conditional"
       },
       "binding": {
         "status": "legacy",
@@ -1014,7 +1016,9 @@
       ],
       "description": "Run Godot project import in headless mode and wait for completion.",
       "risk": {
-        "tags": [],
+        "tags": [
+          "normal_mutation"
+        ],
         "dynamic": "none"
       },
       "binding": {
@@ -1033,7 +1037,9 @@
       ],
       "description": "Launch the project's main scene in a persistent owned headless Godot process.",
       "risk": {
-        "tags": [],
+        "tags": [
+          "normal_mutation"
+        ],
         "dynamic": "none"
       },
       "binding": {
@@ -1052,7 +1058,9 @@
       ],
       "description": "Launch a project-local scene in a persistent owned headless Godot process.",
       "risk": {
-        "tags": [],
+        "tags": [
+          "normal_mutation"
+        ],
         "dynamic": "none"
       },
       "binding": {
@@ -1071,7 +1079,9 @@
       ],
       "description": "Run a project-local GDScript test entry point in headless Godot with a bounded timeout.",
       "risk": {
-        "tags": [],
+        "tags": [
+          "normal_mutation"
+        ],
         "dynamic": "none"
       },
       "binding": {
@@ -1114,7 +1124,7 @@
         "tags": [
           "control"
         ],
-        "dynamic": "conditional"
+        "dynamic": "none"
       },
       "binding": {
         "status": "canonical",
@@ -1132,7 +1142,9 @@
       ],
       "description": "Initialize the project in headless editor mode and report whether Godot exits successfully.",
       "risk": {
-        "tags": [],
+        "tags": [
+          "normal_mutation"
+        ],
         "dynamic": "none"
       },
       "binding": {
@@ -2290,7 +2302,7 @@
       "description": "Set a project setting value and optionally save to project.godot.",
       "risk": {
         "tags": [],
-        "dynamic": "none"
+        "dynamic": "conditional"
       },
       "binding": {
         "status": "legacy",
@@ -2889,7 +2901,7 @@
         "ui",
         "full"
       ],
-      "description": "Inspect structure of a script (methods, properties, signals, base type).",
+      "description": "Inspect script structure. GDScript paths compile fresh disk source without replacing live instances; other languages use compiled resources. node_path inspects the attached script.",
       "risk": {
         "tags": [
           "read"

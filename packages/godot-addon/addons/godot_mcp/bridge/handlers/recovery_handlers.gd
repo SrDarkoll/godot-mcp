@@ -8,10 +8,10 @@ func _error(code: String, message: String) -> Dictionary:
 func editor_state() -> Dictionary:
     var root = _editor.get_edited_scene_root()
     if root == null:
-        return {"path":null,"instanceId":null,"version":0}
+        return {"path":null,"instanceId":null,"version":0,"safeCloseSupported":true}
     var manager = _editor.get_editor_undo_redo()
     var history = manager.get_history_undo_redo(manager.get_object_history_id(root))
-    return {"path":root.scene_file_path if not root.scene_file_path.is_empty() else null,"instanceId":str(root.get_instance_id()),"version":history.get_version() if history else 0}
+    return {"path":root.scene_file_path if not root.scene_file_path.is_empty() else null,"instanceId":str(root.get_instance_id()),"version":history.get_version() if history else 0,"safeCloseSupported":true}
 func prepare(params: Dictionary) -> Dictionary:
     var paths: Array = params.get("paths",[])
     if _editor.is_playing_scene():
@@ -47,10 +47,23 @@ func validate(params: Dictionary) -> Dictionary:
         else:
             errors.append("Unsupported validation type: "+path)
     return {"valid":errors.is_empty(),"errors":errors}
-func close_scene() -> Dictionary:
+func close_scene(params: Dictionary = {}) -> Dictionary:
     if not _editor.has_method("close_scene"):
         return _error("CAPABILITY_UNAVAILABLE","This editor cannot close scenes through the public API")
-    if _editor.get_edited_scene_root()==null:
-        return {"closed":false}
+    if typeof(params.get("discard_changes", false)) != TYPE_BOOL:
+        return _error("INVALID_ARGUMENT","discard_changes must be a boolean")
+    var root = _editor.get_edited_scene_root()
+    if root == null:
+        return {"closed":false,"saved":false}
+    var discard: bool = params.get("discard_changes", false)
+    if not discard:
+        if root.scene_file_path.is_empty():
+            return _error("SCENE_SAVE_REQUIRED","Save this unnamed scene with scene.save_as before closing, or explicitly request discard_changes")
+        if not _editor.has_method("save_scene"):
+            return _error("CAPABILITY_UNAVAILABLE","This editor cannot save scenes; the scene was not closed")
+        var save_error: int = _editor.call("save_scene")
+        if save_error != OK:
+            return _error("SCENE_SAVE_FAILED","Scene was not closed because saving failed (error %d)" % save_error)
+    # Godot's public close_scene API discards changes, so saving must succeed first.
     var error: int = _editor.call("close_scene")
-    return {"closed":true} if error==OK else _error("EDITOR_CLOSE_FAILED","Unable to close scene")
+    return {"closed":true,"saved":not discard} if error==OK else _error("EDITOR_CLOSE_FAILED","Unable to close scene")

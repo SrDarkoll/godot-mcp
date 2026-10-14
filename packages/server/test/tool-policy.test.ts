@@ -308,7 +308,7 @@ it('classifies headless process operations with only project and Godot process p
     ];
     for (const [name, args] of cases) {
         const assessment = await policy.assess(name, args);
-        expect(assessment.risk, name).toBe('risky');
+        expect(assessment.risk, name).toBe('normal');
         expect(assessment.permissions, name).toEqual(['filesystem.project', 'process.godot']);
         expect(assessment.permissions, name).not.toContain('network.local');
         expect(assessment.permissions, name).not.toContain('process.shell');
@@ -353,8 +353,7 @@ it('keeps headless observation and stop available during an open transaction whi
         await expect(policy.execute(name, args, async () => ({ started: true }))).rejects.toMatchObject({ code: 'TRANSACTION_ACTIVE' });
     }
 
-    const stopAssessment = await policy.assess('headless.stop', {});
-    await expect(policy.execute('headless.stop', {}, async () => ({ stopped: true }), { approvedFingerprint: stopAssessment.fingerprint }))
+    await expect(policy.execute('headless.stop', {}, async () => ({ stopped: true })))
         .resolves.toEqual({ stopped: true });
 });
 
@@ -366,8 +365,7 @@ it('keeps headless observation and stop available during recovery barriers while
 
     await expect(policy.execute('headless.status', {}, async () => ({ ok: true }))).resolves.toEqual({ ok: true });
     await expect(policy.execute('headless.get_output', {}, async () => ({ ok: true }))).resolves.toEqual({ ok: true });
-    const stopAssessment = await policy.assess('headless.stop', {});
-    await expect(policy.execute('headless.stop', {}, async () => ({ stopped: true }), { approvedFingerprint: stopAssessment.fingerprint }))
+    await expect(policy.execute('headless.stop', {}, async () => ({ stopped: true })))
         .resolves.toEqual({ stopped: true });
     expect(barrier).not.toHaveBeenCalled();
 
@@ -375,7 +373,7 @@ it('keeps headless observation and stop available during recovery barriers while
     expect(barrier).toHaveBeenCalledTimes(1);
 });
 
-it('binds headless.stop approval fingerprints and targets to the active execution id', async () => {
+it('binds headless.stop observability fingerprints and targets to the owned execution id', async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), 'godot-mcp-policy-headless-stop-'));
     const session = createSession(root);
     const sessions = new SessionStore(root);
@@ -385,7 +383,7 @@ it('binds headless.stop approval fingerprints and targets to the active executio
     const policy = new ToolPolicy(session, sessions, recovery, async () => ({ active: { executionId } }));
 
     const first = await policy.assess('headless.stop', {});
-    expect(first.risk).toBe('risky');
+    expect(first.risk).toBe('normal');
     expect(first.targets).toContain(`execution:${executionId}`);
 
     executionId = '22222222-2222-4222-8222-222222222222';

@@ -8,6 +8,20 @@ Permissions are reset to their defaults every time the MCP server starts. Projec
 
 Enabling a permission that is disabled by default is itself a risky operation and requires host/user approval. Permission changes are recorded in the session manifest and audit log.
 
+## Routine project work
+
+An enabled session permission is sufficient for ordinary bounded work; the server does not ask for an additional risk approval on every routine call:
+
+- The six `headless` process tools validate/import/run local projects and scenes, run local GDScript tests, or stop the session-owned process. They require `filesystem.project` and `process.godot`, use controlled arguments, reject linked/out-of-project targets, and cannot stop an arbitrary PID. Project code is trusted, just as when running a game in the editor; this is not an operating-system sandbox.
+- `project.settings.set` permits a bounded allowlist of plain values: project name, an existing ordinary project-local main scene, normal local autoloads or their removal, window dimensions, stretch configuration, canvas texture filter and 2D pixel snapping. The `GodotMcpRuntime` autoload and addon resources are excluded. Unknown keys, invalid values, unavailable/external/linked resources and other sensitive configuration still require risk approval.
+- `editor.close_scene` saves the active named scene before closing it. A failed or unavailable save leaves the scene open; an unnamed scene returns `SCENE_SAVE_REQUIRED` so the caller can use `scene.save_as`. Only explicit `discard_changes: true` skips saving, and that option requires approval. No open scene is a harmless no-op. The server requires the addon's `safeCloseSupported` capability before default closing; an old addon returns `CAPABILITY_UNAVAILABLE` and is never sent a potentially destructive close command.
+
+Disabled permissions still fail with `PERMISSION_DENIED`. Routine classification does not bypass recovery barriers, transaction locks, path validation, audit records or ownership checks. Overwriting existing files, restoring snapshots, undo/redo with unknown provenance and reflective calls remain guarded.
+
+### Fresh script inspection
+
+`script.inspect` with a GDScript `path` reads disk source and compiles a new isolated script, without replacing or reloading the cached live script. Godot's separate GDScript cache can reuse a live script even under ResourceLoader's ignore modes, so those modes alone are not sufficient. Deleted source returns `NOT_FOUND`; invalid source returns `SCRIPT_COMPILE_FAILED`, not old valid metadata. With `node_path`, it intentionally inspects the currently attached script instead. `inspection_source` identifies `disk`, `attached`, or `resource` (other languages/binary scripts use the engine's compiled resource, not fresh source compilation). Inspection does not publish code into live instances or save unsaved script-editor buffers. On engines without `Resource.set_path_cache`, a unique path in the same directory provides relative-path context; native verification for this repair targets Godot 4.6.3.
+
 ## Risky-operation approval
 
 Risky tools use MCP's native input-required/elicitation flow. The server does **not** return a bearer confirmation token to the model.

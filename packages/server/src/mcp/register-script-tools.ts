@@ -47,7 +47,7 @@ export function registerScriptTools(registrar: ToolRegistrar, rpc: BridgeServer[
         }
     });
     registrar.registerTool('script.inspect', {
-        description: 'Inspect structure of a script (methods, properties, signals, base type).',
+        description: 'Inspect script structure. GDScript paths compile fresh disk source without replacing live instances; other languages use compiled resources. node_path inspects the attached script.',
         inputSchema: z.object({
             path: z.string().optional(),
             node_path: z.string().optional()

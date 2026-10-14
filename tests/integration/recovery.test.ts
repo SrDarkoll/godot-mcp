@@ -23,40 +23,68 @@ it('rolls back invalid scene/script publication exactly and restores a file chec
     child.stdout.on('data', d => log += d);
     child.stderr.on('data', d => log += d);
     const call = (name: string, args: Record<string, unknown> = {}) => client.callTool({ name, arguments: args });
-    const approve = async (name: string, args: Record<string, unknown> = {}) => { client.setRequestHandler('elicitation/create', async (request) => { expect(request.params.message).toContain(name); return { action: 'accept', content: { confirm: true } }; }); return call(name, args); };
+    let approvedTool: string | null = null;
+    const approvals: string[] = [];
+    client.setRequestHandler('elicitation/create', async request => {
+        approvals.push(request.params.message);
+        if (!approvedTool) return { action: 'decline' };
+        expect(request.params.message).toContain(approvedTool);
+        return { action: 'accept', content: { confirm: true } };
+    });
+    const approve = async (name: string, args: Record<string, unknown> = {}) => {
+        approvedTool = name;
+        try { return await call(name, args); } finally { approvedTool = null; }
+    };
     try {
         await waitFor(async () => (await call('session.status')).structuredContent?.editorConnected === true);
         await waitFor(async () => !!(await call('scene.get_tree')).structuredContent?.root);
+        for (const [setting, value] of [
+            ['application/config/name', 'Routine recovery fixture'],
+            ['application/run/main_scene', 'res://main.tscn'],
+            ['autoload/FixtureGlobals', '*res://main.gd'],
+            ['autoload/FixtureGlobals', null],
+            ['display/window/size/viewport_width', 640],
+            ['display/window/size/viewport_height', 360],
+            ['display/window/stretch/mode', 'canvas_items'],
+            ['rendering/textures/canvas_textures/default_texture_filter', 0]
+        ]) {
+            const result = await call('project.settings.set', { setting, value, save: false });
+            expect(result.isError, JSON.stringify(result.structuredContent)).not.toBe(true);
+        }
         const paths = ['res://main.tscn', 'res://main.gd'];
         expect((await call('transaction.begin', { label: 'open guard', paths })).structuredContent).toMatchObject({ error: { code: 'EDITOR_STATE_CONFLICT' } });
-        expect((await approve('editor.close_scene')).structuredContent).toMatchObject({ closed: true });
+        expect((await call('editor.close_scene')).structuredContent).toMatchObject({ closed: true, saved: true });
+        // Safe close now saves through Godot, which can normalize scene formatting/UIDs.
+        // Recovery must preserve the exact bytes captured after that intentional save.
+        const savedScene = await readFile(path.join(root, 'main.tscn'), 'utf8');
+        expect(approvals).toEqual([]);
         const cp = await call('checkpoint.create', { label: 'baseline', paths });
         expect(cp.isError).not.toBe(true);
         const cpId = (cp.structuredContent as any).id;
         const begin = await call('transaction.begin', { label: 'reject broken script', paths });
         expect(begin.isError, JSON.stringify(begin.structuredContent)).not.toBe(true);
         const id = (begin.structuredContent as any).id;
-        await call('transaction.write_file', { transaction_id: id, path: paths[0], content: originalScene.replace('2, 3', '52, 63') });
+        await call('transaction.write_file', { transaction_id: id, path: paths[0], content: savedScene.replace('2, 3', '52, 63') });
         await call('transaction.write_file', { transaction_id: id, path: paths[1], content: 'extends Node2D\nfunc broken(\n' });
         expect((await call('node.create', { type: 'Node2D', name: 'Blocked' })).structuredContent).toMatchObject({ error: { code: 'TRANSACTION_ACTIVE' } });
         const failed = await approve('transaction.commit', { transaction_id: id });
         expect(failed.isError).toBe(true);
         expect(failed.structuredContent).toMatchObject({ state: 'rolled_back', validation: { valid: false } });
-        expect(await readFile(path.join(root, 'main.tscn'), 'utf8')).toBe(originalScene);
+        expect(await readFile(path.join(root, 'main.tscn'), 'utf8')).toBe(savedScene);
         expect(await readFile(path.join(root, 'main.gd'), 'utf8')).toBe(originalScript);
         const again = await call('transaction.begin', { label: 'valid edit', paths });
         const nextId = (again.structuredContent as any).id;
-        await call('transaction.write_file', { transaction_id: nextId, path: paths[0], content: originalScene.replace('2, 3', '52, 63') });
+        await call('transaction.write_file', { transaction_id: nextId, path: paths[0], content: savedScene.replace('2, 3', '52, 63') });
         await call('transaction.write_file', { transaction_id: nextId, path: paths[1], content: 'extends Node2D\nvar speed := 20\n' });
         const committed = await approve('transaction.commit', { transaction_id: nextId });
         expect(committed.structuredContent).toMatchObject({ state: 'committed', validation: { valid: true } });
         await call('scene.open', { path: 'res://main.tscn' });
         await waitFor(async () => !!(await call('scene.get_tree')).structuredContent?.root);
         expect((await call('node.get_property', { node_path: '/Main', property: 'position' })).structuredContent).toMatchObject({ value: { x: 52, y: 63 } });
-        await approve('editor.close_scene');
+        expect((await call('editor.close_scene')).structuredContent).toMatchObject({ closed: true, saved: true });
         const restored = await approve('checkpoint.restore', { checkpoint_id: cpId });
         expect(restored.structuredContent).toMatchObject({ state: 'committed' });
-        expect(await readFile(path.join(root, 'main.tscn'), 'utf8')).toBe(originalScene);
+        expect(await readFile(path.join(root, 'main.tscn'), 'utf8')).toBe(savedScene);
         expect(await readFile(path.join(root, 'main.gd'), 'utf8')).toBe(originalScript);
         const manifest = (await call('session.manifest')).structuredContent?.manifest as any;
         expect(manifest.checkpoints).toContainEqual(expect.objectContaining({ kind: 'files', id: cpId }));

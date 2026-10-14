@@ -11,6 +11,7 @@ import { scanSessionStorage } from '../session/session-storage.js';
 import { OperationGate } from './operation-gate.js';
 import { isBlockedReflectiveMethod } from './reflection-safety.js';
 import { validateArgumentBudget } from './argument-budget.js';
+import { isRoutineProjectSetting } from './routine-project-settings.js';
 import { CONTROL_TOOL_NAMES, NORMAL_MUTATION_TOOL_NAMES, READ_TOOL_NAMES } from './tool-policy.generated.js';
 const READS = new Set(READ_TOOL_NAMES);
 const CONTROLS = new Set(CONTROL_TOOL_NAMES);
@@ -234,11 +235,12 @@ export class ToolPolicy {
                 fingerprints[target] = await this.recovery.files.fingerprint(target);
         }
         let risk: Risk = READS.has(name) || NORMAL_MUTATIONS.has(name) || CONTROLS.has(name) ? 'normal' : 'risky';
-        if (['object.call', 'scene.reload', 'editor.close_scene', 'editor.undo', 'editor.redo', 'project.settings.set',
-            'transaction.commit', 'transaction.recover', 'checkpoint.restore',
-            'headless.validate_project', 'headless.import', 'headless.run', 'headless.run_scene', 'headless.run_tests', 'headless.stop'].includes(name)) {
+        if (['object.call', 'scene.reload', 'editor.undo', 'editor.redo',
+            'transaction.commit', 'transaction.recover', 'checkpoint.restore'].includes(name)) {
             risk = 'risky';
         }
+        if (name === 'editor.close_scene') risk = args.discard_changes === true ? 'risky' : 'normal';
+        if (name === 'project.settings.set') risk = await isRoutineProjectSetting(args, this.recovery.files) ? 'normal' : 'risky';
         if (['script.create', 'resource.create', 'resource.save', 'scene.create', 'scene.save_as'].includes(name) &&
             Object.values(fingerprints).some(value => value !== null)) {
             risk = 'risky';

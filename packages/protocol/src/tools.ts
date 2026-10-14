@@ -268,6 +268,7 @@ export interface ScriptValidateResult {
 
 export interface ScriptInspectResult {
   path: string;
+  inspection_source?: 'disk' | 'attached' | 'resource';
   base_type: string;
   methods: Array<{ name: string; args?: Array<{ name: string; type: string }> | undefined; return_type?: string | undefined }>;
   properties: Array<{ name: string; type: string }>;

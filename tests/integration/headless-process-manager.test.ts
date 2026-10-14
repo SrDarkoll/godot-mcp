@@ -57,13 +57,11 @@ test('owns a real Godot 4.6.3 headless lifecycle without authenticating an edito
   });
   const client = new Client({ name: 'headless-process-manager-integration', version: '1' }, { capabilities: { elicitation: { form: {} } } });
   const call = (name: string, args: Record<string, unknown> = {}) => client.callTool({ name, arguments: args });
-  const approve = async (name: string, args: Record<string, unknown> = {}) => {
-    client.setRequestHandler('elicitation/create', async request => {
-      expect(request.params.message).toContain(name);
-      return { action: 'accept', content: { confirm: true } };
-    });
-    return call(name, args);
-  };
+  const approvals: string[] = [];
+  client.setRequestHandler('elicitation/create', async request => {
+    approvals.push(request.params.message);
+    return { action: 'decline' };
+  });
   const expectEditorDisconnected = async () => {
     const status = await call('session.status');
     expect(status.isError).not.toBe(true);
@@ -81,52 +79,53 @@ test('owns a real Godot 4.6.3 headless lifecycle without authenticating an edito
   try {
     await expectEditorDisconnected();
 
-    const validate = await approve('headless.validate_project');
+    const validate = await call('headless.validate_project');
     expect(validate.isError, JSON.stringify(validate.structuredContent)).not.toBe(true);
     expect(validate.structuredContent).toMatchObject({ kind: 'validate_project', state: 'exited', exitCode: 0, timedOut: false });
     await expectEditorDisconnected();
 
-    const imported = await approve('headless.import');
+    const imported = await call('headless.import');
     expect(imported.isError, JSON.stringify(imported.structuredContent)).not.toBe(true);
     expect(imported.structuredContent).toMatchObject({ kind: 'import', state: 'exited', exitCode: 0, timedOut: false });
     await expectEditorDisconnected();
 
-    const tests = await approve('headless.run_tests', { script_path: 'res://tests/headless-test-runner.gd' });
+    const tests = await call('headless.run_tests', { script_path: 'res://tests/headless-test-runner.gd' });
     expect(tests.isError, JSON.stringify(tests.structuredContent)).not.toBe(true);
     expect(tests.structuredContent).toMatchObject({ kind: 'run_tests', state: 'exited', exitCode: 7, timedOut: false });
     const testExecutionId = String((tests.structuredContent as any).executionId);
     await outputContaining(testExecutionId, 'HEADLESS_TEST_RUNNER_OK');
     await expectEditorDisconnected();
 
-    const run = await approve('headless.run');
+    const run = await call('headless.run');
     expect(run.isError, JSON.stringify(run.structuredContent)).not.toBe(true);
     expect(run.structuredContent).toMatchObject({ kind: 'run', state: 'running' });
     const runId = String((run.structuredContent as any).executionId);
     await outputContaining(runId, 'HEADLESS_PERSISTENT_READY');
     expect((await call('headless.status')).structuredContent).toMatchObject({ active: { executionId: runId, kind: 'run', state: 'running' } });
 
-    const busy = await approve('headless.run');
+    const busy = await call('headless.run');
     expect(busy.isError).toBe(true);
     expect(busy.structuredContent).toMatchObject({ error: { code: 'HEADLESS_BUSY' } });
     await expectEditorDisconnected();
 
-    const stopped = await approve('headless.stop');
+    const stopped = await call('headless.stop');
     expect(stopped.isError, JSON.stringify(stopped.structuredContent)).not.toBe(true);
     expect(stopped.structuredContent).toMatchObject({ stopped: true, execution: { executionId: runId, stoppedByRequest: true } });
     expect((await call('headless.status')).structuredContent).toMatchObject({ active: null });
 
-    const scene = await approve('headless.run_scene', { scene_path: 'res://tests/headless-persistent.tscn' });
+    const scene = await call('headless.run_scene', { scene_path: 'res://tests/headless-persistent.tscn' });
     expect(scene.isError, JSON.stringify(scene.structuredContent)).not.toBe(true);
     expect(scene.structuredContent).toMatchObject({ kind: 'run_scene', state: 'running', scenePath: 'res://tests/headless-persistent.tscn' });
     const sceneId = String((scene.structuredContent as any).executionId);
     await outputContaining(sceneId, 'HEADLESS_PERSISTENT_READY');
-    await approve('headless.stop');
+    await call('headless.stop');
     expect((await call('headless.status')).structuredContent).toMatchObject({ active: null });
     await expectEditorDisconnected();
+    expect(approvals).toEqual([]);
   } finally {
     try {
       const status = await call('headless.status');
-      if ((status.structuredContent as any)?.active) await approve('headless.stop');
+      if ((status.structuredContent as any)?.active) await call('headless.stop');
     } catch { /* server teardown still owns its child */ }
     await client.close();
     await rm(root, { recursive: true, force: true, maxRetries: 15, retryDelay: 200 });

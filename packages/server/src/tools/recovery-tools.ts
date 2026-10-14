@@ -1,5 +1,5 @@
 import * as z from 'zod/v4';import {TransactionBeginSchema,RecoveryPathSchema,RecoveryPathsSchema} from '@godot-mcp/protocol';
-import type {ToolRegistrar} from '../security/tool-registrar.js';import type {RecoveryService} from '../recovery/recovery-service.js';import type {RpcRouter} from '../bridge/rpc-router.js';import {toolSuccess,toolError} from '../mcp/tool-result.js';
+import type {ToolRegistrar} from '../security/tool-registrar.js';import type {RecoveryService} from '../recovery/recovery-service.js';import {BridgeRpcError,type RpcRouter} from '../bridge/rpc-router.js';import {toolSuccess,toolError} from '../mcp/tool-result.js';
 export function registerRecoveryTools(server:ToolRegistrar,recovery:RecoveryService,rpc:Pick<RpcRouter,'call'>):void{
  const id=z.string().uuid();const session=z.string().regex(/^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-\d{3}Z_[a-f0-9]{8}$/);
  const register=(name:string,inputSchema:z.ZodObject<any>,handler:(args:any)=>Promise<object>)=>server.registerTool(name,{description:`${name}: declared on-disk file recovery with retained snapshots.`,inputSchema},async args=>{try{return toolSuccess(await handler(args));}catch(error){return toolError(error);}});
@@ -15,5 +15,17 @@ export function registerRecoveryTools(server:ToolRegistrar,recovery:RecoveryServ
  register('checkpoint.list',z.strictObject({session_id:session.optional()}),async a=>({checkpoints:await recovery.listCheckpoints(a.session_id)}));
  register('checkpoint.inspect',z.strictObject({checkpoint_id:id,session_id:session.optional()}),a=>recovery.inspectCheckpoint(a.checkpoint_id,a.session_id));
  register('checkpoint.restore',z.strictObject({checkpoint_id:id,session_id:session.optional()}),a=>recovery.restoreCheckpoint(a.checkpoint_id,a.session_id));
- register('editor.close_scene',z.strictObject({}),async()=>await rpc.call('editor.close_scene',{}) as object);
+ server.registerTool('editor.close_scene',{
+  description:'Save and close the active named scene without discarding changes. Explicit discard_changes requires approval; unnamed scenes must be saved first.',
+  inputSchema:z.strictObject({discard_changes:z.boolean().optional()})
+ },async args=>{
+  try{
+   if(args.discard_changes!==true){
+    // Older addons silently ignored close parameters and discarded editor work.
+    const state=await rpc.call('recovery.editor_state',{}) as Record<string,unknown>;
+    if(!state||state.safeCloseSupported!==true)throw new BridgeRpcError('CAPABILITY_UNAVAILABLE','Update the Godot addon before using save-before-close; no scene was closed.');
+   }
+   return toolSuccess(await rpc.call('editor.close_scene',args) as object);
+  }catch(error){return toolError(error);}
+ });
 }

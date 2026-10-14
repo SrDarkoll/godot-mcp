@@ -128,10 +128,31 @@ func detach(params: Dictionary) -> Dictionary:
 func inspect(params: Dictionary) -> Dictionary:
 	var path: String = params.get("path", "")
 	var script: Script = null
+	var inspection_source := "attached"
 	if not path.is_empty():
-		if not ResourceLoader.exists(path):
+		if not FileAccess.file_exists(path):
 			return _error("NOT_FOUND", "Script not found: %s" % path)
-		script = load(path) as Script
+		if path.get_extension().to_lower() == "gd":
+			var file := FileAccess.open(path, FileAccess.READ)
+			if not file:
+				return _error("FILE_ERROR", "Cannot read script source: %s" % path)
+			var fresh := GDScript.new()
+			# ResourceLoader's IGNORE modes still reuse GDScript's separate script cache.
+			# Compile a new resource; never reload or take over the cached live script.
+			if fresh.has_method("set_path_cache"):
+				fresh.call("set_path_cache", path)
+			else:
+				fresh.resource_path = path.get_base_dir().path_join("__godot_mcp_inspect_" + str(fresh.get_instance_id()) + ".gd")
+			fresh.source_code = file.get_as_text()
+			file.close()
+			if fresh.reload() != OK:
+				return _error("SCRIPT_COMPILE_FAILED", "Cannot inspect invalid script source: %s" % path)
+			script = fresh
+			inspection_source = "disk"
+		else:
+			# Other languages/binary scripts describe the engine's compiled resource.
+			script = load(path) as Script
+			inspection_source = "resource"
 	else:
 		var node_path: String = params.get("node_path", "")
 		if node_path.is_empty():
@@ -176,7 +197,8 @@ func inspect(params: Dictionary) -> Dictionary:
 		})
 
 	return {
-		"path": script.resource_path,
+		"path": path if not path.is_empty() else script.resource_path,
+		"inspection_source": inspection_source,
 		"base_type": script.get_instance_base_type(),
 		"methods": methods,
 		"properties": properties,

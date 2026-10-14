@@ -4,7 +4,7 @@ Plan 5 adds recoverable operations on explicitly declared project files. It does
 
 ## Safe workflow
 
-Save any edits you intend to keep and close scene tabs before beginning. For scripts/resources, close their affected script tabs or resource inspector as well. The preflight deliberately requires no open scene tabs because other scenes may share dependencies; it does not guess which unsaved edits are safe to discard. `editor.close_scene` is a separate, confirmed operation and can discard unsaved changes. Recovery never automatically saves or closes tabs.
+Save any edits you intend to keep and close scene tabs before beginning. For scripts/resources, close their affected script tabs or resource inspector as well. The preflight deliberately requires no open scene tabs because other scenes may share dependencies; it does not guess which unsaved edits are safe to discard. `editor.close_scene` is a separate operation that saves a named scene before closing; unnamed scenes require `scene.save_as`, and explicit `discard_changes:true` requires confirmation. An old addon without the save-before-close capability is refused. Recovery never automatically saves or closes tabs.
 
 Begin with paths and a label:
 
@@ -72,7 +72,7 @@ File checkpoints have `kind: "files"`; earlier visual checkpoints have `kind: "v
 
 Permissions govern the advertised tool surface. They do not sandbox project scripts, create missing shell/network endpoints or remove the fixed project-path boundary. Stop and local status operations remain available for safe control. Enabling dangerous permissions requires confirmation; disabling/restricting a permission does not.
 
-`risk.preview({tool,arguments})` reports risk and targets without execution. Risky operations include reflective calls, reload/close, project settings changes, existing-resource overwrite, publication and restoration. Known forbidden reflective methods such as `free` remain blocked with `SAFETY_VIOLATION`; confirmation cannot enable them.
+`risk.preview({tool,arguments})` reports risk and targets without execution. Risky operations include reflective calls, scene reload, explicit scene discard, non-routine project settings, existing-resource overwrite, publication and restoration. Routine bounded headless operations, safe scene close and allowlisted project settings use their existing session permissions without extra confirmation; see the [security model](security.md). Known forbidden reflective methods such as `free` remain blocked with `SAFETY_VIOLATION`; confirmation cannot enable them.
 
 A risky attempt returns an MCP `input_required` result containing a boolean elicitation request. Its `requestState` is HMAC-signed by the MCP SDK, expires after five minutes, and carries the tool plus the current operation fingerprint. The fingerprint includes the session, canonical arguments and relevant file/editor state. Changed arguments or files invalidate the prior approval and require a new review. The local MCP host is trusted to surface elicitation to the human operator.
 

@@ -117,7 +117,7 @@ func dispatch(raw_text: String) -> Dictionary:
         "recovery.validate":
             result = _recovery.validate(params)
         "editor.close_scene":
-            result = _recovery.close_scene()
+            result = _recovery.close_scene(params)
         "debugger.info":
             result = _runtime.debugger_info()
         "debugger.breakpoint.set":
