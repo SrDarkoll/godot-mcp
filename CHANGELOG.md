@@ -2,6 +2,21 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.6.5] - 2026-10-14
+
+- Remove redundant approvals from bounded, routine project settings and local headless validation/import/run/tests while retaining existing session permissions.
+- Save named scenes before closing them. Keep failed saves and unnamed scenes open; explicit discarding still requires approval.
+- Inspect fresh GDScript disk source without reloading live instances or returning cached metadata for invalid/deleted scripts.
+- Preserve protections for destructive operations and retain the complete bundled runtime. Protocol remains 1 and the catalog remains 194 tools.
+- See the [0.6.5 release notes](docs/releases/0.6.5.md) for per-project upgrade and reload instructions.
+
+## [0.6.4] - 2026-10-13
+
+- Bundle the full production runtime, including MCP SDK core/server, Zod, ws and smol-toml, in the public npm artifact.
+- Fix Windows global-install startup failures caused by missing or invalid workspace-hoisted dependencies before MCP initialization.
+- Preserve project-local profiles, backups and independent shared project sessions. Protocol remains 1 and the catalog remains 194 tools.
+- See the [0.6.4 release notes](docs/releases/0.6.4.md) for update and verification instructions.
+
 ## [0.6.3] - 2026-10-12
 
 - Share one project server across Codex tool discovery and multiple chats, with authenticated local connections, independent tool profiles and approval state. Closing one client leaves the others connected; closing the last finishes the session.

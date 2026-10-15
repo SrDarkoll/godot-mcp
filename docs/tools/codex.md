@@ -2,7 +2,7 @@
 
 Godot MCP includes Codex as an `init --client codex` target. The project-local configuration works with Codex CLI, the IDE extension, and local Codex tasks in the desktop app on the same host. Codex loads `.codex/config.toml` only after you trust the project; see the [official MCP guide](https://learn.chatgpt.com/docs/extend/mcp) and [configuration precedence](https://learn.chatgpt.com/docs/config-file/config-basic).
 
-From npm version 0.5.1 or newer:
+Install the current published release:
 
 ```powershell
 npx --yes @srdarkx/godot-mcp@latest init "C:\Games\MyGame" --client codex --tool-profile 2d
@@ -13,7 +13,7 @@ This creates or updates `C:\Games\MyGame\.codex\config.toml` with a project-scop
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp@0.6.3", "start", "C:/Games/MyGame", "--tool-profile", "2d"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.5", "start", "C:/Games/MyGame", "--tool-profile", "2d"]
 ```
 
 The generated file uses an absolute project path so the server opens the intended Godot project regardless of Codex's process directory. Starting with 0.6.1, generated launchers pin the installed version, and `init` offers the safe upgrade flow for an existing installation. The [upgrade guide](../upgrading.md) covers confirmed shutdown, migration of recognized older npm/bundled-server entries, retained backups and verification. Other MCP entries and custom server options are preserved. Unrelated commands remain protected. The updater changes only the project's Codex configuration, not `~/.codex/config.toml`.
@@ -39,7 +39,7 @@ Run `codex mcp get godot-mcp --json` from the intended project directory and che
 
 A global entry can intentionally target another project while the trusted project-local entry overrides it. If a separate global alias also starts the same Godot project, enable one entry within that project to avoid duplicate server starts and `PROJECT_BUSY`.
 
-`INFO bridge` and `INFO runtimeConnection` describe live connection state. An offline MCP server or disconnected runtime agent does not by itself make addon installation fail.
+The `bridge` and `runtimeConnection` checks describe live connection state. An offline MCP server or disconnected runtime agent does not by itself make addon installation fail.
 
 ## Multiple Codex connections to one project
 

@@ -17,6 +17,29 @@ Instead of copying and pasting GDScript snippets, guessing node hierarchy paths,
 
 ---
 
+## Current release: 0.6.5
+
+The public npm package, MCP server and Godot addon are aligned at **0.6.5**, with **protocol 1** and **194 tools**.
+
+- Routine project settings and headless work use the existing session permissions without redundant approval prompts.
+- Closing a named scene saves it first; discarding unsaved changes remains protected.
+- GDScript inspection reads fresh disk source without reloading live instances.
+- The complete Windows runtime bundle includes the startup fixes delivered in 0.6.4.
+
+See the [0.6.5 release notes](docs/releases/0.6.5.md), [0.6.4 release notes](docs/releases/0.6.4.md) and [changelog](CHANGELOG.md).
+
+For an existing installation, run these commands from **each Godot project folder**:
+
+```powershell
+npx --yes @srdarkx/godot-mcp@latest upgrade . --dry-run
+npx --yes @srdarkx/godot-mcp@latest upgrade .
+npx --yes @srdarkx/godot-mcp@latest doctor .
+```
+
+Updating a global npm installation alone does not update project addons or pinned client launchers. Reload the addon in an already-open Godot editor and reconnect that project's MCP client after upgrading.
+
+---
+
 ## Built with Godot MCP & Gemini 3.8 Flash
 
 ![NEON SWARM - Built with Godot MCP](docs/assets/neon_swarm_demo.gif)
@@ -122,7 +145,7 @@ Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing 
 ### Step 2: Run the Setup Command (Single Step)
 Open a terminal in your project directory and run the command for your AI editor:
 
-Codex setup is available in npm versions 0.5.1 and newer. See the [Codex setup guide](docs/tools/codex.md) for project trust and configuration details.
+Codex is supported directly by `init --client codex`. See the [Codex setup guide](docs/tools/codex.md) for project trust and configuration details.
 
 Use `@latest` in the setup commands below. Without a version, npx can select an older local installation; check `npx --yes @srdarkx/godot-mcp@latest --version` if a supported client is rejected.
 
@@ -187,12 +210,12 @@ Add Godot MCP to your preferred AI assistant configuration:
 
 ### Codex
 
-`godot-mcp init . --client codex` writes a managed server entry to the project's `.codex/config.toml`:
+`godot-mcp init . --client codex` writes a managed server entry to the project's `.codex/config.toml`. Generated launchers pin the installed version so the server and addon remain aligned; the current release produces:
 
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp@0.6.3", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.5", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
 ```
 
 Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project and restart Codex after configuration changes. From that project, `codex mcp get godot-mcp --json` shows the configured launch command and project path; `/mcp` shows the active connection. The local `setup codex` recipe in the [Codex guide](docs/tools/codex.md) is also available for source development. See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
@@ -208,7 +231,7 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp@0.6.3",
+        "@srdarkx/godot-mcp@0.6.5",
         "run",
         "--project",
         "C:\\path\\to\\YourGodotProject",
@@ -231,7 +254,7 @@ In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
       "command": "npx",
       "args": [
         "-y",
-        "@srdarkx/godot-mcp@0.6.3",
+        "@srdarkx/godot-mcp@0.6.5",
         "run",
         "--project",
         "C:/path/to/YourGodotProject"

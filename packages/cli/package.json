@@ -2,7 +2,7 @@
   "name": "@srdarkx/godot-mcp",
   "version": "0.6.5",
   "private": false,
-  "description": "Connects AI assistants like Codex, Claude and Cursor to Godot 4 to create and edit scenes, run games, debug code and capture screenshots.",
+  "description": "Connects Codex, Claude, Cursor and other AI assistants to Godot 4 on Windows for 2D/3D scene editing, game execution, debugging and screenshots.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SrDarkoll/godot-mcp.git",
