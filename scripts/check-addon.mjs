@@ -11,17 +11,25 @@ await cp(path.resolve('fixtures/empty-project'),root,{recursive:true});
 const addon=path.join(root,'addons/godot_mcp');
 await cp(path.resolve('packages/godot-addon/addons/godot_mcp'),addon,{recursive:true});
 const logs=[];
-function run(args) {
-  const result=spawnSync(godot,args,{encoding:'utf8',windowsHide:true,timeout:30000});
+function run(args,{timeoutMs=30000}={}) {
+  const started=performance.now();
+  const result=spawnSync(godot,args,{encoding:'utf8',windowsHide:true,timeout:timeoutMs});
   const output=`${result.stdout??''}${result.stderr??''}`;
-  logs.push({args,status:result.status,output});
-  if(result.status!==0 || /SCRIPT ERROR|Parse Error|Failed to load script/.test(output)) {
-    throw new Error(`GDScript validation failed: ${args.join(' ')}\n${output}`);
+  const error=result.error?{code:result.error.code??null,message:result.error.message}:null;
+  logs.push({args,status:result.status??null,signal:result.signal??null,error,
+    timeoutMs,durationMs:Math.round(performance.now()-started),output});
+  if(error || result.signal || result.status!==0 || /SCRIPT ERROR|Parse Error|Failed to load script/.test(output)) {
+    const reason=error?.code==='ETIMEDOUT'?`Godot process timed out after ${timeoutMs} ms`:
+      error?`Godot process could not run (${error.code??'unknown'}): ${error.message}`:
+      result.signal?`Godot process terminated by ${result.signal}`:
+      result.status!==0?`Godot process exited with status ${result.status}`:'GDScript diagnostics reported errors';
+    throw new Error(`${reason}: ${args.join(' ')}\n${output}`);
   }
 }
 try {
   run(['--headless','--path',root,'--script','res://addons/godot_mcp/tools/enable_plugin.gd']);
-  run(['--headless','--editor','--path',root,'--quit']);
+  // Cold editor imports can exceed the per-script limit on hosted Windows runners.
+  run(['--headless','--editor','--path',root,'--import'],{timeoutMs:120000});
   const files=(await readdir(addon,{recursive:true})).filter(f=>f.endsWith('.gd')).sort();
   for(const file of files)run(['--headless','--path',root,'--check-only','--script',`res://addons/godot_mcp/${file.replaceAll('\\','/')}`]);
   run(['--headless','--path',root,'--check-only','--script','res://.godot-mcp/generated/runtime_logger.gd']);

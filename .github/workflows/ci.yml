@@ -26,6 +26,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run check:docs
+      - name: Check addon validator regressions
+        run: node --test scripts/check-addon.test.mjs
       - name: Install verified Godot
         shell: pwsh
         run: ./scripts/ci-install-godot.ps1 -Destination "$env:RUNNER_TEMP/godot-mcp-engine"
