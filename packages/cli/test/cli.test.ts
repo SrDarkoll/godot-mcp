@@ -1,5 +1,11 @@
 import {expect,it} from 'vitest';
 import {parseCliArgs} from '../src/index.js';
+it.each(['codex','cursor','antigravity','claude'])('defaults short init commands for %s to the current project directory',client=>{
+ expect(parseCliArgs(['init','--client',client])).toMatchObject({command:'init',client,projectRoot:process.cwd()});
+});
+it.each(['doctor','status','upgrade'])('defaults short %s commands to the current project directory',command=>{
+ expect(parseCliArgs([command])).toMatchObject({command,projectRoot:process.cwd()});
+});
 it('parses help, foreground start, zero-friction init and scoped session inspection',()=>{
  expect(parseCliArgs(['--help']).command).toBe('help');
  expect(parseCliArgs(['start','C:/Game With Spaces','--bridge-port','0','--tool-profile','runtime'])).toMatchObject({command:'start',projectRoot:'C:/Game With Spaces',bridgePort:0,toolProfile:'runtime'});

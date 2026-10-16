@@ -7,32 +7,36 @@ import {SERVER_VERSION} from '@godot-mcp/protocol';
 
 async function tempRoot():Promise<string>{return await mkdtemp(path.join(tmpdir(),'godot-mcp-client-'));}
 
-it('creates project-local Cursor config and preserves unrelated MCP state with one backup',async()=>{
+it.each(['cursor','antigravity','claude'] as const)('creates %s config and preserves unrelated MCP state with one backup',async(client)=>{
  const root=await tempRoot();
- const file=path.join(root,'.cursor','mcp.json');
+ const locations={env:{APPDATA:path.join(root,'profile')},homeDir:root,platform:'win32' as const};
+ const file=clientConfigPath(client,root,locations);
+ const expectedPaths={cursor:path.join(root,'.cursor','mcp.json'),antigravity:path.join(root,'.agents','mcp_config.json'),claude:path.join(root,'profile','Claude','claude_desktop_config.json')};
+ expect(file).toBe(path.resolve(expectedPaths[client]));
  await mkdir(path.dirname(file),{recursive:true});
  await writeFile(file,JSON.stringify({theme:'dark',mcpServers:{other:{command:'other'}}},null,2));
- const first=await configureClient({client:'cursor',projectRoot:root,toolProfile:'2d',now:()=>new Date('2026-09-07T12:00:00.000Z')});
+ const first=await configureClient({client,projectRoot:root,toolProfile:'2d',...locations,now:()=>new Date('2026-09-07T12:00:00.000Z')});
  expect(first.changed).toBe(true);
  expect(first.backupPath).toBeTruthy();
  const parsed=JSON.parse(await readFile(file,'utf8'));
  expect(parsed.theme).toBe('dark');
  expect(parsed.mcpServers.other).toEqual({command:'other'});
- expect(parsed.mcpServers['godot-mcp']).toEqual({command:'npx',args:['--yes',`@srdarkx/godot-mcp@${SERVER_VERSION}`,'start',path.resolve(root),'--tool-profile','2d']});
- const second=await configureClient({client:'cursor',projectRoot:root,toolProfile:'2d',now:()=>new Date('2026-09-07T12:00:01.000Z')});
+ expect(parsed.mcpServers['godot-mcp']).toEqual({...(client==='cursor'?{type:'stdio'}:{}),command:'npx',args:['--yes',`@srdarkx/godot-mcp@${SERVER_VERSION}`,'start',path.resolve(root),'--tool-profile','2d']});
+ const second=await configureClient({client,projectRoot:root,toolProfile:'2d',...locations,now:()=>new Date('2026-09-07T12:00:01.000Z')});
  expect(second.changed).toBe(false);
  const backups=(await readdir(path.dirname(file))).filter(name=>name.includes('.godot-mcp-')&&name.endsWith('.bak'));
  expect(backups).toHaveLength(1);
 });
 
-it('fails closed for malformed or structurally invalid client config',async()=>{
+it.each(['cursor','antigravity','claude'] as const)('fails closed for malformed or structurally invalid %s config',async(client)=>{
  const root=await tempRoot();
- const file=path.join(root,'.cursor','mcp.json');
+ const locations={env:{APPDATA:path.join(root,'profile')},homeDir:root,platform:'win32' as const};
+ const file=clientConfigPath(client,root,locations);
  await mkdir(path.dirname(file),{recursive:true});
  await writeFile(file,'{broken');
- await expect(configureClient({client:'cursor',projectRoot:root,toolProfile:'full'})).rejects.toThrow(/Invalid cursor MCP config JSON/);
+ await expect(configureClient({client,projectRoot:root,toolProfile:'full',...locations})).rejects.toThrow(new RegExp(`Invalid ${client} MCP config JSON`));
  await writeFile(file,JSON.stringify({mcpServers:[]}));
- await expect(configureClient({client:'cursor',projectRoot:root,toolProfile:'full'})).rejects.toThrow(/mcpServers must be a JSON object/);
+ await expect(configureClient({client,projectRoot:root,toolProfile:'full',...locations})).rejects.toThrow(/mcpServers must be a JSON object/);
 });
 
 it('uses workspace-local Antigravity config and honors explicit user-config overrides',async()=>{

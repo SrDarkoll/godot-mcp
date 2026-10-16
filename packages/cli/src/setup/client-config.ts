@@ -8,7 +8,7 @@ export const CLIENT_NAMES=['antigravity','cursor','claude','codex'] as const;
 export type ClientName=typeof CLIENT_NAMES[number];
 export const DEFAULT_NPX_PACKAGE='@srdarkx/godot-mcp';
 
-export interface ClientLaunchEntry {command:string;args:string[];}
+export interface ClientLaunchEntry {command:string;args:string[];type?:'stdio';}
 export interface ClientConfigResult {
  client:ClientName;
  path:string;
@@ -57,7 +57,7 @@ export async function configureClient(options:ClientConfigOptions):Promise<Clien
  if(!CLIENT_NAMES.includes(options.client))throw new Error(`Unsupported MCP client: ${String(options.client)}`);
  const projectRoot=path.resolve(options.projectRoot);
  const file=clientConfigPath(options.client,projectRoot,options);
- const entry=makeClientLaunchEntry(projectRoot,options.toolProfile,options.npxPackage);
+ const entry:ClientLaunchEntry={...makeClientLaunchEntry(projectRoot,options.toolProfile,options.npxPackage),...(options.client==='cursor'?{type:'stdio' as const}:{})};
  if(options.client==='codex'){
   const configured=await configureCodexConfig(file,entry,options.now);
   return {client:'codex',path:file,entry,...configured};

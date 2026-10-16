@@ -28,15 +28,16 @@ The public npm package, MCP server and Godot addon are aligned at **0.6.5**, wit
 
 See the [0.6.5 release notes](docs/releases/0.6.5.md), [0.6.4 release notes](docs/releases/0.6.4.md) and [changelog](CHANGELOG.md).
 
-For an existing installation, run these commands from **each Godot project folder**:
+To update, run these commands from **each Godot project folder**:
 
 ```powershell
-npx --yes @srdarkx/godot-mcp@latest upgrade . --dry-run
-npx --yes @srdarkx/godot-mcp@latest upgrade .
-npx --yes @srdarkx/godot-mcp@latest doctor .
+npm install -g @srdarkx/godot-mcp@latest
+godot-mcp upgrade --dry-run
+godot-mcp upgrade
+godot-mcp doctor
 ```
 
-Updating a global npm installation alone does not update project addons or pinned client launchers. Reload the addon in an already-open Godot editor and reconnect that project's MCP client after upgrading.
+Updating npm alone does not update project addons or pinned client launchers. The upgrade flow migrates recognized Codex entries. For Cursor, Antigravity or Claude Desktop, also rerun the matching `godot-mcp init --client <name>` command after the upgrade and before reconnecting the client. Reload the addon in an already-open Godot editor. See [client setup and verification](docs/tools/clients.md) for the exact scopes and limitations.
 
 ---
 
@@ -137,59 +138,80 @@ To keep LLM context sizes bounded, Godot MCP divides its 194 tools into 8 specia
 
 ---
 
-## 🚀 Quickstart: Connect Godot to your AI Assistant in 3 Steps
+## Setup
 
-### Step 1: Create or Open Your Godot Project
-Open Godot Engine and create a new project (e.g. `MyGame`), or open an existing project containing `project.godot`.
+### 1. Create the project in Godot
 
-### Step 2: Run the Setup Command (Single Step)
-Open a terminal in your project directory and run the command for your AI editor:
+Create or open your game in Godot, then close the editor while you install the addon.
 
-Codex is supported directly by `init --client codex`. See the [Codex setup guide](docs/tools/codex.md) for project trust and configuration details.
+### 2. Install the command once
 
-Use `@latest` in the setup commands below. Without a version, npx can select an older local installation; check `npx --yes @srdarkx/godot-mcp@latest --version` if a supported client is rejected.
-
+With Node.js 22+ installed, open CMD or PowerShell and run:
 
 ```powershell
-# For Codex
-npx --yes @srdarkx/godot-mcp@latest init . --client codex
-
-# For Google Antigravity / Gemini
-npx --yes @srdarkx/godot-mcp@latest init . --client antigravity
-
-# For Cursor
-npx --yes @srdarkx/godot-mcp@latest init . --client cursor
-
-# For Claude Desktop
-npx --yes @srdarkx/godot-mcp@latest init . --client claude
+npm install -g @srdarkx/godot-mcp@latest
 ```
-*(Tip: You can also pass a full path instead of `.`, e.g. `npx --yes @srdarkx/godot-mcp@latest init C:\Projects\MyGame --client antigravity`)*
 
-#### What the setup command does:
-1. 🔍 **Discovers Godot**: Automatically detects your installed Godot 4.x executable across standard Windows and system paths.
-2. 📦 **Installs Bridge Plugin**: Copies `addons/godot_mcp` directly into your game folder.
-3. ⚡ **Activates Plugin**: Enables the plugin automatically in `project.godot` (via Godot's headless CLI, no manual editor clicks needed).
-4. 🤖 **Configures Your AI Client**: Automatically generates or updates its configuration (`.codex/config.toml`, `.agents/mcp_config.json`, `.cursor/mcp.json`, or Claude Desktop config).
+### 3. Open a terminal in your project folder
 
-### Step 3: Open Your AI Editor and Godot
-1. **Open your project in your AI editor** (**Codex**, **Antigravity**, **Cursor**, or **Claude Desktop**). Codex loads the project-local MCP config only after you trust the project. Restart an already-open client after changing its MCP configuration.
-2. **Open your project in Godot Engine**. The editor plugin connects to the bridge over local WebSocket in ~1 second.
+In File Explorer, open the folder containing `project.godot`. Right-click inside the folder and select **Open in Terminal**, or open CMD/PowerShell there.
 
-🎉 **You're all set!** You can now prompt your AI directly:
-- *"Inspect the active scene tree and add a `CharacterBody2D` with a `Sprite2D`."*
-- *"Capture the 2D viewport to verify layout and shaders."*
-- *"Attach the DAP debugger, set a breakpoint in `player.gd`, and step through execution."*
-- *"Run headless project checks and verify zero GDScript errors."*
+### 4. Configure your client
 
----
+Run the command for the client you use:
 
-### Verify Environment with Doctor
+| Client | Command |
+| --- | --- |
+| Codex | `godot-mcp init --client codex` |
+| Cursor | `godot-mcp init --client cursor` |
+| Antigravity | `godot-mcp init --client antigravity` |
+| Claude Desktop | `godot-mcp init --client claude` |
 
-Ensure your environment, permissions, and Godot executable are properly configured at any time:
+For Gemini CLI, Roo Code or Cline, follow the [client guide](docs/tools/clients.md#manual-clients).
+
+### 5. Open your AI client
+
+- **Codex:** add the project folder and mark it as trusted.
+- **Cursor or Antigravity:** open the project folder and enable Godot MCP in the client's MCP settings if prompted.
+- **Claude Desktop:** completely quit and reopen the app.
+
+If the client was already open during installation, reload its MCP connection or restart it.
+
+### 6. Reopen the project in Godot
+
+Open the same `project.godot` you used in step 3. The client starts the MCP server automatically.
+
+### 7. Check the connection
+
+Start a chat in your AI client and send:
+
+> Use Godot MCP to check the connection. Show me the project path and whether the Godot editor is connected. Do not modify the project.
+
+The path should match your project and the editor should be connected. You can then start working on the game.
+
+### Troubleshooting
+
+| Symptom | Check or fix |
+| --- | --- |
+| `godot-mcp` is not recognized | Reopen the terminal after step 2. If it still fails, check npm's global executable directory is on PATH. |
+| `project.godot` is missing | Open the terminal in the folder containing that file, or pass the project path to `init`. |
+| Godot executable not detected | Add `--godot "C:\Tools\Godot.exe"` to your setup command, using your executable's path. |
+| Server configured but editor disconnected | Reload the client and reopen the same Godot project; inspect addon warnings and the live connection state. |
+| Codex selects another project | For projects without Git, run `godot-mcp setup codex --register-project-root` and reconnect Codex. This updates Codex user configuration with a backup; see the [Codex guide](docs/tools/codex.md). |
+| Runtime disconnected | Expected before a scene is running. Use F6 to run a scene; F5 requires a main scene. |
+
+For a diagnostic report, run `godot-mcp doctor` in the project folder. Godot itself can be installed elsewhere; the project folder is identified by `project.godot`.
+
+### Without global installation
+
+Use `npx` instead:
 
 ```powershell
-npx --yes @srdarkx/godot-mcp@latest doctor .
+npx --yes @srdarkx/godot-mcp@latest init --client codex
+npx --yes @srdarkx/godot-mcp@latest doctor
 ```
+
+Replace `codex` with your client name, then continue at step 5.
 
 ---
 
@@ -210,7 +232,7 @@ Add Godot MCP to your preferred AI assistant configuration:
 
 ### Codex
 
-`godot-mcp init . --client codex` writes a managed server entry to the project's `.codex/config.toml`. Generated launchers pin the installed version so the server and addon remain aligned; the current release produces:
+`godot-mcp init --client codex` writes a managed server entry to the project's `.codex/config.toml`. Generated launchers pin the installed version so the server and addon remain aligned; the current release produces:
 
 ```toml
 [mcp_servers.godot-mcp]
@@ -222,18 +244,19 @@ Codex CLI, IDE extension, and local desktop tasks share the configuration on the
 
 ### Claude Desktop
 
-Edit `%APPDATA%\Claude\claude_desktop_config.json`:
+Run `godot-mcp init --client claude`, then fully quit and reopen Claude Desktop. It writes `%APPDATA%\Claude\claude_desktop_config.json`, preserving other server entries and backing up an existing file. This is local STDIO, not a remote connector URL or Claude Code configuration. See [Anthropic's connection/status instructions](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop) and the [official local-server setup example](https://modelcontextprotocol.io/docs/develop/connect-local-servers).
+
+The managed entry targets one absolute Godot project. Initializing another project for Desktop replaces that managed target with a backup; it does not follow whichever Godot window is active. For simultaneous projects, configure separately named entries and confirm which project each tool controls.
 
 ```json
 {
   "mcpServers": {
-    "godot": {
+    "godot-mcp": {
       "command": "npx",
       "args": [
-        "-y",
+        "--yes",
         "@srdarkx/godot-mcp@0.6.5",
-        "run",
-        "--project",
+        "start",
         "C:\\path\\to\\YourGodotProject",
         "--tool-profile",
         "full"
@@ -245,32 +268,40 @@ Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 
 ### Cursor
 
-In `.cursor/mcp.json` (or Cursor Settings > Features > MCP):
+Run `godot-mcp init --client cursor` from the project root. Cursor reads `.cursor/mcp.json`; its [official MCP documentation](https://cursor.com/docs/mcp) describes local STDIO entries and configuration scopes.
 
 ```json
 {
   "mcpServers": {
-    "godot": {
+    "godot-mcp": {
+      "type": "stdio",
       "command": "npx",
       "args": [
-        "-y",
+        "--yes",
         "@srdarkx/godot-mcp@0.6.5",
-        "run",
-        "--project",
-        "C:/path/to/YourGodotProject"
+        "start",
+        "C:/path/to/YourGodotProject",
+        "--tool-profile",
+        "full"
       ]
     }
   }
 }
 ```
 
-### Antigravity & Generic MCP Clients
+### Antigravity
 
-Launch the server over stdio:
+Run the short setup command from the workspace root:
 
 ```powershell
-npx --yes @srdarkx/godot-mcp@latest run --project C:\path\to\YourGodotProject --tool-profile full
+godot-mcp init --client antigravity
 ```
+
+This writes `.agents/mcp_config.json`. Reload the server through Antigravity's MCP manager. Google's [official MCP guide](https://antigravity.google/docs/mcp) documents this workspace scope; it is not Gemini CLI's `.gemini/settings.json`.
+
+### Other local STDIO clients
+
+Gemini CLI, Cline and Roo Code need manual configuration. See [client setup, official references and verification limits](docs/tools/clients.md). No `--client gemini`, `--client cline` or `--client roo` option is currently implemented.
 
 ---
 
