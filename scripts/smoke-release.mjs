@@ -54,7 +54,7 @@ await fs.stat(path.join(project,'addons/godot_mcp/plugin.gd'));
 const projectConfig=JSON.parse(await fs.readFile(path.join(project,'.godot-mcp/config.json'),'utf8'));
 assert.equal(projectConfig.toolProfile,'2d');
 const clientConfig=JSON.parse(await fs.readFile(path.join(project,'.cursor/mcp.json'),'utf8'));
-assert.deepEqual(clientConfig.mcpServers['godot-mcp'],{command:'npx',args:['--yes',`@srdarkx/godot-mcp@${packed.pkg.version}`,'start',project,'--tool-profile','2d']});
+assert.deepEqual(clientConfig.mcpServers['godot-mcp'],{type:'stdio',command:'npx',args:['--yes',`@srdarkx/godot-mcp@${packed.pkg.version}`,'start',project,'--tool-profile','2d']});
 const codexInit=JSON.parse(cli(['upgrade',project,'--client','codex','--tool-profile','2d','--yes','--json']));
 assert.equal(codexInit.client.client,'codex');
 assert.equal(codexInit.doctor.ok,true);
