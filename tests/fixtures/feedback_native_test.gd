@@ -35,6 +35,11 @@ func run_tests() -> void:
     check(syntax.valid == false and syntax.errors[0].line >= 4, "syntax error location must be useful")
     var dependency = scripts.validate({"content":"extends Node\n\nconst Missing = preload(\"res://missing_dependency.gd\")\n", "path":"res://dependency.gd"})
     check(dependency.valid == false and dependency.errors.size() > 0, "missing dependency must report diagnostics")
+    var outside_root := ProjectSettings.globalize_path("res://").get_base_dir().get_base_dir().path_join("godot_mcp_escape.gd")
+    for unsafe_path in [outside_root, "user://escape.gd", "res://../escape.gd", "res://a\\b.gd", "res://C:/escape.gd", "res://addons/godot_mcp/escape.gd"]:
+        var rejected = scripts.create({"path":unsafe_path})
+        check(rejected.get("__error",{}).get("code") == "PATH_OUTSIDE_PROJECT", "script.create must reject unsafe path: " + unsafe_path)
+    check(not FileAccess.file_exists(outside_root), "rejected script.create must not write outside the project")
 
     var layer := TileMapLayer.new()
     layer.name = "Ground"

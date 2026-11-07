@@ -13,7 +13,7 @@ This creates or updates `C:\Games\MyGame\.codex\config.toml` with a project-scop
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp@0.6.5", "start", "C:/Games/MyGame", "--tool-profile", "2d"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.6", "start", "C:/Games/MyGame", "--tool-profile", "2d"]
 ```
 
 The generated file uses an absolute project path so the server opens the intended Godot project regardless of Codex's process directory. Starting with 0.6.1, generated launchers pin the installed version, and `init` offers the safe upgrade flow for an existing installation. The [upgrade guide](../upgrading.md) covers confirmed shutdown, migration of recognized older npm/bundled-server entries, retained backups and verification. Other MCP entries and custom server options are preserved. Unrelated commands remain protected. The updater changes only the project's Codex configuration, not `~/.codex/config.toml`.

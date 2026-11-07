@@ -58,7 +58,7 @@ First install the addon using `godot-mcp init`. Then merge this local STDIO entr
       "command": "npx",
       "args": [
         "--yes",
-        "@srdarkx/godot-mcp@0.6.5",
+        "@srdarkx/godot-mcp@0.6.6",
         "start",
         "C:/Games/My Game",
         "--tool-profile",

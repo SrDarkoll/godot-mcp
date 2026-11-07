@@ -172,6 +172,19 @@ describe('BridgeServer', () => {
     await bridge.stop();
   });
 
+  it('rejects a token of different length as an authentication failure', async () => {
+    const session = createSession('C:/Games/Test');
+    const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });
+    const ws = await connect(bridge, 'a'.repeat(65));
+    const closeEvent = await new Promise<{ code: number; reason: string }>(resolve => {
+      ws.once('close', (code, reason) => resolve({ code, reason: reason.toString() }));
+    });
+    expect(closeEvent.code).toBe(1008);
+    expect(closeEvent.reason).toContain('Authentication failed');
+    expect(bridge.connected).toBe(false);
+    await bridge.stop();
+  });
+
   it('rejects connection with protocol mismatch', async () => {
     const session = createSession('C:/Games/Test');
     const bridge = new BridgeServer({ session, token: 'a'.repeat(64), port: 0 });

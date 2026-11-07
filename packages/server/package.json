@@ -1,6 +1,6 @@
 {
   "name": "@godot-mcp/server",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -14,10 +14,10 @@
     "test": "vitest run --passWithNoTests --testTimeout 20000"
   },
   "dependencies": {
-    "@godot-mcp/protocol": "0.6.5",
+    "@godot-mcp/protocol": "0.6.6",
     "ws": "^8.18.0",
-    "zod": "^4.0.0",
-    "@modelcontextprotocol/server": "^2.0.0"
+    "zod": "^4.6.6",
+    "@modelcontextprotocol/server": "^2.4.0"
   },
   "exports": {
     "./entry-point": {
@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.5.0",
-    "@modelcontextprotocol/client": "^2.0.0"
+    "@modelcontextprotocol/client": "^2.4.0"
   },
   "license": "MIT",
   "description": "Godot MCP server package (Windows-first Developer Preview)",

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { AddonHelloSchema, MAX_BRIDGE_PAYLOAD, type AddonHello, type AddonCapabilities, type CompatibilityManifest } from '@godot-mcp/protocol';
@@ -20,6 +21,13 @@ export interface BridgeServerOptions {
   onDisconnected?: ()=>void;
   onManagementStatus?: ()=>Promise<Record<string,unknown>>;
   onShutdown?: ()=>Promise<void>;
+}
+
+function tokenMatches(candidate: unknown, expected: string): boolean {
+  if (typeof candidate !== 'string') return false;
+  const left = Buffer.from(candidate, 'utf8');
+  const right = Buffer.from(expected, 'utf8');
+  return left.length === right.length && timingSafeEqual(left, right);
 }
 
 async function canonicalProjectRoot(value: string): Promise<string> {
@@ -129,7 +137,7 @@ export class BridgeServer {
     const request=parsed.data;
     const base={type:'management_response',protocol:1,requestId:request.requestId,sessionId:this.options.session.id};
     const fail=(code:string,message:string)=>socket.send(JSON.stringify({...base,ok:false,error:{code,message}}),()=>socket.close(1008));
-    if(request.token!==this.options.token){fail('AUTH_FAILED','Management authentication failed');return;}
+    if(!tokenMatches(request.token,this.options.token)){fail('AUTH_FAILED','Management authentication failed');return;}
     if(await canonicalProjectRoot(request.projectRoot)!==await canonicalProjectRoot(this.options.session.projectRoot)){fail('PROJECT_MISMATCH','Management project mismatch');return;}
     if(request.command==='shutdown'){
       if(!this.options.onShutdown){fail('COMMAND_UNAVAILABLE','Shutdown is not configured');return;}
@@ -177,7 +185,7 @@ export class BridgeServer {
       }
     }
 
-    if (hello.token !== this.options.token) {
+    if (!tokenMatches(hello.token, this.options.token)) {
       socket.close(1008, 'Authentication failed');
       return;
     }
