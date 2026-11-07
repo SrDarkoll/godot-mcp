@@ -17,16 +17,16 @@ Instead of copying and pasting GDScript snippets, guessing node hierarchy paths,
 
 ---
 
-## Current release: 0.6.5
+## Current release: 0.6.6
 
-The public npm package, MCP server and Godot addon are aligned at **0.6.5**, with **protocol 1** and **194 tools**.
+The public npm package, MCP server and Godot addon are aligned at **0.6.6**, with **protocol 1** and **194 tools**.
 
-- Routine project settings and headless work use the existing session permissions without redundant approval prompts.
-- Closing a named scene saves it first; discarding unsaved changes remains protected.
-- GDScript inspection reads fresh disk source without reloading live instances.
-- The complete Windows runtime bundle includes the startup fixes delivered in 0.6.4.
+- The bundled MCP SDK (2.4.0) and Zod (4.6.7) include upstream security fixes; `npm audit` reports no known vulnerabilities.
+- The Godot addon rejects `script.create` paths outside ordinary `res://` project files, matching the server-side path policy.
+- Editor and management bridge tokens are compared in constant time.
+- Routine-permission, scene-closing and GDScript inspection behavior from 0.6.5 is unchanged.
 
-See the [0.6.5 release notes](docs/releases/0.6.5.md), [0.6.4 release notes](docs/releases/0.6.4.md) and [changelog](CHANGELOG.md).
+See the [0.6.6 release notes](docs/releases/0.6.6.md), [0.6.5 release notes](docs/releases/0.6.5.md) and [changelog](CHANGELOG.md).
 
 To update, run these commands from **each Godot project folder**:
 
@@ -237,7 +237,7 @@ Add Godot MCP to your preferred AI assistant configuration:
 ```toml
 [mcp_servers.godot-mcp]
 command = "npx"
-args = ["--yes", "@srdarkx/godot-mcp@0.6.5", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
+args = ["--yes", "@srdarkx/godot-mcp@0.6.6", "start", "C:/path/to/YourGodotProject", "--tool-profile", "full"]
 ```
 
 Codex CLI, IDE extension, and local desktop tasks share the configuration on the same host. Trust the project and restart Codex after configuration changes. From that project, `codex mcp get godot-mcp --json` shows the configured launch command and project path; `/mcp` shows the active connection. The local `setup codex` recipe in the [Codex guide](docs/tools/codex.md) is also available for source development. See [OpenAI's MCP configuration guide](https://learn.chatgpt.com/docs/extend/mcp) for the client-side format.
@@ -255,7 +255,7 @@ The managed entry targets one absolute Godot project. Initializing another proje
       "command": "npx",
       "args": [
         "--yes",
-        "@srdarkx/godot-mcp@0.6.5",
+        "@srdarkx/godot-mcp@0.6.6",
         "start",
         "C:\\path\\to\\YourGodotProject",
         "--tool-profile",
@@ -278,7 +278,7 @@ Run `godot-mcp init --client cursor` from the project root. Cursor reads `.curso
       "command": "npx",
       "args": [
         "--yes",
-        "@srdarkx/godot-mcp@0.6.5",
+        "@srdarkx/godot-mcp@0.6.6",
         "start",
         "C:/path/to/YourGodotProject",
         "--tool-profile",

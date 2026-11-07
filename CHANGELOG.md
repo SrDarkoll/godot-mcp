@@ -2,6 +2,13 @@
 
 All notable release-level changes to Godot MCP are documented here.
 
+## [0.6.6] - 2026-11-06
+
+- Bundle MCP SDK core/server 2.4.0 and Zod 4.6.7, which fix upstream advisories in the previously bundled 2.0.0 and pre-4.6.6 releases. Minimum ranges now exclude the vulnerable versions.
+- Reject absolute, `user://`, traversal, backslash, drive-letter and addon-internal paths in the addon's `script.create` handler as defense in depth.
+- Compare editor hello and management tokens with a length-checked constant-time comparison.
+- Protocol remains 1 and the catalog remains 194 tools. See the [0.6.6 release notes](docs/releases/0.6.6.md).
+
 ## [0.6.5] - 2026-10-14
 
 - Remove redundant approvals from bounded, routine project settings and local headless validation/import/run/tests while retaining existing session permissions.
