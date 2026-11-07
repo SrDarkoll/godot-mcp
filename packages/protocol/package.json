@@ -17,7 +17,7 @@
     "test": "vitest run --passWithNoTests --testTimeout 20000"
   },
   "dependencies": {
-    "zod": "^4.0.0"
+    "zod": "^4.6.6"
   },
   "license": "MIT",
   "description": "Godot MCP protocol package (Windows-first Developer Preview)",

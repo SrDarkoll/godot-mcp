@@ -33,6 +33,10 @@ func create(params: Dictionary) -> Dictionary:
 	var path: String = params.get("path", "")
 	if path.is_empty():
 		return _error("INVALID_ARGUMENT", "path is required")
+	# Defense in depth: the MCP server confines paths before RPC, but the addon
+	# must not write outside the project if a bridge call arrives another way.
+	if not path.begins_with("res://") or path.contains("..") or path.contains("\\") or path.substr(6).contains(":") or path.to_lower().begins_with("res://addons/godot_mcp/"):
+		return _error("PATH_OUTSIDE_PROJECT", "Script path must be an ordinary res:// project path")
 
 	var inherits: String = params.get("inherits", "Node")
 	var template: String = params.get("template", "")

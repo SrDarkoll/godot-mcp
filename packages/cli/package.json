@@ -27,11 +27,11 @@
     "@godot-mcp/godot-addon": "0.6.5",
     "@godot-mcp/protocol": "0.6.5",
     "@godot-mcp/server": "0.6.5",
-    "@modelcontextprotocol/core": "^2.0.0",
-    "@modelcontextprotocol/server": "^2.0.0",
+    "@modelcontextprotocol/core": "^2.4.0",
+    "@modelcontextprotocol/server": "^2.4.0",
     "smol-toml": "^1.9.0",
     "ws": "^8.18.0",
-    "zod": "^4.0.0"
+    "zod": "^4.6.6"
   },
   "license": "MIT",
   "files": [
